@@ -1,0 +1,33 @@
+{
+  "name": "@llumiverse/core",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Provide an universal API to LLMs. Support for existing LLMs can be added by writing a driver.",
+  "main": "./lib/index.js",
+  "files": [
+    "lib",
+    "src"
+  ],
+  "exports": {
+    ".": "./lib/index.js",
+    "./async": "./lib/async.js"
+  },
+  "scripts": {
+    "test": "ESBK_TSCONFIG_PATH=./test/tsconfig.json npx mocha -r tsx ./test/**/*.ts",
+    "build": "npm run clean && tsc --build",
+    "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
+  },
+  "license": "MIT",
+  "devDependencies": {
+    "@types/estree": "^1.0.1",
+    "@types/eventsource": "^1.1.15",
+    "@types/json-schema": "^7.0.15",
+    "@types/mocha": "^10.0.1",
+    "chai": "^4.3.8",
+    "mocha": "^10.2.0",
+    "tsx": "^3.12.10"
+  },
+  "dependencies": {
+    "json-schema": "^0.4.0"
+  }
+}
