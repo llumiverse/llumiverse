@@ -39,7 +39,7 @@
   ],
   "references": [
     {
-      "path": "../../packages/llumiverse/tsconfig.json"
+      "path": "../core/tsconfig.json"
     }
   ]
 }

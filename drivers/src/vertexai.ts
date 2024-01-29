@@ -48,7 +48,9 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, string
         throw new Error("Method not implemented.");
     }
     async listModels(_params: ModelSearchPayload): Promise<AIModel<string>[]> {
-        const response = await this.fetchClient.get('/models');
+        debugger
+        const response = await this.fetchClient.get('/publishers/google/models/gemini-pro');
+
         // TODO uncomment this to use apiplatform instead of the fetch client
         // const response = await this.aiplatform.listModels({
         //     parent: `projects/${this.options.project}/locations/${this.options.region}`,
