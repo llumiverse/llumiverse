@@ -162,7 +162,8 @@ export class OpenAIDriver extends AbstractDriver<
 
         const job = await this.service.fineTuning.jobs.create({
             training_file: file.id,
-            model: options.model
+            model: options.model,
+            hyperparameters: options.params
         })
 
         return jobInfo(job);

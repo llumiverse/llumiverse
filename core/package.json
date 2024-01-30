@@ -1,6 +1,6 @@
 {
   "name": "@llumiverse/core",
-  "version": "1.0.0",
+  "version": "0.8.0",
   "type": "module",
   "description": "Provide an universal API to LLMs. Support for existing LLMs can be added by writing a driver.",
   "main": "./lib/index.js",

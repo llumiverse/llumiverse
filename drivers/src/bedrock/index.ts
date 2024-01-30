@@ -4,8 +4,8 @@ import { S3Client } from "@aws-sdk/client-s3";
 import { AIModel, AbstractDriver, BuiltinProviders, Completion, DataSource, DriverOptions, ExecutionOptions, ModelSearchPayload, PromptFormats, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
-import { forceUploadFile } from "./s3.js";
 import mnemonist from "mnemonist";
+import { forceUploadFile } from "./s3.js";
 
 const { LRUCache } = mnemonist;
 
@@ -187,7 +187,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
             return {
                 prompt: prompt,
                 temperature: options.temperature,
-                max_tokens_to_sample: options.max_tokens,
+                max_tokens_to_sample: options.max_tokens ?? 250,
             } as ClaudeRequestPayload;
         } else if (contains(options.model, "ai21")) {
             return {
@@ -219,7 +219,12 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
     }
 
     async startTraining(dataset: DataSource, options: TrainingOptions): Promise<TrainingJob> {
-        //const params = options.params || {};
+
+        //convert options.params to Record<string, string>
+        const params: Record<string, string> = {};
+        for (const [key, value] of Object.entries(options.params || {})) {
+            params[key] = String(value);
+        }
 
         if (!this.options.training_bucket) {
             throw new Error("Training cannot nbe used since the 'training_bucket' property was not specified in driver options")
@@ -239,7 +244,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
                 s3Uri: `s3://${upload.Bucket}/${upload.Key}`,
             },
             outputDataConfig: undefined,
-            hyperParameters: undefined,
+            hyperParameters: params,
             //TODO not supported?
             //customizationType: "FINE_TUNING",
         }));
@@ -290,7 +295,8 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
     async listModels(_params: ModelSearchPayload): Promise<AIModel[]> {
         this.logger.debug("[Bedrock] listing models");
         // exclude trainable models since they are not executable
-        return this._listModels(m => m.customizationsSupported ? !m.customizationsSupported.includes("FINE_TUNING") : true);
+        const filter = (m: FoundationModelSummary) => m.inferenceTypesSupported?.includes("ON_DEMAND") ?? false;
+        return this._listModels(filter);
     }
 
     async _listModels(foundationFilter?: (m: FoundationModelSummary) => boolean): Promise<AIModel[]> {
