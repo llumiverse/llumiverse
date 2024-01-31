@@ -7,7 +7,9 @@ export interface ResultValidationError {
     message: string;
     data?: string;
 }
+
 export interface Completion<ResultT = any> {
+    // the driver impl must return the result and optionally the token_usage. the execution time is computed by the extended abstract driver 
     result: ResultT;
     token_usage?: ExecutionTokenUsage;
     execution_time?: number;
@@ -39,11 +41,11 @@ export interface DriverOptions {
 }
 
 export interface PromptOptions {
+    model: string;
     format?: PromptFormats;
     resultSchema?: JSONSchema4;
 }
 export interface ExecutionOptions extends PromptOptions {
-    model: string;
     temperature?: number;
     max_tokens?: number;
 }

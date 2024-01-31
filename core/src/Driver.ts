@@ -100,7 +100,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     }
 
     createTrainingPrompt(options: TrainingPromptOptions): string {
-        const prompt = this.createPrompt(options.segments, { resultSchema: options.schema })
+        const prompt = this.createPrompt(options.segments, { resultSchema: options.schema, model: options.model })
         return JSON.stringify({
             prompt,
             completion: typeof options.completion === 'string' ? options.completion : JSON.stringify(options.completion)

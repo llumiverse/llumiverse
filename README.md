@@ -24,7 +24,7 @@ New capabilities and platform can easily be added by creating a new driver for t
 
 ## Requirements
 
-* node v16+, or bun 1.0+
+* node v18+, or bun 1.0+
 
 ## Installation 
 

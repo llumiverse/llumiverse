@@ -1,10 +1,8 @@
 import { v1 } from "@google-cloud/aiplatform";
 import { GenerateContentRequest, VertexAI } from "@google-cloud/vertexai";
 import { AIModel, AbstractDriver, BuiltinProviders, Completion, DriverOptions, ExecutionOptions, ModelSearchPayload, PromptFormats, PromptOptions, PromptSegment } from "@llumiverse/core";
-import { asyncMap } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
-import { BuiltinModels } from "./models.js";
-import { formatPrompt, getGenerativeModel } from "./prompt.js";
+import { BuiltinModels, getModelDefinition } from "./models.js";
 //import { GoogleAuth } from "google-auth-library";
 
 export interface VertexAIDriverOptions extends DriverOptions {
@@ -44,48 +42,19 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
         });
     }
 
-    public createPrompt(segments: PromptSegment[], opts: PromptOptions): GenerateContentRequest {
-        return formatPrompt(segments, opts.resultSchema);
+    // protected canStream(_options: ExecutionOptions): Promise<boolean> {
+    //     return Promise.resolve(false);
+    // }
+
+    public createPrompt(segments: PromptSegment[], options: PromptOptions): GenerateContentRequest {
+        return getModelDefinition(options.model).createPrompt(this, segments, options);
     }
 
     async requestCompletion(prompt: GenerateContentRequest, options: ExecutionOptions): Promise<Completion<any>> {
-        const model = getGenerativeModel(this.vertexai, options);
-        const r = await model.generateContent(prompt);
-        const response = await r.response;
-        console.log('aggregated response: ', JSON.stringify(response)), '======', response;
-        throw new Error('not implemented');
-        // return {
-        //     result: resp.response,
-        //     token_usage: {
-        //         prompt: resp.usage?.prompt_tokens,
-        //         result: resp.usage?.completion_tokens,
-        //         total: resp.usage?.total_tokens,
-        //     },
-        // };    
+        return getModelDefinition(options.model).requestCompletion(this, prompt, options);
     }
     async requestCompletionStream(prompt: GenerateContentRequest, options: ExecutionOptions): Promise<AsyncIterable<string>> {
-        const model = getGenerativeModel(this.vertexai, options);
-        const streamingResp = await model.generateContentStream(prompt);
-
-        const stream = asyncMap(streamingResp.stream, async (item) => {
-            if (item.candidates.length > 0) {
-                for (const candidate of item.candidates) {
-                    if (candidate.content?.role === 'model') {
-                        const parts = candidate.content?.parts;
-                        if (parts) {
-                            for (const part of parts) {
-                                if (part.text) {
-                                    return part.text;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return '';
-        });
-
-        return stream;
+        return getModelDefinition(options.model).requestCompletionStream(this, prompt, options);
     }
 
     async listModels(_params: ModelSearchPayload): Promise<AIModel<string>[]> {
@@ -130,3 +99,10 @@ function createFetchClient({ region, project, apiEndpoint, apiVersion = 'v1' }: 
         'Content-Type': 'application/json',
     });
 }
+
+// class MyClient extends FetchClient {
+//     handleRequest(fetch: FETCH_FN, url: string, init: RequestInit): Promise<Response> {
+//         console.log('########', url);
+//         return super.handleRequest(fetch, url, init);
+//     }
+// }

@@ -187,7 +187,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
             return {
                 prompt: prompt,
                 temperature: options.temperature,
-                max_tokens_to_sample: options.max_tokens ?? 250,
+                max_tokens_to_sample: options.max_tokens ?? 256,
             } as ClaudeRequestPayload;
         } else if (contains(options.model, "ai21")) {
             return {

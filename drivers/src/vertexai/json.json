@@ -1,0 +1,94 @@
+{
+    "predictions": [
+        {
+            "safetyAttributes": {
+                "scores": [
+                    0.1,
+                    0.3,
+                    0.1,
+                    0.1
+                ],
+                "safetyRatings": [
+                    {
+                        "severity": "NEGLIGIBLE",
+                        "probabilityScore": 0.1,
+                        "severityScore": 0,
+                        "category": "Dangerous Content"
+                    },
+                    {
+                        "category": "Harassment",
+                        "probabilityScore": 0.1,
+                        "severityScore": 0,
+                        "severity": "NEGLIGIBLE"
+                    },
+                    {
+                        "probabilityScore": 0,
+                        "severityScore": 0,
+                        "category": "Hate Speech",
+                        "severity": "NEGLIGIBLE"
+                    },
+                    {
+                        "severityScore": 0,
+                        "probabilityScore": 0.1,
+                        "category": "Sexually Explicit",
+                        "severity": "NEGLIGIBLE"
+                    }
+                ],
+                "categories": [
+                    "Finance",
+                    "Health",
+                    "Insult",
+                    "Sexual"
+                ],
+                "blocked": false
+            },
+            "content": " Hi there! How can I help you?",
+            "citationMetadata": {
+                "citations": []
+            }
+        }
+    ],
+    "metadata": {
+        "tokenMetadata": {
+            "outputTokenCount": {
+                "totalBillableCharacters": 23,
+                "totalTokens": 9
+            },
+            "inputTokenCount": {
+                "totalBillableCharacters": 5,
+                "totalTokens": 1
+            }
+        }
+    }
+}
+
+
+{
+    "outputs": [
+        {
+            "structVal": {
+                "content": {
+                    "stringVal": [
+                        " {\\n  \\"color\\": \\"Various\\"\\n}"
+                    ]
+                },
+                "safetyAttributes": {
+                    "structVal": {
+                        "blocked": {
+                            "boolVal": [
+                                false
+                            ]
+                        },
+                        "categories": {},
+                        "scores": {}
+                    }
+                },
+                "citationMetadata": {
+                    "structVal": {
+                        "citations": {}
+                    }
+                }
+            }
+        }
+    ]
+}
