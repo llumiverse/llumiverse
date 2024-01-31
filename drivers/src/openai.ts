@@ -157,7 +157,7 @@ export class OpenAIDriver extends AbstractDriver<
         const url = await dataset.getURL();
         const file = await this.service.files.create({
             file: await fetch(url),
-            purpose: "fine_tune",
+            purpose: "fine-tune",
         });
 
         const job = await this.service.fineTuning.jobs.create({
