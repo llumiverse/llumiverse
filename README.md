@@ -1,4 +1,7 @@
-# @llumiverse v0.8.0
+# Llumiverse - Universal LLM Connectors for Node.js
+
+[![npm version](https://badge.fury.io/js/%40llumiverse%2Fcore.svg)](https://badge.fury.io/js/%40llumiverse%2Fcore)
+[![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
 LLumiverse is a universal interface for interacting with Large Language Models, for the Typescript/Javascript ecosystem. It provides a lightweight modular library for interacting with various LLM models and execution platforms.
 
@@ -6,20 +9,23 @@ It solely focuses on abstracting LLMs and their execution platforms, and does no
 
 The following LLM platforms are supported in the current version:
 
+
 | Provider | Completion | Chat | Model Listing | Fine-Tuning |
-| OpenAI | ✅ | ✅ | ✅ | ✅ |
-| Replicate | ✅ | ✅ | ✅ | ✅ |
-| AWS Bedrock | ✅ | ✅ | ✅ | ✅ |
-| HuggingFace Inference Endpoints | ✅ | ✅ | N/A | N/A |
-| Google Vertex AI | ✅ | ✅ | N/A | No |
+| -------- | ---------- | ---- | ------------- | ----------- |
+| OpenAI    | ✅        | ✅    | ✅            | ✅          |
+| Replicate | ✅        | ✅    | ✅            | ✅          |
+| AWS Bedrock | ✅      | ✅    | ✅            | ✅          |
+| HuggingFace Inference Endpoints | ✅ | ✅ | N/A | N/A       |
+| Google Vertex AI | ✅ | ✅ | Partial | In Progress |
 
 New capabilities and platform can easily be added by creating a new driver for the platform.
 
 
-##Requirements
+## Requirements
+
 * node v16+, or bun 1.0+
 
-##Instalation 
+## Installation 
 
 1. If you want to use llumiverse to execute prompt completion on various supported providers then install `@llumiverse/core` and `@llumiverse/drivers`
 
