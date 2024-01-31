@@ -1,17 +1,23 @@
 # @llumiverse v0.8.0
 
-LLumiverse provides an abstraction over LLM endpoints focusing on execution prompt completions, training new models and browsing existing models.
+LLumiverse is a universal interface for interacting with Large Language Models, for the Typescript/Javascript ecosystem. It provides a lightweight modular library for interacting with various LLM models and execution platforms.
 
-The following target LLM providers are supported in the current version:
+It solely focuses on abstracting LLMs and their execution platforms, and does not provide prompt templating, or RAG, or chains, letting you pick the best tool for the job.
 
-* OpenAI
-* Replicate
-* Bedrock
-* HuggingFace
-* Google VertexAI
+The following LLM platforms are supported in the current version:
+
+| Provider | Completion | Chat | Model Listing | Fine-Tuning |
+| OpenAI | ✅ | ✅ | ✅ | ✅ |
+| Replicate | ✅ | ✅ | ✅ | ✅ |
+| AWS Bedrock | ✅ | ✅ | ✅ | ✅ |
+| HuggingFace Inference Endpoints | ✅ | ✅ | N/A | N/A |
+| Google Vertex AI | ✅ | ✅ | N/A | No |
+
+New capabilities and platform can easily be added by creating a new driver for the platform.
+
 
 ##Requirements
-* node v16 or greater 
+* node v16+, or bun 1.0+
 
 ##Instalation 
 
@@ -35,3 +41,14 @@ npm install @llumiverse/core
 
 ## Usage
 
+
+
+## Contributing
+
+Contributions are welcome!
+Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+
+
+## License
+
+Llumivers is licensed under the [Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0). Feel free to use it accordingly.
