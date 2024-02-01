@@ -2,11 +2,13 @@ import { AIModel, Completion, ExecutionOptions, ModelType, PromptOptions, Prompt
 import { GeminiModelDefinition } from "./models/gemini.js";
 import { VertexAIDriver } from "./index.js";
 import { Palm2TextDefinition } from "./models/palm2-text.js";
+import { Palm2ChatDefinition } from "./models/palm2-chat.js";
 
 
 const Models: Record<string, ModelDefinition> = {
     "gemini-pro": GeminiModelDefinition,
     "text-bison": Palm2TextDefinition,
+    "chat-bison": Palm2ChatDefinition,
 }
 
 export interface ModelDefinition<PromptT = any> {

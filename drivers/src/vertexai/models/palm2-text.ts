@@ -2,27 +2,17 @@ import { Completion, ExecutionOptions, ModelType, PromptOptions, PromptSegment }
 import { ParsedEvent } from "eventsource-parser";
 import { VertexAIDriver } from "../index.js";
 import { ModelDefinition } from "../models.js";
+import { PromptParamatersBase, getPromptAsText } from "../utils/prompts.js";
 import { sse } from "../utils/sse.js";
-import { formatObjectAsTensor } from "../utils/tensor.js";
-import { getPromptAsText } from "../utils/prompts.js";
+import { generateStreamingPrompt } from "../utils/tensor.js";
+
+interface PromptParamaters extends PromptParamatersBase {
+    echo?: boolean
+}
 
 export interface Palm2TextPrompt {
     instances: { prompt: string }[];
-    parameters: {
-        temperature?: number,
-        maxOutputTokens?: number,
-        topK?: number,
-        topP?: number,
-        groundingConfig?: string,
-        stopSequences?: string[],
-        candidateCount?: number,
-        logprobs?: number,
-        presencePenalty?: number,
-        frequencyPenalty?: number,
-        logitBias?: Record<string, number>,
-        echo?: boolean,
-        seed?: number,
-    }
+    parameters: PromptParamaters;
 }
 
 export interface Palm2TextStreamingPrompt {
@@ -105,11 +95,11 @@ export const Palm2TextDefinition: ModelDefinition<Palm2TextPrompts> = {
             maxOutputTokens: options.max_tokens,
         });
 
-        const response = await driver.fetchClient.post(`/publishers/google/models/${this.model.id}:predict`, {
+        const response: Palm2TextResponse = await driver.fetchClient.post(`/publishers/google/models/${this.model.id}:predict`, {
             payload: prompt
         });
 
-        const metadata = response.metadata as Palm2TextResponseMetadata;
+        const metadata = response.metadata;
         const inputTokens = metadata.tokenMetadata.inputTokenCount.totalTokens;
         const outputTokens = metadata.tokenMetadata.outputTokenCount.totalTokens;
         const result = response.predictions[0].content ?? '';
@@ -132,12 +122,7 @@ export const Palm2TextDefinition: ModelDefinition<Palm2TextPrompts> = {
 
         const path = `/publishers/google/models/${this.model.id}:serverStreamingPredict?alt=sse`;
 
-        const instances = inPrompt.instances;
-        const parameters = inPrompt.parameters;
-        const newPrompt = formatObjectAsTensor({
-            inputs: instances,
-            parameters
-        });
+        const newPrompt = generateStreamingPrompt(inPrompt);
 
         // we need to modify the existing prompt since it is not the final one
         const outPrompt = prompt as Palm2TextStreamingPrompt;

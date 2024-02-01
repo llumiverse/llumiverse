@@ -37,7 +37,7 @@ export function formatArrayAsTensor(arr: any[]): any {
         if (type === 'string' || type === 'number' || type === 'boolean') {
             return item; // primitve values 
         } else {
-            return _formatObjectAsTensor(item)
+            return formatObjectAsTensor(item)
         }
     });
 }
@@ -47,7 +47,7 @@ export function formatArrayAsTensor(arr: any[]): any {
  * @param obj 
  * @returns 
  */
-function _formatObjectAsTensor(obj: any, isField = false): any {
+function formatObjectAsTensor(obj: any, isField = false): any {
     const struct: any = {};
     const keys = Object.keys(obj);
     for (const key of keys) {
@@ -56,10 +56,10 @@ function _formatObjectAsTensor(obj: any, isField = false): any {
         const type = getTensorType(val);
         if (type === 'structVal') {
             if (Array.isArray(val)) {
-                struct[key] = formatArrayAsTensor(val);
+                struct[key] = { listVal: formatArrayAsTensor(val) };
             } else {
                 struct[key] = {
-                    [type]: Array.isArray(val) ? formatArrayAsTensor(val) : _formatObjectAsTensor(val, true)
+                    [type]: formatObjectAsTensor(val, true)
                 }
             }
         } else if (type) {
@@ -73,40 +73,10 @@ function _formatObjectAsTensor(obj: any, isField = false): any {
     };
 }
 
-export function formatObjectAsTensor(obj: any) {
-    return _formatObjectAsTensor(obj).structVal;
-}
 
-
-function test() {
-    const obj = {
-        instances: [
-            {
-                prompt: '\n' +
-                    '  What is the color of the following entity: flower.\n' +
-                    '\n' +
-                    'The answer must be a JSON object using the following JSON Schema:\n' +
-                    '{"type":"object","properties":{"color":{"type":"string"}},"required":["color"]}'
-            }
-        ],
-        parameters: { temperature: 0.7, maxOutputTokens: 100 }
+export function generateStreamingPrompt(prompt: { instances: any, parameters: any }): any {
+    return {
+        inputs: prompt.instances.map((inst: any) => formatObjectAsTensor(inst)),
+        parameters: formatObjectAsTensor(prompt.parameters)
     }
-    console.log('%o', formatObjectAsTensor(obj));
-
-    const instances = obj.instances.map(inst => formatObjectAsTensor(inst));
-    const parameters = formatObjectAsTensor(obj.parameters);
-
-    console.log('++++++++++++++\n', { inputs: instances, parameters });
-
-
-    const newPrompt = formatObjectAsTensor({
-        inputs: obj.instances,
-        parameters: obj.parameters
-    });
-
-    console.log('###################\n', newPrompt)
-
 }
-
-
-test()
