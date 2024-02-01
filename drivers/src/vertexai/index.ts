@@ -1,4 +1,4 @@
-import { v1 } from "@google-cloud/aiplatform";
+//import { v1 } from "@google-cloud/aiplatform";
 import { GenerateContentRequest, VertexAI } from "@google-cloud/vertexai";
 import { AIModel, AbstractDriver, BuiltinProviders, Completion, DriverOptions, ExecutionOptions, ModelSearchPayload, PromptFormats, PromptOptions, PromptSegment } from "@llumiverse/core";
 import { FetchClient } from "api-fetch-client";
@@ -14,9 +14,8 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
     provider = BuiltinProviders.vertexai;
     defaultFormat = PromptFormats.genericTextLLM;
 
-    aiplatform: v1.ModelServiceClient;
+    //aiplatform: v1.ModelServiceClient;
     vertexai: VertexAI;
-    authToken: Promise<string>;
     fetchClient: FetchClient;
 
     constructor(
@@ -28,7 +27,6 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
             project: this.options.project,
             location: this.options.region,
         });
-        this.authToken = this.vertexai.preview.token;
         this.fetchClient = createFetchClient({
             region: this.options.region,
             project: this.options.project,
@@ -36,10 +34,10 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
             const token = await this.vertexai.preview.token;
             return `Bearer ${token}`;
         });
-        this.aiplatform = new v1.ModelServiceClient({
-            projectId: this.options.project,
-            apiEndpoint: `${this.options.region}-${API_BASE_PATH}`,
-        });
+        // this.aiplatform = new v1.ModelServiceClient({
+        //     projectId: this.options.project,
+        //     apiEndpoint: `${this.options.region}-${API_BASE_PATH}`,
+        // });
     }
 
     // protected canStream(_options: ExecutionOptions): Promise<boolean> {
@@ -99,10 +97,3 @@ function createFetchClient({ region, project, apiEndpoint, apiVersion = 'v1' }: 
         'Content-Type': 'application/json',
     });
 }
-
-// class MyClient extends FetchClient {
-//     handleRequest(fetch: FETCH_FN, url: string, init: RequestInit): Promise<Response> {
-//         console.log('########', url);
-//         return super.handleRequest(fetch, url, init);
-//     }
-// }

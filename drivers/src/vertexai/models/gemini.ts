@@ -1,7 +1,6 @@
 import { Content, GenerateContentRequest, GenerativeModel, HarmBlockThreshold, HarmCategory, TextPart } from "@google-cloud/vertexai";
-import { Completion, ExecutionOptions, ExecutionTokenUsage, ModelType, PromptRole, PromptSegment } from "@llumiverse/core";
+import { Completion, ExecutionOptions, ExecutionTokenUsage, ModelType, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
-import { JSONSchema4 } from "json-schema";
 import { VertexAIDriver } from "../index.js";
 import { ModelDefinition } from "../models.js";
 
@@ -44,7 +43,8 @@ export const GeminiModelDefinition: ModelDefinition<GenerateContentRequest> = {
         type: ModelType.Text,
     },
 
-    createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], schema?: JSONSchema4): GenerateContentRequest {
+    createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions): GenerateContentRequest {
+        const schema = options.resultSchema;
         const contents: Content[] = [];
         const safety: string[] = [];
 
@@ -122,6 +122,7 @@ export const GeminiModelDefinition: ModelDefinition<GenerateContentRequest> = {
                 // }
             }
         }
+
         return {
             result: result ?? '',
             token_usage
