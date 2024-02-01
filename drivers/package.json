@@ -41,6 +41,7 @@
         "eventsource": "^2.0.2",
         "eventsource-parser": "^1.1.1",
         "google-auth-library": "^9.4.1",
+        "json-bigint": "^1.0.0",
         "json-schema": "^0.4.0",
         "mnemonist": "^0.39.7",
         "openai": "^4.4.0",
