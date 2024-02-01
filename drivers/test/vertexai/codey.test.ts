@@ -24,13 +24,13 @@ function assertCompletionOk(r: ExecutionResponse) {
     //console.log('###', r.result);
 }
 
-async function assertStreamingCompletionOk(completion: CompletionStream) {
+async function assertStreamingCompletionOk(stream: CompletionStream) {
 
     const out = []
-    for await (const chunk of completion) {
+    for await (const chunk of stream) {
         out.push(chunk)
     }
-    const r = completion.completion as ExecutionResponse;
+    const r = stream.completion as ExecutionResponse;
     //console.log('###', r.result, out);
 
     assert.strictEqual(r.result, out.join(''))
