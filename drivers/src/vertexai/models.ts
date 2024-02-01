@@ -1,7 +1,7 @@
 import { AIModel, Completion, ExecutionOptions, ModelType, PromptOptions, PromptSegment } from "@llumiverse/core";
-import { GeminiModelDefinition } from "./gemini.js";
+import { GeminiModelDefinition } from "./models/gemini.js";
 import { VertexAIDriver } from "./index.js";
-import { Palm2TextDefinition } from "./palm2-text.js";
+import { Palm2TextDefinition } from "./models/palm2-text.js";
 
 
 const Models: Record<string, ModelDefinition> = {

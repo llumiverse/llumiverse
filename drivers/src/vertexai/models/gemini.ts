@@ -2,8 +2,8 @@ import { Content, GenerateContentRequest, GenerativeModel, HarmBlockThreshold, H
 import { Completion, ExecutionOptions, ExecutionTokenUsage, ModelType, PromptRole, PromptSegment } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { JSONSchema4 } from "json-schema";
-import { VertexAIDriver } from "./index.js";
-import { ModelDefinition } from "./models.js";
+import { VertexAIDriver } from "../index.js";
+import { ModelDefinition } from "../models.js";
 
 function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions): GenerativeModel {
     return driver.vertexai.preview.getGenerativeModel({
