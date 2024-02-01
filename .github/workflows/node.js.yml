@@ -20,13 +20,15 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+    - uses: 'google-github-actions/auth@v2'
+      with:
+        credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
+        create_credentials_file: true
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
-      env: # Or as an environment variable
-        GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
     - run: npm ci
     - run: npm run build --if-present
     - run: npm run test 
