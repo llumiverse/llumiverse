@@ -10,7 +10,7 @@
         "build": "npm run build --ws",
         "test": "npm run test --ws"
     },
-    "packageManager": "npm@10.2.0",
+    "packageManager": "npm@10.4.0",
     "devDependencies": {
         "typescript": "^5.3.3"
     },
