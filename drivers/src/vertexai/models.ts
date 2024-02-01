@@ -3,12 +3,16 @@ import { GeminiModelDefinition } from "./models/gemini.js";
 import { VertexAIDriver } from "./index.js";
 import { Palm2TextDefinition } from "./models/palm2-text.js";
 import { Palm2ChatDefinition } from "./models/palm2-chat.js";
+import { CodeyChatDefinition } from "./models/codey-chat.js";
+import { CodeyTextDefinition } from "./models/codey-text.js";
 
 
 const Models: Record<string, ModelDefinition> = {
     "gemini-pro": GeminiModelDefinition,
     "text-bison": Palm2TextDefinition,
     "chat-bison": Palm2ChatDefinition,
+    "code-bison": CodeyTextDefinition,
+    "codechat-bison": CodeyChatDefinition,
 }
 
 export interface ModelDefinition<PromptT = any> {
@@ -61,21 +65,21 @@ export const BuiltinModels: AIModel<string>[] = [
     },
     {
         id: "code-gecko",
-        name: "Codey Code Completion",
+        name: "Codey for Code Completion",
         provider: "vertexai",
         owner: "google",
         type: ModelType.Code,
     },
     {
         id: "code-bison",
-        name: "Codey Code Generation",
+        name: "Codey for Code Generation",
         provider: "vertexai",
         owner: "google",
         type: ModelType.Code,
     },
     {
         id: "codechat-bison",
-        name: "Bison Code Chat",
+        name: "Codey for Code Chat",
         provider: "vertexai",
         owner: "google",
         type: ModelType.Code,

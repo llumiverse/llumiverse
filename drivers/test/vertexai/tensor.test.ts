@@ -85,7 +85,7 @@ export const CHAT_PROMPT_STREAM = {
     }
 }
 
-describe('JS text Templates', () => {
+describe('VertexAI: Test generation of tensor stuctures used by serverStreamingPredict endpoints', () => {
     it('generate streaming prompt for text-bison', () => {
         assert.deepEqual(TEXT_PROMPT_STREAM, generateStreamingPrompt(TEXT_PROMPT_NOSTREAM))
     });

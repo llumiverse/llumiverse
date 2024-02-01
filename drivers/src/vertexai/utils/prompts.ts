@@ -14,6 +14,7 @@ export interface PromptParamatersBase {
     frequencyPenalty?: number,
     logitBias?: Record<string, number>,
     seed?: number,
+    echo?: boolean
 }
 
 export function getJSONSafetyNotice(schema: JSONSchema4) {

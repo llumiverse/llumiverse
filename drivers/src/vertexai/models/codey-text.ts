@@ -6,16 +6,19 @@ import { PromptParamatersBase, getPromptAsText } from "../utils/prompts.js";
 import { sse } from "../utils/sse.js";
 import { generateStreamingPrompt } from "../utils/tensor.js";
 
-
-export interface Palm2TextPrompt {
-    instances: { prompt: string }[];
-    parameters: PromptParamatersBase;
+interface PromptParamaters extends PromptParamatersBase {
+    echo?: boolean
 }
 
-export interface Palm2TextStreamingPrompt {
+export interface CodeyTextPrompt {
+    instances: { prefix: string }[];
+    parameters: PromptParamaters;
+}
+
+export interface CodeyTextStreamingPrompt {
     inputs: {
         structVal: {
-            prompt: {
+            prefix: {
                 stringVal: string
             }
         }
@@ -30,9 +33,9 @@ export interface Palm2TextStreamingPrompt {
     }
 }
 
-export type Palm2TextPrompts = Palm2TextPrompt | Palm2TextStreamingPrompt;
+export type CodeyTextPrompts = CodeyTextPrompt | CodeyTextStreamingPrompt;
 
-interface Palm2TextResponseMetadata {
+interface CodeyTextResponseMetadata {
     tokenMetadata: {
         outputTokenCount: {
             totalBillableCharacters: number,
@@ -45,7 +48,7 @@ interface Palm2TextResponseMetadata {
     }
 }
 
-interface Palm2TextResponsePrediction {
+interface CodeyTextResponsePrediction {
     content: string,
     safetyAttributes: {
         scores: number[],
@@ -61,38 +64,38 @@ interface Palm2TextResponsePrediction {
     }
 }
 
-export interface Palm2TextResponse {
-    predictions: Palm2TextResponsePrediction[],
-    metadata: Palm2TextResponseMetadata
+export interface CodeyTextResponse {
+    predictions: CodeyTextResponsePrediction[],
+    metadata: CodeyTextResponseMetadata
 }
 
-export const Palm2TextDefinition: ModelDefinition<Palm2TextPrompts> = {
+export const CodeyTextDefinition: ModelDefinition<CodeyTextPrompts> = {
     model: {
-        id: "text-bison",
-        name: "PaLM 2 Text Bison",
+        id: "code-bison",
+        name: "Codey for Code Generation",
         provider: "vertexai",
         owner: "google",
         type: ModelType.Text,
     },
 
-    createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], opts: PromptOptions): Palm2TextPrompt {
+    createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], opts: PromptOptions): CodeyTextPrompt {
         return {
             instances: [{
-                prompt: getPromptAsText(segments, opts)
+                prefix: getPromptAsText(segments, opts)
             }],
             parameters: {
                 // put defauilts here
             }
-        } as Palm2TextPrompt;
+        } as CodeyTextPrompt;
     },
 
-    async requestCompletion(driver: VertexAIDriver, prompt: Palm2TextPrompts, options: ExecutionOptions): Promise<Completion> {
-        Object.assign((prompt as Palm2TextPrompt).parameters, {
+    async requestCompletion(driver: VertexAIDriver, prompt: CodeyTextPrompts, options: ExecutionOptions): Promise<Completion> {
+        Object.assign((prompt as CodeyTextPrompt).parameters, {
             temperature: options.temperature,
             maxOutputTokens: options.max_tokens,
         });
 
-        const response: Palm2TextResponse = await driver.fetchClient.post(`/publishers/google/models/${this.model.id}:predict`, {
+        const response: CodeyTextResponse = await driver.fetchClient.post(`/publishers/google/models/${this.model.id}:predict`, {
             payload: prompt
         });
 
@@ -110,8 +113,8 @@ export const Palm2TextDefinition: ModelDefinition<Palm2TextPrompts> = {
         } as Completion;
     },
 
-    async requestCompletionStream(driver: VertexAIDriver, prompt: Palm2TextPrompts, options: ExecutionOptions): Promise<AsyncIterable<string>> {
-        const inPrompt = prompt as Palm2TextPrompt;
+    async requestCompletionStream(driver: VertexAIDriver, prompt: CodeyTextPrompts, options: ExecutionOptions): Promise<AsyncIterable<string>> {
+        const inPrompt = prompt as CodeyTextPrompt;
         Object.assign(inPrompt.parameters, {
             temperature: options.temperature,
             maxOutputTokens: options.max_tokens,
@@ -122,7 +125,7 @@ export const Palm2TextDefinition: ModelDefinition<Palm2TextPrompts> = {
         const newPrompt = generateStreamingPrompt(inPrompt);
 
         // we need to modify the existing prompt since it is not the final one
-        const outPrompt = prompt as Palm2TextStreamingPrompt;
+        const outPrompt = prompt as CodeyTextStreamingPrompt;
         delete (outPrompt as any).instances;
         outPrompt.inputs = newPrompt.inputs;
         outPrompt.parameters = newPrompt.parameters;
