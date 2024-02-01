@@ -18,6 +18,7 @@
     },
     "license": "MIT",
     "devDependencies": {
+        "@types/chai": "^4.3.11",
         "@types/estree": "^1.0.1",
         "@types/eventsource": "^1.1.15",
         "@types/json-schema": "^7.0.15",
@@ -40,8 +41,7 @@
         "api-fetch-client": "^0.7.0",
         "eventsource": "^2.0.2",
         "eventsource-parser": "^1.1.1",
-        "google-auth-library": "^9.4.1",
-        "json-bigint": "^1.0.0",
+        "google-auth-library": "^9.6.1",
         "json-schema": "^0.4.0",
         "mnemonist": "^0.39.7",
         "openai": "^4.4.0",

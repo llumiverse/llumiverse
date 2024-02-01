@@ -7,8 +7,7 @@
         "./drivers"
     ],
     "scripts": {
-        "build": "npm run build --ws",
-        "test": "npm run test --ws"
+        "build": "npm run build --ws"
     },
     "packageManager": "npm@10.2.0",
     "devDependencies": {
