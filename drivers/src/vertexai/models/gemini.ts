@@ -1,5 +1,5 @@
 import { Content, GenerateContentRequest, GenerativeModel, HarmBlockThreshold, HarmCategory, TextPart } from "@google-cloud/vertexai";
-import { Completion, ExecutionOptions, ExecutionTokenUsage, ModelType, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
+import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, ModelType, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
 import { ModelDefinition } from "../models.js";
@@ -33,15 +33,16 @@ function collectTextParts(content: Content) {
     return out.join('\n');
 }
 
-export const GeminiModelDefinition: ModelDefinition<GenerateContentRequest> = {
+export class GeminiModelDefinition implements ModelDefinition<GenerateContentRequest> {
 
-    model: {
+    model: AIModel = {
         id: "gemini-pro",
         name: "Gemini Pro",
         provider: "vertexai",
         owner: "google",
         type: ModelType.Text,
-    },
+        canStream: true,
+    }
 
     createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions): GenerateContentRequest {
         const schema = options.resultSchema;
@@ -97,7 +98,7 @@ export const GeminiModelDefinition: ModelDefinition<GenerateContentRequest> = {
 
         // put system mesages first and safety last
         return { contents, tools } as GenerateContentRequest;
-    },
+    }
 
     async requestCompletion(driver: VertexAIDriver, prompt: GenerateContentRequest, options: ExecutionOptions): Promise<Completion> {
         const model = getGenerativeModel(driver, options);
@@ -127,7 +128,7 @@ export const GeminiModelDefinition: ModelDefinition<GenerateContentRequest> = {
             result: result ?? '',
             token_usage
         };
-    },
+    }
 
     async requestCompletionStream(driver: VertexAIDriver, prompt: GenerateContentRequest, options: ExecutionOptions): Promise<AsyncIterable<string>> {
         const model = getGenerativeModel(driver, options);

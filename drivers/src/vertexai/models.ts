@@ -8,11 +8,11 @@ import { CodeyTextDefinition } from "./models/codey-text.js";
 
 
 const Models: Record<string, ModelDefinition> = {
-    "gemini-pro": GeminiModelDefinition,
-    "text-bison": Palm2TextDefinition,
-    "chat-bison": Palm2ChatDefinition,
-    "code-bison": CodeyTextDefinition,
-    "codechat-bison": CodeyChatDefinition,
+    "gemini-pro": new GeminiModelDefinition(),
+    "text-bison": new Palm2TextDefinition(),
+    "chat-bison": new Palm2ChatDefinition(),
+    "code-bison": new CodeyTextDefinition(),
+    "codechat-bison": new CodeyChatDefinition(),
 }
 
 export interface ModelDefinition<PromptT = any> {

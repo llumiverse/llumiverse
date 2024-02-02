@@ -40,9 +40,9 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
         // });
     }
 
-    // protected canStream(_options: ExecutionOptions): Promise<boolean> {
-    //     return Promise.resolve(false);
-    // }
+    protected canStream(options: ExecutionOptions): Promise<boolean> {
+        return Promise.resolve(getModelDefinition(options.model).model.canStream === true);
+    }
 
     public createPrompt(segments: PromptSegment[], options: PromptOptions): GenerateContentRequest {
         return getModelDefinition(options.model).createPrompt(this, segments, options);

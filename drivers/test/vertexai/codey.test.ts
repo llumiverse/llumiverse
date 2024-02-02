@@ -31,7 +31,7 @@ async function assertStreamingCompletionOk(stream: CompletionStream) {
         out.push(chunk)
     }
     const r = stream.completion as ExecutionResponse;
-    //console.log('###', r.result, out);
+    //console.log('###stream', r.result, out);
 
     assert.strictEqual(r.result, out.join(''))
     assert.isFalse(!!r.error)
@@ -42,7 +42,20 @@ async function assertStreamingCompletionOk(stream: CompletionStream) {
 
 }
 
-describe('VertexAI: Test prediction of codey models', () => {
+describe('VertexAI: Test prediction of codey models', function () {
+    this.timeout(10000); // 10 seconds
+    it('text-bison completion works', (done) => {
+        driver.execute(prompt, { model: 'text-bison', temperature: 0.8, max_tokens: 1024 }).then(r => {
+            assertCompletionOk(r);
+            done();
+        }).catch(done);
+    });
+    it('chat-bison streaming completion works', (done) => {
+        driver.stream(prompt, { model: 'chat-bison', temperature: 0.8, max_tokens: 1024 }).then(r => {
+            assertStreamingCompletionOk(r);
+            done();
+        }).catch(done);
+    });
     it('code-bison completion works', (done) => {
         driver.execute(prompt, { model: 'code-bison', temperature: 0.8, max_tokens: 1024 }).then(r => {
             assertCompletionOk(r);
@@ -51,6 +64,18 @@ describe('VertexAI: Test prediction of codey models', () => {
     });
     it('code-bison streaming completion works', (done) => {
         driver.stream(prompt, { model: 'code-bison', temperature: 0.8, max_tokens: 1024 }).then(r => {
+            assertStreamingCompletionOk(r);
+            done();
+        }).catch(done);
+    });
+    it('codechat-bison completion works', (done) => {
+        driver.execute(prompt, { model: 'codechat-bison', temperature: 0.8, max_tokens: 1024 }).then(r => {
+            assertCompletionOk(r);
+            done();
+        }).catch(done);
+    });
+    it('codechat-bison streaming completion works', (done) => {
+        driver.stream(prompt, { model: 'codechat-bison', temperature: 0.8, max_tokens: 1024 }).then(r => {
             assertStreamingCompletionOk(r);
             done();
         }).catch(done);
