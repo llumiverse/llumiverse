@@ -55,7 +55,7 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
         return getModelDefinition(options.model).requestCompletionStream(this, prompt, options);
     }
 
-    async listModels(_params: ModelSearchPayload): Promise<AIModel<string>[]> {
+    async listModels(_params?: ModelSearchPayload): Promise<AIModel<string>[]> {
         return BuiltinModels;
         // try {
         //     const response = await this.fetchClient.get('/publishers/google/models/gemini-pro');

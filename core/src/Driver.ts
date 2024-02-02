@@ -71,7 +71,7 @@ export interface Driver<PromptT = unknown> {
     getTrainingJob(jobId: string): Promise<TrainingJob>;
 
     //list models available for this environement
-    listModels(params: ModelSearchPayload): Promise<AIModel[]>;
+    listModels(params?: ModelSearchPayload): Promise<AIModel[]>;
 
     //list models that can be trained
     listTrainableModels(): Promise<AIModel[]>;
