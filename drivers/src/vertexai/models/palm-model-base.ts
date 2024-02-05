@@ -1,10 +1,9 @@
 import { AIModel, Completion, ExecutionOptions, PromptOptions, PromptSegment } from "@llumiverse/core";
-import { ParsedEvent } from "eventsource-parser";
 import { VertexAIDriver } from "../index.js";
 import { ModelDefinition } from "../models.js";
 import { PromptParamatersBase } from "../utils/prompts.js";
-import { sse } from "../utils/sse.js";
 import { generateStreamingPrompt } from "../utils/tensor.js";
+import { sse, ServerSideEvent } from "api-fetch-client";
 
 export interface NonStreamingPromptBase<InstanceType = any> {
     instances: InstanceType[];
@@ -109,10 +108,11 @@ export abstract class AbstractPalmModelDefinition<NonStreamingPromptT extends No
 class ChunkTransformStream<NonStreamingPromptT extends NonStreamingPromptBase, StreamingPromptT extends StreamingPromptBase> extends TransformStream {
     constructor(def: AbstractPalmModelDefinition<NonStreamingPromptT, StreamingPromptT>) {
         super({
-            transform(event: ParsedEvent, controller: TransformStreamDefaultController) {
+            transform(event: ServerSideEvent, controller: TransformStreamDefaultController) {
                 if (event.type === 'event' && event.data) {
                     const data = JSON.parse(event.data);
-                    controller.enqueue(def.extractContentFromResponseChunk(data));
+                    const stringChunk = def.extractContentFromResponseChunk(data);
+                    controller.enqueue(Array.isArray(stringChunk) ? stringChunk.join('') : stringChunk);
                 }
             }
         })
