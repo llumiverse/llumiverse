@@ -3,7 +3,7 @@ import { VertexAIDriver } from "../index.js";
 import { ModelDefinition } from "../models.js";
 import { PromptParamatersBase } from "../utils/prompts.js";
 import { generateStreamingPrompt } from "../utils/tensor.js";
-import { sse, ServerSideEvent } from "api-fetch-client";
+import { ServerSentEvent } from "api-fetch-client";
 
 export interface NonStreamingPromptBase<InstanceType = any> {
     instances: InstanceType[];
@@ -97,7 +97,7 @@ export abstract class AbstractPalmModelDefinition<NonStreamingPromptT extends No
 
         const eventStrean = await driver.fetchClient.post(path, {
             payload: newPrompt,
-            reader: sse
+            reader: 'sse'
         });
         return eventStrean.pipeThrough(new ChunkTransformStream(this));
 
@@ -108,7 +108,7 @@ export abstract class AbstractPalmModelDefinition<NonStreamingPromptT extends No
 class ChunkTransformStream<NonStreamingPromptT extends NonStreamingPromptBase, StreamingPromptT extends StreamingPromptBase> extends TransformStream {
     constructor(def: AbstractPalmModelDefinition<NonStreamingPromptT, StreamingPromptT>) {
         super({
-            transform(event: ServerSideEvent, controller: TransformStreamDefaultController) {
+            transform(event: ServerSentEvent, controller: TransformStreamDefaultController) {
                 if (event.type === 'event' && event.data) {
                     const data = JSON.parse(event.data);
                     const stringChunk = def.extractContentFromResponseChunk(data);

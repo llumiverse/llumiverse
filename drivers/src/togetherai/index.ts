@@ -1,5 +1,5 @@
 import { AIModel, AbstractDriver, Completion, DriverOptions, ExecutionOptions, PromptFormats } from "@llumiverse/core";
-import { FetchClient, ServerSideEvent, sse } from "api-fetch-client";
+import { FetchClient, ServerSentEvent } from "api-fetch-client";
 import { TogetherModelInfo } from "./interfaces.js";
 
 interface TogetherAIDriverOptions extends DriverOptions {
@@ -54,11 +54,11 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
                 temperature: options.temperature ?? 0.7,
                 stream: true,
             },
-            reader: sse
+            reader: 'sse'
         })
 
-        return stream.pipeThrough(new TransformStream<ServerSideEvent, string>({
-            transform(event: ServerSideEvent, controller) {
+        return stream.pipeThrough(new TransformStream<ServerSentEvent, string>({
+            transform(event: ServerSentEvent, controller) {
                 if (event.type === 'event' && event.data && event.data !== '[DONE]') {
                     try {
                         const data = JSON.parse(event.data);
