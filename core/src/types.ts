@@ -145,7 +145,8 @@ export enum BuiltinProviders {
     replicate = 'replicate',
     bedrock = 'bedrock',
     vertexai = 'vertexai',
-    //virtual = 'virtual',
+    togetherai = 'togetherai',
+    //virtual = 'virtual',    
     //cohere = 'cohere',
 }
 
