@@ -3,13 +3,13 @@ import { OpenAIDriver } from "@llumiverse/drivers";
 
 async function main() {
 
-    const vertexai = new OpenAIDriver({
+    const opeanai = new OpenAIDriver({
         apiKey: "YOUR_API_KEY_HERE",
         logger: false
     });
 
     // list models
-    const models: AIModel[] = await vertexai.listModels();
+    const models: AIModel[] = await opeanai.listModels();
 
     console.log('# Available OpenAI Models:');
     for (const model of models) {
@@ -25,7 +25,7 @@ async function main() {
     ]
 
     console.log('\n# Executing model text-bison with prompt: ', prompt);
-    const response = await vertexai.execute(prompt, {
+    const response = await opeanai.execute(prompt, {
         model: 'gpt-3.5-turbo',
         temperature: 0.6,
         max_tokens: 1024
@@ -37,7 +37,7 @@ async function main() {
 
     // execute a model in streaming mode 
     console.log('\n# Executing model text-bison in streaming mode with prompt: ', prompt);
-    const stream = await vertexai.stream(prompt, {
+    const stream = await opeanai.stream(prompt, {
         model: 'gpt-3.5-turbo',
         temperature: 0.6,
         max_tokens: 1024

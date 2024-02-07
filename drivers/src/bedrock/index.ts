@@ -1,5 +1,5 @@
 import { Bedrock, CreateModelCustomizationJobCommand, FoundationModelSummary, GetModelCustomizationJobCommand, GetModelCustomizationJobCommandOutput, ModelCustomizationJobStatus, StopModelCustomizationJobCommand } from "@aws-sdk/client-bedrock";
-import { BedrockRuntime, InvokeModelCommandOutput } from "@aws-sdk/client-bedrock-runtime";
+import { BedrockRuntime, InvokeModelCommandOutput, ResponseStream } from "@aws-sdk/client-bedrock-runtime";
 import { S3Client } from "@aws-sdk/client-s3";
 import { AIModel, AbstractDriver, BuiltinProviders, Completion, DataSource, DriverOptions, ExecutionOptions, ModelSearchPayload, PromptFormats, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
@@ -146,7 +146,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
             }
             const decoder = new TextDecoder();
 
-            return transformAsyncIterator(res.body, (stream) => {
+            return transformAsyncIterator(res.body, (stream: ResponseStream) => {
                 const segment = JSON.parse(decoder.decode(stream.chunk?.bytes));
                 if (segment.completion) {
                     return segment.completion;

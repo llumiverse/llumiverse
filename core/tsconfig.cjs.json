@@ -1,0 +1,12 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+        "noEmit": false,
+        "composite": false,
+        "declaration": false, // do mot emit twice the types
+        //"declarationDir": "./lib/types",
+        "outDir": "./lib/cjs",
+        "module": "CommonJS",
+        "moduleResolution": "Node10"
+    }
+}

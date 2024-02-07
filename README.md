@@ -18,6 +18,7 @@ The following LLM platforms are supported in the current version:
 | AWS Bedrock | ✅      | ✅    | ✅            | ✅          |
 | HuggingFace Inference Endpoints | ✅ | ✅ | N/A | N/A       |
 | Google Vertex AI | ✅ | ✅ | Partial | In Progress |
+| Together AI| ✅ | ✅ | ✅ | In Progress |
 
 New capabilities and platform can easily be added by creating a new driver for the platform.
 
@@ -55,13 +56,13 @@ import { AIModel, PromptRole, PromptSegment } from "@llumiverse/core";
 import { OpenAIDriver } from "@llumiverse/drivers";
 
 // create an instance of the OpenAI driver 
-const vertexai = new OpenAIDriver({
+const openai = new OpenAIDriver({
     apiKey: "YOUR_OPENAI_API_KEY",
     logger: false
 });
 
 // list available models on your OpenAI account
-const models: AIModel[] = await vertexai.listModels();
+const models: AIModel[] = await openai.listModels();
 
 console.log('# Available OpenAI Models:');
 for (const model of models) {
@@ -78,7 +79,7 @@ import { AIModel, PromptRole, PromptSegment } from "@llumiverse/core";
 import { OpenAIDriver } from "@llumiverse/drivers";
 
 // create an instance of the OpenAI driver 
-const vertexai = new OpenAIDriver({
+const openai = new OpenAIDriver({
     apiKey: "YOUR_OPENAI_API_KEY",
     logger: false
 });
@@ -93,7 +94,7 @@ const prompt: PromptSegment[] = [
 
 // execute a model (blocking)
 console.log('\n# Executing prompt on model gpt-3.5-turbo: ', prompt);
-const response = await vertexai.execute(prompt, {
+const response = await openai.execute(prompt, {
     model: 'gpt-3.5-turbo',
     temperature: 0.6,
     max_tokens: 1024
@@ -113,7 +114,7 @@ import { AIModel, PromptRole, PromptSegment } from "@llumiverse/core";
 import { OpenAIDriver } from "@llumiverse/drivers";
 
 // create an instance of the OpenAI driver 
-const vertexai = new OpenAIDriver({
+const openai = new OpenAIDriver({
     apiKey: "YOUR_OPENAI_API_KEY",
     logger: false
 });
@@ -128,7 +129,7 @@ const prompt: PromptSegment[] = [
 
 // execute the prompt in streaming mode 
 console.log('\n# Executing the prompt in streaming mode on model gpt-3.5-turbo: ', prompt);
-const stream = await vertexai.stream(prompt, {
+const stream = await openai.stream(prompt, {
     model: 'gpt-3.5-turbo',
     temperature: 0.6,
     max_tokens: 1024

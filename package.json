@@ -4,7 +4,8 @@
     "private": true,
     "workspaces": [
         "./core",
-        "./drivers"
+        "./drivers",
+        "./examples"
     ],
     "scripts": {
         "build": "npm run build --ws",

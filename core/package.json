@@ -3,18 +3,35 @@
     "version": "0.8.0",
     "type": "module",
     "description": "Provide an universal API to LLMs. Support for existing LLMs can be added by writing a driver.",
-    "main": "./lib/index.js",
     "files": [
         "lib",
         "src"
     ],
+    "types": "./lib/types/index.d.ts",
+    "typesVersions": {
+        "*": {
+            "async": [
+                "./lib/types/async.d.ts"
+            ]
+        }
+    },
     "exports": {
-        ".": "./lib/index.js",
-        "./async": "./lib/async.js"
+        ".": {
+            "types": "./lib/types/index.d.ts",
+            "import": "./lib/esm/index.js",
+            "require": "./lib/cjs/index.js",
+            "default": "./lib/esm/index.js"
+        },
+        "./async": {
+            "types": "./lib/types/async.d.ts",
+            "import": "./lib/esm/async.js",
+            "require": "./lib/cjs/async.js",
+            "default": "./lib/esm/async.js"
+        }
     },
     "scripts": {
         "test": "ESBK_TSCONFIG_PATH=./test/tsconfig.json npx mocha -r tsx ./test/**/*.ts",
-        "build": "npm run clean && tsc --build",
+        "build": "npm run clean && tsc -p ./tsconfig.esm.json && tsc -p ./tsconfig.cjs.json",
         "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
     },
     "license": "MIT",

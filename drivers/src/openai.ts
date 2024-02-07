@@ -17,7 +17,7 @@ import {
 } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import OpenAI from "openai";
-import { Stream } from "openai/streaming.mjs";
+import { Stream } from "openai/streaming";
 
 const supportFineTunning = new Set([
     "gpt-3.5-turbo-1106",

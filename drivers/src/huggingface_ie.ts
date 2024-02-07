@@ -10,7 +10,8 @@ import {
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import {
     HfInference,
-    HfInferenceEndpoint
+    HfInferenceEndpoint,
+    TextGenerationStreamOutput
 } from "@huggingface/inference";
 import { FetchClient } from "api-fetch-client";
 
@@ -75,7 +76,7 @@ export class HuggingFaceIEDriver extends AbstractDriver<HuggingFaceIEDriverOptio
             },
         });
 
-        return transformAsyncIterator(req, (val) => {
+        return transformAsyncIterator(req, (val: TextGenerationStreamOutput) => {
             //special like <s> are not part of the result
             if (val.token.special) return "";
             return val.token.text;

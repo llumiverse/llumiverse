@@ -19,7 +19,7 @@
     "moduleResolution": "Bundler",
     //"allowImportingTsExtensions": true,
     //"verbatimModuleSyntax": true,
-    //"noEmit": false,
+    "noEmit": true,
     "skipLibCheck": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -36,8 +36,14 @@
   ],
   "exclude": [
     "node_modules",
-    "**/*.test.ts",
     "lib",
-    "test"
+  ],
+  "references": [
+    {
+      "path": "../core/tsconfig.json"
+    },
+    {
+      "path": "../drivers/tsconfig.json"
+    }
   ]
 }

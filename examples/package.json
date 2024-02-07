@@ -1,0 +1,37 @@
+{
+    "name": "@llumiverse/examples",
+    "private": true,
+    "version": "0.8.0",
+    "type": "module",
+    "description": "LLM driver implementations. Currently supported are: openai, huggingface, bedrock, replicate.",
+    "main": "./lib/index.js",
+    "files": [
+        "lib",
+        "src"
+    ],
+    "exports": {
+        ".": "./lib/index.js"
+    },
+    "scripts": {
+        "test": "ESBK_TSCONFIG_PATH=./test/tsconfig.json npx mocha -r tsx ./test/**/*.ts",
+        "build": "echo \"No build specified\"",
+        "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
+    },
+    "license": "MIT",
+    "devDependencies": {
+        "@types/bun": "^1.0.4",
+        "@types/chai": "^4.3.11",
+        "@types/estree": "^1.0.1",
+        "@types/eventsource": "^1.1.15",
+        "@types/json-schema": "^7.0.15",
+        "@types/mocha": "^10.0.1",
+        "chai": "^4.3.8",
+        "mocha": "^10.2.0",
+        "tsx": "^3.12.10",
+        "typescript": "^5.3.3"
+    },
+    "dependencies": {
+        "@llumiverse/core": "*",
+        "@llumiverse/drivers": "*"
+    }
+}
