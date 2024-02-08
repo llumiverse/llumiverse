@@ -1,7 +1,10 @@
-import { CompletionStream, Driver, ExecutionResponse, PromptRole, PromptSegment } from '@llumiverse/core';
-import { assert } from "chai";
+import { Driver, PromptRole, PromptSegment } from '@llumiverse/core';
 import 'dotenv/config';
+import { describe, expect, test } from "vitest";
 import { TogetherAIDriver } from "../../src/index.js";
+import { assertCompletionOk, assertStreamingCompletionOk } from '../assertions.js';
+
+const TIMEOUT = 10000;
 
 const prompt: PromptSegment[] = [
     {
@@ -9,62 +12,26 @@ const prompt: PromptSegment[] = [
         content: "Hello"
     }
 ]
-
-if (!process.env.TOGETHER_API_KEY) {
-    throw new Error('TOGETHERAI_TEST_APIKEY is not defined');
-}
-
+//TODO you need to define a GOOGLE_APPLICATION_CREDENTIALSenv var for authentiocation
 const driver = new TogetherAIDriver({
     apiKey: process.env.TOGETHER_API_KEY as string,
     logger: false
 }) as Driver;
 
 
-function assertCompletionOk(r: ExecutionResponse) {
-    assert.isFalse(!!r.error)
-    assert.isNotEmpty(r.prompt)
-    assert.isNotEmpty(r.token_usage)
-    assert.isTrue(r.result && r.result.length > 2)
-}
-
-async function assertStreamingCompletionOk(stream: CompletionStream) {
-
-    const out = []
-    for await (const chunk of stream) {
-        out.push(chunk)
-    }
-    const r = stream.completion as ExecutionResponse;
-    //console.log('###stream', r.result, out);
-
-    assert.strictEqual(r.result, out.join(''))
-    assert.isFalse(!!r.error)
-    assert.isNotEmpty(r.prompt)
-    assert.isNotEmpty(r.token_usage)
-    assert.isTrue(r.result && r.result.length > 2)
-
-
-}
-
 describe('TogetherAI driver', function () {
-    this.timeout(10000); // 10 seconds
-    it('list models', (done) => {
-        driver.listModels().then(r => {
-            assert(r.length > 0)
-            done();
-        }).catch(done);
-    });
+    test('list models', async () => {
+        const r = await driver.listModels();
+        expect(r.length).toBeGreaterThan(0);
+    }, TIMEOUT);
 
-    it('execute prompt against mistral', (done) => {
-        driver.execute(prompt, { model: 'mistralai/Mistral-7B-v0.1', temperature: 0.8, max_tokens: 1024 }).then(r => {
-            assertCompletionOk(r);
-            done();
-        }).catch(done);
-    });
-    it('execute prompt against mistral (streaming mode)', (done) => {
-        driver.stream(prompt, { model: 'mistralai/Mistral-7B-v0.1', temperature: 0.8, max_tokens: 1024 }).then(r => {
-            assertStreamingCompletionOk(r);
-            done();
-        }).catch(done);
-    });
+    test('execute prompt against mistral', async () => {
+        const r = await driver.execute(prompt, { model: 'mistralai/Mistral-7B-v0.1', temperature: 0.8, max_tokens: 1024 });
+        assertCompletionOk(r);
+    }, TIMEOUT);
+    test('execute prompt against mistral (streaming mode)', async () => {
+        const r = await driver.stream(prompt, { model: 'mistralai/Mistral-7B-v0.1', temperature: 0.8, max_tokens: 1024 })
+        assertStreamingCompletionOk(r);
+    }, TIMEOUT);
 })
 

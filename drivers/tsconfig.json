@@ -5,7 +5,10 @@
       "ES2022",
       "DOM"
     ],
-    "rootDir": "./src",
+    "rootDirs": [
+      "./src",
+      "./test"
+    ],
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true, /* Enable experimental support for TC39 stage 2 draft decorators. */

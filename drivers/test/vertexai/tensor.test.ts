@@ -1,4 +1,4 @@
-import { assert } from "chai";
+import { describe, expect, test } from "vitest";
 import { generateStreamingPrompt } from "../../src/vertexai/utils/tensor.js";
 
 export const TEXT_PROMPT_NOSTREAM = {
@@ -86,11 +86,11 @@ export const CHAT_PROMPT_STREAM = {
 }
 
 describe('VertexAI: Test generation of tensor stuctures used by serverStreamingPredict endpoints', () => {
-    it('generate streaming prompt for text-bison', () => {
-        assert.deepEqual(TEXT_PROMPT_STREAM, generateStreamingPrompt(TEXT_PROMPT_NOSTREAM))
+    test('generate streaming prompt for text-bison', () => {
+        expect(TEXT_PROMPT_STREAM).toEqual(generateStreamingPrompt(TEXT_PROMPT_NOSTREAM))
     });
-    it('generate streaming prompt for chat-bison', () => {
-        assert.deepEqual(CHAT_PROMPT_STREAM, generateStreamingPrompt(CHAT_PROMPT_NOSTREAM))
+    test('generate streaming prompt for chat-bison', () => {
+        expect(CHAT_PROMPT_STREAM).toEqual(generateStreamingPrompt(CHAT_PROMPT_NOSTREAM))
     });
 
 })

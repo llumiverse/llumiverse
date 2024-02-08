@@ -7,20 +7,6 @@
         "lib",
         "src"
     ],
-    "keywords": [
-        "llm",
-        "ai",
-        "prompt",
-        "prompt engineering",
-        "ml",
-        "machine learning",
-        "embeddings",
-        "training",
-        "model",
-        "universal",
-        "api",
-        "chatgpt"
-    ],
     "types": "./lib/types/index.d.ts",
     "typesVersions": {
         "*": {
@@ -32,43 +18,36 @@
     "exports": {
         ".": {
             "types": "./lib/types/index.d.ts",
-            "default": "./lib/esm/index.js",
             "import": "./lib/esm/index.js",
-            "require": "./lib/cjs/index.js"
+            "require": "./lib/cjs/index.js",
+            "default": "./lib/esm/index.js"
         },
         "./async": {
             "types": "./lib/types/async.d.ts",
-            "default": "./lib/esm/async.js",
             "import": "./lib/esm/async.js",
-            "require": "./lib/cjs/async.js"
+            "require": "./lib/cjs/async.js",
+            "default": "./lib/esm/async.js"
         }
     },
     "scripts": {
         "test": "vitest run",
-        "build": "tsmod build",
+        "build": "npm run clean && tsc -p ./tsconfig.esm.json && tsc -p ./tsconfig.cjs.json",
         "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
     },
-    "author": "Llumiverse",
-    "license": "Apache-2.0",
-    "homepage": "https://github.com/llumiverse/llumiverse",
-    "repository": {
-        "type": "git",
-        "url": "git+ssh://git@github.com/llumiverse/llumiverse.git"
-    },
+    "license": "MIT",
     "devDependencies": {
+        "@types/estree": "^1.0.1",
         "@types/eventsource": "^1.1.15",
         "@types/json-schema": "^7.0.15",
-        "ts-dual-module": "^0.5.0",
+        "@types/mocha": "^10.0.1",
+        "chai": "^4.3.8",
+        "mocha": "^10.2.0",
+        "ts-dual-module": "^0.4.3",
+        "tsx": "^3.12.10",
         "typescript": "^5.3.3",
         "vitest": "^1.2.2"
     },
     "dependencies": {
         "json-schema": "^0.4.0"
-    },
-    "ts_dual_module": {
-        "outDir": "lib",
-        "exports": {
-            "async": "async.js"
-        }
     }
 }
