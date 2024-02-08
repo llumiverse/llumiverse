@@ -10,12 +10,12 @@ const prompt: PromptSegment[] = [
     }
 ]
 
-if (!process.env.TOGETHERAI_TEST_APIKEY) {
+if (!process.env.TOGETHER_API_KEY) {
     throw new Error('TOGETHERAI_TEST_APIKEY is not defined');
 }
 
 const driver = new TogetherAIDriver({
-    apiKey: process.env.TOGETHERAI_TEST_APIKEY as string,
+    apiKey: process.env.TOGETHER_API_KEY as string,
     logger: false
 }) as Driver;
 
