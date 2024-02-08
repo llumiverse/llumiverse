@@ -1,7 +1,7 @@
-import 'dotenv/config'
-import { Assertion, assert } from "chai";
-import { Completion, CompletionStream, Driver, ExecutionResponse, PromptRole, PromptSegment } from '@llumiverse/core';
-import { TogetherAIDriver, VertexAIDriver } from "../../src/index.js";
+import { CompletionStream, Driver, ExecutionResponse, PromptRole, PromptSegment } from '@llumiverse/core';
+import { assert } from "chai";
+import 'dotenv/config';
+import { TogetherAIDriver } from "../../src/index.js";
 
 const prompt: PromptSegment[] = [
     {
@@ -9,7 +9,11 @@ const prompt: PromptSegment[] = [
         content: "Hello"
     }
 ]
-//TODO you need to define a GOOGLE_APPLICATION_CREDENTIALSenv var for authentiocation
+
+if (!process.env.TOGETHERAI_TEST_APIKEY) {
+    throw new Error('TOGETHERAI_TEST_APIKEY is not defined');
+}
+
 const driver = new TogetherAIDriver({
     apiKey: process.env.TOGETHERAI_TEST_APIKEY as string,
     logger: false
@@ -21,7 +25,6 @@ function assertCompletionOk(r: ExecutionResponse) {
     assert.isNotEmpty(r.prompt)
     assert.isNotEmpty(r.token_usage)
     assert.isTrue(r.result && r.result.length > 2)
-    //console.log('###', r.result);
 }
 
 async function assertStreamingCompletionOk(stream: CompletionStream) {
