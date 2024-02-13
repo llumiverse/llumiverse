@@ -9,6 +9,8 @@
       "./src",
       "./test"
     ],
+    "declarationDir": "./lib/types", // must be specified otherwise vscode generate files in src
+    "outDir": "./lib/esm",
     "sourceMap": true,
     "forceConsistentCasingInFileNames": true,
     "experimentalDecorators": true, /* Enable experimental support for TC39 stage 2 draft decorators. */
