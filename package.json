@@ -8,6 +8,7 @@
         "./examples"
     ],
     "scripts": {
+        "release": "npm publish --ws --access public",
         "prepare": "cp ./README.md ./core/ && cp ./README.md ./drivers/",
         "build": "npm run build --ws",
         "test": "npm run test --ws"
