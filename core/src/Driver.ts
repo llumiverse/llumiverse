@@ -41,8 +41,14 @@ const NoopLogger: Logger = {
     error: noop,
 }
 
-export function createLogger(logger: Logger | false | undefined) {
-    return logger ? logger : logger === false ? NoopLogger : ConsoleLogger;
+export function createLogger(logger: Logger | "console" | undefined) {
+    if (logger === "console") {
+        return ConsoleLogger;
+    } else if (logger) {
+        return logger;
+    } else {
+        return NoopLogger;
+    }
 }
 
 

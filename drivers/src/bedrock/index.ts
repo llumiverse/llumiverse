@@ -1,7 +1,7 @@
 import { Bedrock, CreateModelCustomizationJobCommand, FoundationModelSummary, GetModelCustomizationJobCommand, GetModelCustomizationJobCommandOutput, ModelCustomizationJobStatus, StopModelCustomizationJobCommand } from "@aws-sdk/client-bedrock";
 import { BedrockRuntime, InvokeModelCommandOutput, ResponseStream } from "@aws-sdk/client-bedrock-runtime";
 import { S3Client } from "@aws-sdk/client-s3";
-import { AIModel, AbstractDriver, BuiltinProviders, Completion, DataSource, DriverOptions, ExecutionOptions, ModelSearchPayload, PromptFormats, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
+import { AIModel, AbstractDriver, BuiltinProviders, Completion, DataSource, DriverOptions, ExecutionOptions, PromptFormats, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import mnemonist from "mnemonist";
@@ -292,7 +292,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
         return this._listModels(m => m.customizationsSupported ? m.customizationsSupported.includes("FINE_TUNING") : false);
     }
 
-    async listModels(_params: ModelSearchPayload): Promise<AIModel[]> {
+    async listModels(): Promise<AIModel[]> {
         this.logger.debug("[Bedrock] listing models");
         // exclude trainable models since they are not executable
         const filter = (m: FoundationModelSummary) => m.inferenceTypesSupported?.includes("ON_DEMAND") ?? false;

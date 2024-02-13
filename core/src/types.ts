@@ -37,7 +37,7 @@ export interface Logger {
 }
 
 export interface DriverOptions {
-    logger?: Logger | false;
+    logger?: Logger | "console";
 }
 
 export interface PromptOptions {

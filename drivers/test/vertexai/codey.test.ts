@@ -14,8 +14,7 @@ const prompt: PromptSegment[] = [
 //TODO you need to define a GOOGLE_APPLICATION_CREDENTIALS env var for authentiocation
 const driver = new VertexAIDriver({
     project: "dengenlabs",
-    region: "us-central1",
-    logger: false
+    region: "us-central1"
 }) as Driver;
 
 describe('VertexAI: Test prediction of codey models', function () {

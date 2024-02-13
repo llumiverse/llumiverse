@@ -49,22 +49,98 @@ npm install @llumiverse/core
 
 ## Usage
 
-Here is an example on using the OpenAI driver. Apart the driver configuration and the target model (which depends on the driver) the code will work with any driver.
+First, you need to instantiate a driver instance for the target LLM platform you want to interact too. Each, driver accept its own set of parameters when instantiating.
+
+### OpenAI driver
 
 ```javascript
-import { AIModel, PromptRole, PromptSegment } from "@llumiverse/core";
 import { OpenAIDriver } from "@llumiverse/drivers";
 
 // create an instance of the OpenAI driver 
-const openai = new OpenAIDriver({
-    apiKey: "YOUR_OPENAI_API_KEY",
-    logger: false
+const driver = new OpenAIDriver({
+    apiKey: "YOUR_OPENAI_API_KEY"
 });
+```
 
-// list available models on your OpenAI account
-const models: AIModel[] = await openai.listModels();
+### Bedrock driver
 
-console.log('# Available OpenAI Models:');
+In this example we will instantiate the Bedrock driver using credentials from the Shared Credentials File (i.e. ~/.aws/credentials).
+Learn more on how to [setup AWS credentials in node](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html). 
+
+```javascript
+import { defaultProvider } from "@aws-sdk/credential-provider-node";
+import { BedrockDriver } from "@llumiverse/drivers";
+
+const credentials = defaultProvider({
+    profile: "default",
+})
+
+const driver = new BedrockDriver({
+    region: 'us-west-2',
+    credentials: credentials
+});
+```
+
+### VertexAI driver
+
+For the following example to work you need to define a `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+
+```javascript 
+import { VertexAIDriver } from "@llumiverse/drivers";
+const driver = new VertexAIDriver({
+    project: 'YOUR_GCLOUD_PROJECT',
+    region: 'us-central1'
+});
+```
+
+### Replicate driver
+
+```javascript
+import { ReplicateDriver } from "@llumiverse/drivers";
+
+const driver = new ReplicateDriver({
+    apiKey: "YOUR_REPLICATE_API_KEY"
+});
+```
+
+### TogetherAI driver
+
+```javascript
+import { TogetherAIDriver } from "@llumiverse/drivers";
+
+const driver = new TogetherAIDriver({
+    apiKey: "YOUR_TOGETHER_AI_API_KEY"
+});
+```
+
+### HuggingFace driver
+
+```javascript
+import { HuggingFaceIEDriver } from "@llumiverse/drivers";
+
+const driver = new HuggingFaceIEDriver({
+    apiKey: "YOUR_HUGGINGFACE_API_KEY",
+    endpoint_url: "YOUR_HUGGINGFACE_ENDPOINT",
+});
+```
+
+### Listing available models
+
+Once you instantiated a driver you can list the available models. Some drivers accepts an argument for the `listModel` method to search for matching models. Some drivers like for example `replicate` is listing a preselected set of models. To list other models ypu need to perform a search by giving a text query as an argument.
+
+In the following example, we are assuming that we have already instantiated a driver, which is available as the `driver` variable.
+
+
+```javascript
+import { AIModel } from "@llumiverse/core";
+
+// instantiate the desired driver
+const driver = createDriverInstance();
+
+// list available models on the target LLM. (somne drivers may require a search parameter to discover more models)
+const models: AIModel[] = await driver.listModels();
+
+console.log('# Available Models:');
 for (const model of models) {
     console.log(`${model.name} [${model.id}]`);
 }
@@ -72,30 +148,47 @@ for (const model of models) {
 
 ### Execute a prompt 
 
-Here is an example oin how to execute a prompt. We will pick OpenAI aghain, but the code works with any other driver.
+To execute a prompt we need to create prompt in the LLumiverse format and pass it to the driver `execute` method. 
+
+The prompt format is very similar to the OpenAI prompt format. If is an array of messages with a `content` and a `role` property. The roles can be any of `"user" | "system" | "assistant" | "safety"`. 
+
+The `safety` role is similar to `system` but has a greater precedence over the other messages. Thus, it will override any `user` or `system` message which is saying something contrary to the `safety` message.
+
+In order to execute a prompt we also need to specify a target model, given a model ID which is known by the target LLM. We may also specify execution options like `temperature`, `max_tokens` etc.
+
+In the following example, we are again assuming that we have already instantiated a driver, which is available as the `driver` variable. 
+
+Also we are assuming the model ID we want to target is available as the `model` variable. To get a list of the existing models (and their IDs) you can list the model as we shown in the previous example
+
+Here is an example of model IDs depending on the driver type:
+* OpenAI: `gpt-3.5-turbo`
+* Bedrock: `arn:aws:bedrock:us-west-2::foundation-model/cohere.command-text-v14`
+* VertexAI: `text-bison`
+* Replicate: `meta/llama-2-70b-chat:02e509c789964a7ea8736978a43525956ef40397be9033abf9fd2badfe68c9e3`
+* TogetherAI: `mistralai/Mistral-7B-instruct-v0.1`
+* HuggingFace: `aws-mistral-7b-instruct-v0-1-015`
+
 
 ```javascript
-import { AIModel, PromptRole, PromptSegment } from "@llumiverse/core";
-import { OpenAIDriver } from "@llumiverse/drivers";
+import { PromptRole, PromptSegment } from "@llumiverse/core";
 
-// create an instance of the OpenAI driver 
-const openai = new OpenAIDriver({
-    apiKey: "YOUR_OPENAI_API_KEY",
-    logger: false
-});
 
-// create the prompt. The prompt format is shared between all drivers
+// instantiate the desired driver
+const driver = createDriverInstance();
+const model = "the-model-id"; // change with your desired model ID
+
+// create the prompt.
 const prompt: PromptSegment[] = [
     {
         role: PromptRole.user,
-        content: 'Write please a short story about Paris in winter in no more than 512 characters.'
+        content: 'Please, write a short story about winter in Paris, in no more than 512 characters.'
     }
 ]
 
-// execute a model (blocking)
-console.log('\n# Executing prompt on model gpt-3.5-turbo: ', prompt);
+// execute a model and wait for the response
+console.log(`\n# Executing prompt on ${model} model: ${prompt}`);
 const response = await openai.execute(prompt, {
-    model: 'gpt-3.5-turbo',
+    model,
     temperature: 0.6,
     max_tokens: 1024
 });
@@ -105,37 +198,38 @@ console.log('# Response took', response.execution_time, 'ms')
 console.log('# Token usage:', response.token_usage);
 ```
 
+
 ### Execute a prompt in streaming mode
 
-Here is the  same example above but in streaming mode:
+In this example we will execute a prompt and will stream the result to display it on the console as it is returned by the target LLM platform. 
+
+**Note** that some models doesn't support streaming. In that case the driver will simulate a streaming using a single chunk of text corresponding to the entire response.
+
 
 ```javascript
-import { AIModel, PromptRole, PromptSegment } from "@llumiverse/core";
-import { OpenAIDriver } from "@llumiverse/drivers";
+import { PromptRole, PromptSegment } from "@llumiverse/core";
 
-// create an instance of the OpenAI driver 
-const openai = new OpenAIDriver({
-    apiKey: "YOUR_OPENAI_API_KEY",
-    logger: false
-});
+// instantiate the desired driver
+const driver = createDriverInstance();
+const model = "the-model-id"; // change with your desired model ID
 
-// create the prompt. The prompt format is shared between all drivers
+// create the prompt.
 const prompt: PromptSegment[] = [
     {
         role: PromptRole.user,
-        content: 'Write please a short story about Paris in winter in no more than 512 characters.'
+        content: 'Please, write a short story about winter in Paris, in no more than 512 characters.'
     }
 ]
 
 // execute the prompt in streaming mode 
-console.log('\n# Executing the prompt in streaming mode on model gpt-3.5-turbo: ', prompt);
-const stream = await openai.stream(prompt, {
-    model: 'gpt-3.5-turbo',
+console.log(`\n# Executing prompt on model ${model} in streaming mode: ${prompt}`);
+const stream = await driver.stream(prompt, {
+    model,
     temperature: 0.6,
     max_tokens: 1024
 });
 
-// show the streaming response as it comes
+// print the streaming response as it comes
 for await (const chunk of stream) {
     process.stdout.write(chunk);
 }
@@ -151,7 +245,7 @@ console.log('# Token usage:', streamingResponse.token_usage);
 ## Contributing
 
 Contributions are welcome!
-Please see [CONTRIBUTING.md](CONTRIBUTING.md) for more details.
+Please see [CONTRIBUTING.md](https://github.com/llumiverse/llumiverse/blob/main/CONTRIBUTING.md) for more details.
 
 
 ## License

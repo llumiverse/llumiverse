@@ -217,7 +217,7 @@ export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
         return cachedTrainableModels;
     }
 
-    async listModels(params: ModelSearchPayload): Promise<AIModel[]> {
+    async listModels(params: ModelSearchPayload = { text: '' }): Promise<AIModel[]> {
         if (!params.text) {
             return this.listTrainableModels();
         }

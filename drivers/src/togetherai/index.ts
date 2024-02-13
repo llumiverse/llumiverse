@@ -29,6 +29,10 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
                 prompt: prompt,
                 max_tokens: options.max_tokens ?? 1024,
                 temperature: options.temperature ?? 0.7,
+                stop: [
+                    "</s>",
+                    "[/INST]"
+                ],
             }
         })
 
@@ -53,6 +57,10 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
                 max_tokens: options.max_tokens ?? 1024,
                 temperature: options.temperature ?? 0.7,
                 stream: true,
+                stop: [
+                    "</s>",
+                    "[/INST]"
+                ],
             },
             reader: 'sse'
         })

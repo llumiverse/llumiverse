@@ -3,14 +3,13 @@ import { VertexAIDriver } from "@llumiverse/drivers";
 
 async function main() {
 
-    const vertexai = new VertexAIDriver({
+    const driver = new VertexAIDriver({
         project: 'dengenlabs',
-        region: 'us-central1',
-        logger: false
+        region: 'us-central1'
     });
 
     // list models
-    const models: AIModel[] = await vertexai.listModels();
+    const models: AIModel[] = await driver.listModels();
 
     console.log('# Available VertexAI Models:');
     for (const model of models) {
@@ -26,7 +25,7 @@ async function main() {
     ]
 
     console.log('\n# Executing model text-bison with prompt: ', prompt);
-    const response = await vertexai.execute(prompt, {
+    const response = await driver.execute(prompt, {
         model: 'text-bison',
         temperature: 0.6,
         max_tokens: 1024
@@ -38,7 +37,7 @@ async function main() {
 
     // execute a model in streaming mode 
     console.log('\n# Executing model text-bison in streaming mode with prompt: ', prompt);
-    const stream = await vertexai.stream(prompt, {
+    const stream = await driver.stream(prompt, {
         model: 'text-bison',
         temperature: 0.6,
         max_tokens: 1024

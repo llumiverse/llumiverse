@@ -1,11 +1,18 @@
+import { defaultProvider } from "@aws-sdk/credential-provider-node";
 import { AIModel, PromptRole, PromptSegment } from "@llumiverse/core";
-import { OpenAIDriver } from "@llumiverse/drivers";
+import { BedrockDriver } from "@llumiverse/drivers";
+const credentials = defaultProvider({
+    profile: "default",
+})
 
 async function main() {
 
-    const driver = new OpenAIDriver({
-        apiKey: process.env.OPENAI_API_KEY as string
+    const driver = new BedrockDriver({
+        region: 'us-west-2',
+        credentials: credentials
     });
+    //const model = "arn:aws:bedrock:us-west-2::foundation-model/amazon.titan-tg1-large";
+    const model = "arn:aws:bedrock:us-west-2::foundation-model/cohere.command-text-v14";
 
     // list models
     const models: AIModel[] = await driver.listModels();
@@ -19,13 +26,13 @@ async function main() {
     const prompt: PromptSegment[] = [
         {
             role: PromptRole.user,
-            content: 'Write please a short story about Paris in winter in no more than 512 characters.'
+            content: 'Write a short story about Paris in winter in max 512 characters.'
         }
     ]
 
-    console.log('\n# Executing model text-bison with prompt: ', prompt);
+    console.log(`\n# Executing model ${model} with prompt: `, prompt);
     const response = await driver.execute(prompt, {
-        model: 'gpt-3.5-turbo',
+        model,
         temperature: 0.6,
         max_tokens: 1024
     });
@@ -35,9 +42,9 @@ async function main() {
     console.log('# Token usage:', response.token_usage);
 
     // execute a model in streaming mode 
-    console.log('\n# Executing model text-bison in streaming mode with prompt: ', prompt);
+    console.log(`\n# Executing model ${model} in streaming mode with prompt: `, prompt);
     const stream = await driver.stream(prompt, {
-        model: 'gpt-3.5-turbo',
+        model,
         temperature: 0.6,
         max_tokens: 1024
     });
@@ -57,3 +64,4 @@ async function main() {
 }
 
 main().catch(console.error);
+

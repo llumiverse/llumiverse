@@ -1,4 +1,9 @@
 import {
+    HfInference,
+    HfInferenceEndpoint,
+    TextGenerationStreamOutput
+} from "@huggingface/inference";
+import {
     AIModel,
     AIModelStatus,
     AbstractDriver,
@@ -8,11 +13,6 @@ import {
     PromptFormats
 } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
-import {
-    HfInference,
-    HfInferenceEndpoint,
-    TextGenerationStreamOutput
-} from "@huggingface/inference";
 import { FetchClient } from "api-fetch-client";
 
 export interface HuggingFaceIEDriverOptions extends DriverOptions {
@@ -114,6 +114,7 @@ export class HuggingFaceIEDriver extends AbstractDriver<HuggingFaceIEDriverOptio
     async listModels(): Promise<AIModel[]> {
         const res = await this.service.get("/");
         const hfModels = res.items as HuggingFaceIEModel[];
+        if (!hfModels || !hfModels.length) return [];
 
         const models: AIModel[] = hfModels.map((model: HuggingFaceIEModel) => ({
             id: model.name,

@@ -14,8 +14,7 @@ const prompt: PromptSegment[] = [
 ]
 //TODO you need to define a GOOGLE_APPLICATION_CREDENTIALSenv var for authentiocation
 const driver = new TogetherAIDriver({
-    apiKey: process.env.TOGETHER_API_KEY as string,
-    logger: false
+    apiKey: process.env.TOGETHER_API_KEY as string
 }) as Driver;
 
 

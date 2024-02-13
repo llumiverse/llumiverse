@@ -1,16 +1,19 @@
+import 'dotenv/config';
 import { AIModel, PromptRole, PromptSegment } from "@llumiverse/core";
-import { OpenAIDriver } from "@llumiverse/drivers";
+import { HuggingFaceIEDriver } from "@llumiverse/drivers";
 
 async function main() {
 
-    const driver = new OpenAIDriver({
-        apiKey: process.env.OPENAI_API_KEY as string
+    const model = "aws-mistral-7b-instruct-v0-1-015";
+    const driver = new HuggingFaceIEDriver({
+        apiKey: process.env.HUGGINGFACE_API_KEY as string,
+        endpoint_url: process.env.HUGGINGFACE_ENDPOINT_URL as string
     });
 
     // list models
     const models: AIModel[] = await driver.listModels();
 
-    console.log('# Available OpenAI Models:');
+    console.log('# Main huggingface models:');
     for (const model of models) {
         console.log(`${model.name} [${model.id}]`);
     }
@@ -19,13 +22,13 @@ async function main() {
     const prompt: PromptSegment[] = [
         {
             role: PromptRole.user,
-            content: 'Write please a short story about Paris in winter in no more than 512 characters.'
+            content: 'Hello'
         }
     ]
 
-    console.log('\n# Executing model text-bison with prompt: ', prompt);
+    console.log(`\n# Executing model ${model} with prompt: `, prompt);
     const response = await driver.execute(prompt, {
-        model: 'gpt-3.5-turbo',
+        model,
         temperature: 0.6,
         max_tokens: 1024
     });
@@ -35,9 +38,9 @@ async function main() {
     console.log('# Token usage:', response.token_usage);
 
     // execute a model in streaming mode 
-    console.log('\n# Executing model text-bison in streaming mode with prompt: ', prompt);
+    console.log(`\n# Executing model ${model} in streaming mode with prompt: `, prompt);
     const stream = await driver.stream(prompt, {
-        model: 'gpt-3.5-turbo',
+        model,
         temperature: 0.6,
         max_tokens: 1024
     });

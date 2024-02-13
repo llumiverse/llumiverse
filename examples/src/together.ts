@@ -1,16 +1,18 @@
 import { AIModel, PromptRole, PromptSegment } from "@llumiverse/core";
-import { OpenAIDriver } from "@llumiverse/drivers";
+import { TogetherAIDriver } from "@llumiverse/drivers";
+import 'dotenv/config';
 
 async function main() {
 
-    const driver = new OpenAIDriver({
-        apiKey: process.env.OPENAI_API_KEY as string
+    const model = "mistralai/Mistral-7B-instruct-v0.1";
+    const driver = new TogetherAIDriver({
+        apiKey: process.env.TOGETHER_API_KEY as string
     });
 
     // list models
     const models: AIModel[] = await driver.listModels();
 
-    console.log('# Available OpenAI Models:');
+    console.log('# Main replicate models:');
     for (const model of models) {
         console.log(`${model.name} [${model.id}]`);
     }
@@ -19,26 +21,27 @@ async function main() {
     const prompt: PromptSegment[] = [
         {
             role: PromptRole.user,
-            content: 'Write please a short story about Paris in winter in no more than 512 characters.'
+            content: '<INST>Hello</INST>'
         }
     ]
 
-    console.log('\n# Executing model text-bison with prompt: ', prompt);
+    console.log(`\n# Executing model ${model} with prompt: `, prompt);
     const response = await driver.execute(prompt, {
-        model: 'gpt-3.5-turbo',
-        temperature: 0.6,
-        max_tokens: 1024
+        model,
+        temperature: 0.7,
+        max_tokens: 256
     });
 
     console.log('\n# LLM response:', response.result)
     console.log('# Response took', response.execution_time, 'ms')
     console.log('# Token usage:', response.token_usage);
+    console.log('# final prompt:', response.prompt);
 
     // execute a model in streaming mode 
-    console.log('\n# Executing model text-bison in streaming mode with prompt: ', prompt);
+    console.log(`\n# Executing model ${model} in streaming mode with prompt: `, prompt);
     const stream = await driver.stream(prompt, {
-        model: 'gpt-3.5-turbo',
-        temperature: 0.6,
+        model,
+        temperature: 0.7,
         max_tokens: 1024
     });
 
