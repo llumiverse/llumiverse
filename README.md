@@ -41,7 +41,7 @@ npm install @llumiverse/core @llumiverse/drivers
 npm install @llumiverse/core
 ```
 
-3. If you want to develop a new llumiverse driver for an ussuported LLM provider you only need to install `@llumiverse/core`
+3. If you want to develop a new llumiverse driver for an unsupported LLM provider you only need to install `@llumiverse/core`
 
 ```
 npm install @llumiverse/core
@@ -49,7 +49,7 @@ npm install @llumiverse/core
 
 ## Usage
 
-First, you need to instantiate a driver instance for the target LLM platform you want to interact too. Each, driver accept its own set of parameters when instantiating.
+First, you need to instantiate a driver instance for the target LLM platform you want to interact too. Each driver accepts its own set of parameters when instantiating.
 
 ### OpenAI driver
 
@@ -64,7 +64,7 @@ const driver = new OpenAIDriver({
 
 ### Bedrock driver
 
-In this example we will instantiate the Bedrock driver using credentials from the Shared Credentials File (i.e. ~/.aws/credentials).
+In this example, we will instantiate the Bedrock driver using credentials from the Shared Credentials File (i.e. ~/.aws/credentials).
 Learn more on how to [setup AWS credentials in node](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html). 
 
 ```javascript
@@ -126,7 +126,7 @@ const driver = new HuggingFaceIEDriver({
 
 ### Listing available models
 
-Once you instantiated a driver you can list the available models. Some drivers accepts an argument for the `listModel` method to search for matching models. Some drivers like for example `replicate` is listing a preselected set of models. To list other models ypu need to perform a search by giving a text query as an argument.
+Once you instantiated a driver you can list the available models. Some drivers accept an argument for the `listModel` method to search for matching models. Some drivers like for example `replicate` are listing a preselected set of models. To list other models you need to perform a search by giving a text query as an argument.
 
 In the following example, we are assuming that we have already instantiated a driver, which is available as the `driver` variable.
 
@@ -137,7 +137,7 @@ import { AIModel } from "@llumiverse/core";
 // instantiate the desired driver
 const driver = createDriverInstance();
 
-// list available models on the target LLM. (somne drivers may require a search parameter to discover more models)
+// list available models on the target LLM. (some drivers may require a search parameter to discover more models)
 const models: AIModel[] = await driver.listModels();
 
 console.log('# Available Models:');
@@ -148,17 +148,17 @@ for (const model of models) {
 
 ### Execute a prompt 
 
-To execute a prompt we need to create prompt in the LLumiverse format and pass it to the driver `execute` method. 
+To execute a prompt we need to create a prompt in the LLumiverse format and pass it to the driver `execute` method. 
 
-The prompt format is very similar to the OpenAI prompt format. If is an array of messages with a `content` and a `role` property. The roles can be any of `"user" | "system" | "assistant" | "safety"`. 
+The prompt format is very similar to the OpenAI prompt format. It is an array of messages with a `content` and a `role` property. The roles can be any of `"user" | "system" | "assistant" | "safety"`. 
 
-The `safety` role is similar to `system` but has a greater precedence over the other messages. Thus, it will override any `user` or `system` message which is saying something contrary to the `safety` message.
+The `safety` role is similar to `system` but has a greater precedence over the other messages. Thus, it will override any `user` or `system` message that is saying something contrary to the `safety` message.
 
 In order to execute a prompt we also need to specify a target model, given a model ID which is known by the target LLM. We may also specify execution options like `temperature`, `max_tokens` etc.
 
 In the following example, we are again assuming that we have already instantiated a driver, which is available as the `driver` variable. 
 
-Also we are assuming the model ID we want to target is available as the `model` variable. To get a list of the existing models (and their IDs) you can list the model as we shown in the previous example
+Also, we are assuming the model ID we want to target is available as the `model` variable. To get a list of the existing models (and their IDs) you can list the model as we shown in the previous example
 
 Here is an example of model IDs depending on the driver type:
 * OpenAI: `gpt-3.5-turbo`
@@ -187,7 +187,7 @@ const prompt: PromptSegment[] = [
 
 // execute a model and wait for the response
 console.log(`\n# Executing prompt on ${model} model: ${prompt}`);
-const response = await openai.execute(prompt, {
+const response = await driver.execute(prompt, {
     model,
     temperature: 0.6,
     max_tokens: 1024
@@ -201,9 +201,9 @@ console.log('# Token usage:', response.token_usage);
 
 ### Execute a prompt in streaming mode
 
-In this example we will execute a prompt and will stream the result to display it on the console as it is returned by the target LLM platform. 
+In this example, we will execute a prompt and will stream the result to display it on the console as it is returned by the target LLM platform. 
 
-**Note** that some models doesn't support streaming. In that case the driver will simulate a streaming using a single chunk of text corresponding to the entire response.
+**Note** that some models don't support streaming. In that case, the driver will simulate a streaming using a single chunk of text corresponding to the entire response.
 
 
 ```javascript
