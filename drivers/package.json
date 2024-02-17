@@ -1,6 +1,6 @@
 {
   "name": "@llumiverse/drivers",
-  "version": "0.8.1",
+  "version": "0.8.2",
   "type": "module",
   "description": "LLM driver implementations. Currently supported are: openai, huggingface, bedrock, replicate.",
   "files": [
@@ -38,7 +38,13 @@
     "model",
     "universal",
     "api",
-    "chatgpt"
+    "chatgpt",
+    "openai",
+    "vertexai",
+    "bedrock",
+    "replicate",
+    "huggingface",
+    "togetherai"
   ],
   "devDependencies": {
     "@types/eventsource": "^1.1.15",
