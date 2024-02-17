@@ -5,7 +5,7 @@ import { describe, expect, test } from "vitest";
 import { TogetherAIDriver } from "../../src/index.js";
 import { assertCompletionOk, assertStreamingCompletionOk } from '../assertions.js';
 
-const TIMEOUT = 120 * 100;
+const TIMEOUT = 120 * 1000;
 
 const prompt: PromptSegment[] = [
     {
