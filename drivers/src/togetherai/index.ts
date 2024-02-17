@@ -22,11 +22,20 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
         });
     }
 
+    getResponseFormat = (options: ExecutionOptions) => {
+        return options.resultSchema ?
+            {
+                type: "json_object",
+                schema: options.resultSchema
+            } : undefined;
+    }
+
     async requestCompletion(prompt: string, options: ExecutionOptions): Promise<Completion<any>> {
         const res = await this.fetchClient.post('/v1/completions', {
             payload: {
                 model: options.model,
                 prompt: prompt,
+                response_format: this.getResponseFormat(options),
                 max_tokens: options.max_tokens ?? 1024,
                 temperature: options.temperature ?? 0.7,
                 stop: [
@@ -56,6 +65,7 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
                 prompt: prompt,
                 max_tokens: options.max_tokens ?? 1024,
                 temperature: options.temperature ?? 0.7,
+                response_format: this.getResponseFormat(options),
                 stream: true,
                 stop: [
                     "</s>",
