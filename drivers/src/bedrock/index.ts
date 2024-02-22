@@ -362,12 +362,16 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
 
         this.logger.info("[Bedrock] Generating embeddings with model " + model);
 
+        const invokeBody = {
+            inputText: content
+        }
+
         const executor = this.getExecutor();
         const res = await executor.invokeModel(
             {
                 modelId: model,
-                contentType: "text/plain",
-                body: content,
+                contentType: "application/json",
+                body: JSON.stringify(invokeBody),
             }
         );
 
@@ -380,7 +384,10 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
             throw new Error("Embeddings not found");
         }
 
-        return result.embedding;
+        return {
+            embeddings: result.embedding,
+            model: model,
+        };
 
     }
 
