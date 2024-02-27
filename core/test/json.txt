@@ -1,0 +1,17 @@
+{
+    "key1": 'value1 " test',
+    'key2': "value2",
+    key3: "value3",
+    "key4": "value4
+with new line",
+    object: {    
+    array: [
+            "item1",
+            [
+                {
+                    "nested": "object",
+                },
+            ]
+        ],
+    },
+}

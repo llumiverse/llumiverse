@@ -1,5 +1,5 @@
 import { JSONSchema4, validate } from "json-schema";
-import { parseJSON } from "./json.js";
+import { extractAndParseJSON } from "./json.js";
 import { ResultValidationError } from "./types.js";
 
 export class ValidationError extends Error implements ResultValidationError {
@@ -16,7 +16,7 @@ export function validateResult(data: any, schema: JSONSchema4) {
     let json;
     if (typeof data === "string") {
         try {
-            json = parseJSON(data);
+            json = extractAndParseJSON(data);
         } catch (error: any) {
             throw new ValidationError("json_error", error.message)
         }
