@@ -23,7 +23,7 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
         this.client = new MistralClient(options.apiKey, options.endpointUrl);
     }
 
-    getResponseFormat = (options: ExecutionOptions): ResponseFormat | undefined => {
+    getResponseFormat = (_options: ExecutionOptions): ResponseFormat | undefined => {
 
 
         /*const responseFormatJson: ResponseFormat = {
@@ -35,7 +35,7 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
         } as ResponseFormat;
         */
 
-        //return options.resultSchema ? responseFormatJson : responseFormatText;
+        //return _options.resultSchema ? responseFormatJson : responseFormatText;
 
         //TODO remove this when Mistral properly supports the parameters - it makes an error for now
         return undefined
