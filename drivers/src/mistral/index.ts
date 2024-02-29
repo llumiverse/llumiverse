@@ -26,17 +26,19 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
     getResponseFormat = (options: ExecutionOptions): ResponseFormat | undefined => {
 
 
-        const responseFormatJson: ResponseFormat = {
+        /*const responseFormatJson: ResponseFormat = {
             type: "json_object",
         } as ResponseFormat
 
         const responseFormatText: ResponseFormat = {
             type: "text",
         } as ResponseFormat;
+        */
 
         //return options.resultSchema ? responseFormatJson : responseFormatText;
 
-        return undefined //TODO remove this when Mistral properly supports the parameters
+        //TODO remove this when Mistral properly supports the parameters - it makes an error for now
+        return undefined
     }
 
     createPrompt(segments: PromptSegment[], opts: ExecutionOptions): LLMMessage[] {
@@ -48,7 +50,7 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
             const content = "The user is explicitely instructing that the result should be a JSON object.\nThe schema is as follows: \n" + JSON.stringify(opts.resultSchema);
             prompts.push({
                 role: "user",
-                content: JSON.stringify({ schema: opts.resultSchema })
+                content: content
             });
         }
 
