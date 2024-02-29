@@ -12,6 +12,10 @@ export interface Completion<ResultT = any> {
     // the driver impl must return the result and optionally the token_usage. the execution time is computed by the extended abstract driver 
     result: ResultT;
     token_usage?: ExecutionTokenUsage;
+
+    /**
+     * The time it took to execute the request in seconds
+     */
     execution_time?: number;
     /**
      * Set only if a result validation error occured, otherwise if the result is valid the error field is undefined

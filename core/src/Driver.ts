@@ -196,7 +196,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     abstract requestCompletionStream(prompt: PromptT, options: ExecutionOptions): Promise<AsyncIterable<string>>;
 
     //list models available for this environement
-    abstract listModels(params: ModelSearchPayload): Promise<AIModel[]>;
+    abstract listModels(params?: ModelSearchPayload): Promise<AIModel[]>;
 
     abstract listTrainableModels(): Promise<AIModel[]>;
 
