@@ -41,7 +41,7 @@ if (process.env.TOGETHER_API_KEY) {
             apiKey: process.env.TOGETHER_API_KEY as string
         }),
         models: [
-            "meta-llama/Llama-2-70b-chat-hf",
+            "togethercomputer/CodeLlama-34b-Instruct",
             "mistralai/Mixtral-8x7B-Instruct-v0.1"
         ]
     }
