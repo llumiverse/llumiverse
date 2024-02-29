@@ -34,4 +34,5 @@ jobs:
     - run: npm run test 
       env:
         TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
+        MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
 
