@@ -1,7 +1,11 @@
 import { AIModel, AbstractDriver, Completion, DriverOptions, ExecutionOptions, PromptFormats, PromptSegment } from "@llumiverse/core";
-import { transformAsyncIterator } from "@llumiverse/core/async";
-import MistralClient, { ResponseFormat } from "@mistralai/mistralai";
+import { FetchClient, ServerSentEvent } from "api-fetch-client";
+import { CompletionRequestParams, ListModelsResponse, ResponseFormat } from "./types.js";
 
+//TODO retry on 429
+//const RETRY_STATUS_CODES = [429, 500, 502, 503, 504];
+
+const ENDPOINT = 'https://api.mistral.ai';
 
 interface MistralAIDriverOptions extends DriverOptions {
     apiKey: string;
@@ -12,7 +16,8 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
     provider: string;
     apiKey: string;
     defaultFormat: PromptFormats;
-    client: MistralClient;
+    //client: MistralClient;
+    client: FetchClient;
     endpointUrl?: string;
 
     constructor(options: MistralAIDriverOptions) {
@@ -20,7 +25,10 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
         this.provider = "MistralAI";
         this.defaultFormat = PromptFormats.genericTextLLM;
         this.apiKey = options.apiKey;
-        this.client = new MistralClient(options.apiKey, options.endpointUrl);
+        //this.client = new MistralClient(options.apiKey, options.endpointUrl);
+        this.client = new FetchClient(options.endpointUrl || ENDPOINT).withHeaders({
+            authorization: `Bearer ${this.apiKey}`
+        });
     }
 
     getResponseFormat = (_options: ExecutionOptions): ResponseFormat | undefined => {
@@ -60,21 +68,20 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
 
     async requestCompletion(messages: LLMMessage[], options: ExecutionOptions): Promise<Completion<any>> {
 
-        const start = Date.now();
-        const res = await this.client.chat({
-            model: options.model,
-            messages: messages,
-            maxTokens: options.max_tokens ?? 1024,
-            temperature: options.temperature ?? 0.7,
-            responseFormat: this.getResponseFormat(options),
+        const res = await this.client.post('/v1/chat/completions', {
+            payload: _makeChatCompletionRequest({
+                model: options.model,
+                messages: messages,
+                maxTokens: options.max_tokens ?? 1024,
+                temperature: options.temperature ?? 0.7,
+                responseFormat: this.getResponseFormat(options),
+            })
         })
 
-        const elapsed = Date.now() - start;
         const result = res.choices[0]?.message.content;
 
         return {
             result: result,
-            execution_time: elapsed / 1000,
             token_usage: {
                 prompt: res.usage.prompt_tokens,
                 result: res.usage.completion_tokens,
@@ -85,24 +92,36 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
 
     async requestCompletionStream(messages: LLMMessage[], options: ExecutionOptions): Promise<AsyncIterable<string>> {
 
-
-
-        const stream = this.client.chatStream({
-            model: options.model,
-            messages: messages,
-            maxTokens: options.max_tokens ?? 1024,
-            temperature: options.temperature ?? 0.7,
-            responseFormat: this.getResponseFormat(options),
+        const stream = await this.client.post('/v1/chat/completions', {
+            payload: _makeChatCompletionRequest({
+                model: options.model,
+                messages: messages,
+                maxTokens: options.max_tokens ?? 1024,
+                temperature: options.temperature ?? 0.7,
+                responseFormat: this.getResponseFormat(options),
+                stream: true
+            }),
+            reader: 'sse'
         });
 
-        return transformAsyncIterator(stream, (res) => {
-            return res.choices[0].delta.content || '';
-        });
+        return stream.pipeThrough(new TransformStream<ServerSentEvent, string>({
+            transform(event: ServerSentEvent, controller) {
+                if (event.type === 'event' && event.data && event.data !== '[DONE]') {
+                    try {
+                        const data = JSON.parse(event.data);
+                        controller.enqueue(data.choices[0]?.delta.content ?? '');
+                    } catch (err) {
+                        // double check for the last event whicb is not a JSON - at this time mistralai returrns the string [DONE]
+                        // do nothing - happens if data is not a JSON - the last event data is the [DONE] string
+                    }
+                }
+            }
+        }));
+
     }
 
     async listModels(): Promise<AIModel<string>[]> {
-
-        const models = await this.client.listModels();
+        const models: ListModelsResponse = await this.client.get('v1/models');
 
         const aimodels = models.data.map(m => {
             return {
@@ -115,7 +134,6 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
         });
 
         return aimodels;
-
     }
 
     listTrainableModels(): Promise<AIModel<string>[]> {
@@ -135,3 +153,49 @@ interface LLMMessage {
     role: string;
     content: string;
 }
+
+
+/**
+ * Creates a chat completion request
+ * @param {*} model
+ * @param {*} messages
+ * @param {*} tools
+ * @param {*} temperature
+ * @param {*} maxTokens
+ * @param {*} topP
+ * @param {*} randomSeed
+ * @param {*} stream
+ * @param {*} safeMode deprecated use safePrompt instead
+ * @param {*} safePrompt
+ * @param {*} toolChoice
+ * @param {*} responseFormat
+ * @return {Promise<Object>}
+ */
+function _makeChatCompletionRequest({
+    model,
+    messages,
+    tools,
+    temperature,
+    maxTokens,
+    topP,
+    randomSeed,
+    stream,
+    safeMode,
+    safePrompt,
+    toolChoice,
+    responseFormat,
+}: CompletionRequestParams) {
+    return {
+        model: model,
+        messages: messages,
+        tools: tools ?? undefined,
+        temperature: temperature ?? undefined,
+        max_tokens: maxTokens ?? undefined,
+        top_p: topP ?? undefined,
+        random_seed: randomSeed ?? undefined,
+        stream: stream ?? undefined,
+        safe_prompt: (safeMode || safePrompt) ?? undefined,
+        tool_choice: toolChoice ?? undefined,
+        response_format: responseFormat ?? undefined,
+    };
+};

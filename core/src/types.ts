@@ -14,10 +14,6 @@ export interface Completion<ResultT = any> {
     token_usage?: ExecutionTokenUsage;
 
     /**
-     * The time it took to execute the request in seconds
-     */
-    execution_time?: number;
-    /**
      * Set only if a result validation error occured, otherwise if the result is valid the error field is undefined
      * This can only be set if the resultSchema is set and the reuslt could not be parsed as a json or if the result does not match the schema
      */
@@ -26,6 +22,10 @@ export interface Completion<ResultT = any> {
 
 export interface ExecutionResponse<PromptT = any> extends Completion {
     prompt: PromptT;
+    /**
+     * The time it took to execute the request in seconds
+     */
+    execution_time?: number;
 }
 
 
