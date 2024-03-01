@@ -31,7 +31,7 @@ if (process.env.MISTRAL_API_KEY) {
     }
     )
 } else {
-    throw new Error('MISTRAL_API_KEY environment variable is not set');
+    console.warn("MistralAI tests are skipped: MISTRAL_API_KEY environment variable is not set");
 }
 
 if (process.env.TOGETHER_API_KEY) {
@@ -47,7 +47,7 @@ if (process.env.TOGETHER_API_KEY) {
     }
     )
 } else {
-    throw new Error('TOGETHER_API_KEY environment variable is not set');
+    console.warn("TogetherAI tests are skipped: TOGETHER_API_KEY environment variable is not set");
 }
 
 describe.each(drivers)("Driver $name", ({ name, driver, models }) => {
