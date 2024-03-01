@@ -24,7 +24,7 @@ describe('VertexAI: Test prediction of codey models', function () {
     }, TIMEOUT);
     test('chat-bison streaming completion works', async () => {
         const r = await driver.stream(prompt, { model: 'chat-bison', temperature: 0.8, max_tokens: 1024 });
-        assertStreamingCompletionOk(r);
+        await assertStreamingCompletionOk(r);
     }, TIMEOUT);
     test('code-bison completion works', async () => {
         const r = await driver.execute(prompt, { model: 'code-bison', temperature: 0.8, max_tokens: 1024 });
@@ -32,7 +32,7 @@ describe('VertexAI: Test prediction of codey models', function () {
     }, TIMEOUT);
     test('code-bison streaming completion works', async () => {
         const r = await driver.stream(prompt, { model: 'code-bison', temperature: 0.8, max_tokens: 1024 });
-        assertStreamingCompletionOk(r);
+        await assertStreamingCompletionOk(r);
     }, TIMEOUT);
     test('codechat-bison completion works', async () => {
         const r = await driver.execute(prompt, { model: 'codechat-bison', temperature: 0.8, max_tokens: 1024 });
@@ -40,6 +40,6 @@ describe('VertexAI: Test prediction of codey models', function () {
     }, TIMEOUT);
     test('codechat-bison streaming completion works', async () => {
         const r = await driver.stream(prompt, { model: 'codechat-bison', temperature: 0.8, max_tokens: 1024 });
-        assertStreamingCompletionOk(r);
+        await assertStreamingCompletionOk(r);
     }, TIMEOUT);
 });

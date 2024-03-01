@@ -67,7 +67,7 @@ describe.each(drivers)("Driver $name", ({ name, driver, models }) => {
 
     test.each(models)('execute prompt with streaming on %s', async (model) => {
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 })
-        assertStreamingCompletionOk(r);
+        await assertStreamingCompletionOk(r);
     }, TIMEOUT);
 
     test.each(models)('execute prompt with schema on %s', async (model) => {
