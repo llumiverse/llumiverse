@@ -21,7 +21,7 @@ if (process.env.MISTRAL_API_KEY) {
         name: "MistralAI La Plateforme",
         driver: new MistralAIDriver({
             apiKey: process.env.MISTRAL_API_KEY as string,
-            endpointUrl: process.env.MISTRAL_ENDPOINT_URL as string ?? undefined
+            endpoint_url: process.env.MISTRAL_ENDPOINT_URL as string ?? undefined
         }),
         models: [
             "open-mixtral-8x7b",
