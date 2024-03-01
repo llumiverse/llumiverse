@@ -1,3 +1,4 @@
+import type { ServerSentEvent } from "api-fetch-client";
 
 export async function* asyncMap<T, R>(asyncIterable: AsyncIterable<T>, callback: (value: T, index: number) => R) {
     let i = 0;
@@ -13,6 +14,24 @@ export function oneAsyncIterator<T>(value: T): AsyncIterable<T> {
     }
 }
 
+/**
+ * Given a ReadableStream of server seent events, tran
+ */
+export function transformSSEStream(stream: ReadableStream<ServerSentEvent>, transform: (data: string) => string): ReadableStream<string> & AsyncIterable<string> {
+    // on node and bun the readablestream is an async iterable
+    return stream.pipeThrough(new TransformStream<ServerSentEvent, string>({
+        transform(event: ServerSentEvent, controller) {
+            if (event.type === 'event' && event.data && event.data !== '[DONE]') {
+                try {
+                    controller.enqueue(transform(event.data) ?? '');
+                } catch (err) {
+                    // double check for the last event whicb is not a JSON - at this time togetherai and mistralai returrns the string [DONE]
+                    // do nothing - happens if data is not a JSON - the last event data is the [DONE] string
+                }
+            }
+        }
+    })) as ReadableStream<string> & AsyncIterable<string>;
+}
 
 export class EventStream<T, ReturnT = any> implements AsyncIterable<T>{
 

@@ -1,5 +1,6 @@
 import { AIModel, AbstractDriver, Completion, DriverOptions, ExecutionOptions, PromptFormats } from "@llumiverse/core";
-import { FetchClient, ServerSentEvent } from "api-fetch-client";
+import { transformSSEStream } from "@llumiverse/core/async";
+import { FetchClient } from "api-fetch-client";
 import { TogetherModelInfo } from "./interfaces.js";
 
 interface TogetherAIDriverOptions extends DriverOptions {
@@ -75,19 +76,10 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
             reader: 'sse'
         })
 
-        return stream.pipeThrough(new TransformStream<ServerSentEvent, string>({
-            transform(event: ServerSentEvent, controller) {
-                if (event.type === 'event' && event.data && event.data !== '[DONE]') {
-                    try {
-                        const data = JSON.parse(event.data);
-                        controller.enqueue(data.choices[0]?.text ?? '');
-                    } catch (err) {
-                        // double check for the last event whicb is not a JSON - at this time togetherai returrns the string [DONE]
-                        // do nothing - happens if data is not a JSON - the last event data is the [DONE] string
-                    }
-                }
-            }
-        }));
+        return transformSSEStream(stream, (data: string) => {
+            const json = JSON.parse(data);
+            return json.choices[0]?.text ?? '';
+        });
 
     }
 

@@ -1,6 +1,6 @@
 {
     "name": "@llumiverse/core",
-    "version": "0.8.4",
+    "version": "0.9.0",
     "type": "module",
     "description": "Provide an universal API to LLMs. Support for existing LLMs can be added by writing a driver.",
     "files": [
@@ -64,6 +64,7 @@
     "devDependencies": {
         "@types/eventsource": "^1.1.15",
         "@types/json-schema": "^7.0.15",
+        "api-fetch-client": "^0.8.6",
         "ts-dual-module": "^0.6.2",
         "typescript": "^5.3.3",
         "vitest": "^1.2.2"
