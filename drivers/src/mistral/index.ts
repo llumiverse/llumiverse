@@ -10,7 +10,7 @@ const ENDPOINT = 'https://api.mistral.ai';
 
 interface MistralAIDriverOptions extends DriverOptions {
     apiKey: string;
-    endpointUrl: string;
+    endpoint_url?: string;
 }
 
 export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMMessage[]> {
@@ -27,7 +27,7 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
         this.defaultFormat = PromptFormats.genericTextLLM;
         this.apiKey = options.apiKey;
         //this.client = new MistralClient(options.apiKey, options.endpointUrl);
-        this.client = new FetchClient(options.endpointUrl || ENDPOINT).withHeaders({
+        this.client = new FetchClient(options.endpoint_url || ENDPOINT).withHeaders({
             authorization: `Bearer ${this.apiKey}`
         });
     }
