@@ -55,14 +55,14 @@ describe.each(drivers)("Driver $name", ({ name, driver, models }) => {
     test('list models', async () => {
         const r = await driver.listModels();
         expect(r.length).toBeGreaterThan(0);
-        console.log(r);
+        //console.log(r);
     }, TIMEOUT);
 
 
     test.each(models)('execute prompt on %s', async (model) => {
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 });
         assertCompletionOk(r);
-        console.log(r);
+        //console.log(r);
     }, TIMEOUT);
 
     test.each(models)('execute prompt with streaming on %s', async (model) => {
@@ -73,7 +73,7 @@ describe.each(drivers)("Driver $name", ({ name, driver, models }) => {
     test.each(models)('execute prompt with schema on %s', async (model) => {
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, resultSchema: testSchema_color });
         assertCompletionOk(r);
-        console.log(r);
+        //console.log(r);
     }, TIMEOUT);
 
 });
