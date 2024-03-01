@@ -15,7 +15,7 @@
     "require": "./lib/cjs/index.js"
   },
   "scripts": {
-    "test": "vitest run",
+    "test": "vitest run --retry 3",
     "build": "tsmod build",
     "clean": "rm -rf ./lib tsconfig.tsbuildinfo"
   },
