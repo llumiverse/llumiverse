@@ -1,7 +1,7 @@
 import { AbstractDriver } from '@llumiverse/core';
 import 'dotenv/config';
 import { describe, expect, test } from "vitest";
-import { MistralAIDriver, TogetherAIDriver } from '../src';
+import { MistralAIDriver, OpenAIDriver, TogetherAIDriver } from '../src';
 import { assertCompletionOk, assertStreamingCompletionOk } from './assertions';
 import { testPrompt_color, testSchema_color } from './samples';
 
@@ -18,7 +18,7 @@ const drivers: TestDriver[] = [];
 
 if (process.env.MISTRAL_API_KEY) {
     drivers.push({
-        name: "MistralAI La Plateforme",
+        name: "mistralai",
         driver: new MistralAIDriver({
             apiKey: process.env.MISTRAL_API_KEY as string,
             endpoint_url: process.env.MISTRAL_ENDPOINT_URL as string ?? undefined
@@ -36,13 +36,13 @@ if (process.env.MISTRAL_API_KEY) {
 
 if (process.env.TOGETHER_API_KEY) {
     drivers.push({
-        name: "TogetherAI",
+        name: "togetherai",
         driver: new TogetherAIDriver({
             apiKey: process.env.TOGETHER_API_KEY as string
         }),
         models: [
             "togethercomputer/CodeLlama-34b-Instruct",
-            "mistralai/Mixtral-8x7B-Instruct-v0.1"
+            //"mistralai/Mixtral-8x7B-Instruct-v0.1" too slow in tests for now
         ]
     }
     )
@@ -50,7 +50,23 @@ if (process.env.TOGETHER_API_KEY) {
     console.warn("TogetherAI tests are skipped: TOGETHER_API_KEY environment variable is not set");
 }
 
-describe.each(drivers)("Driver $name", ({ name, driver, models }) => {
+if (process.env.OPENAI_API_KEY) {
+    drivers.push({
+        name: "openai",
+        driver: new OpenAIDriver({
+            apiKey: process.env.OPENAI_API_KEY as string
+        }),
+        models: [
+            "gpt-4-turbo-preview",
+            "gpt-3.5-turbo",
+        ]
+    }
+    )
+} else {
+    console.warn("OpenAI tests are skipped: OPENAI_API_KEY environment variable is not set");
+}
+
+describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => {
 
     test('list models', async () => {
         const r = await driver.listModels();
