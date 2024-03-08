@@ -33,9 +33,23 @@ export function claudeMessages(segments: PromptSegment[]): ClaudeMessagesPrompt 
         }
     }
 
+    // messages must contains at least 1 item. If the prompt doesn;t contains a user message (but only system messages)
+    // we need to put the system messages in the messages array
+
+    let systemMessage = system.join('\n').trim();
+    if (messages.length === 0) {
+        if (!systemMessage) {
+            throw new Error('Prompt must contain at least one message');
+        }
+        messages.push({ content: [{ type: "text", text: systemMessage }], role: 'assistant' });
+        systemMessage = safety.join('\n');
+    } else if (safety.length > 0) {
+        systemMessage = systemMessage + '\n\nIMPORTANT: ' + safety.join('\n');
+    }
+
     // put system mesages first and safety last
     return {
-        system: system.concat(safety).join('\n') || '',
+        system: systemMessage,
         messages
     }
 }
