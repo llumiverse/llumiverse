@@ -5,7 +5,7 @@
  */
 
 import { DefaultCompletionStream, FallbackCompletionStream } from "./CompletionStream.js";
-import { PromptFormatters } from "./formatters.js";
+import { PromptFormatters } from "./formatters/index.js";
 import {
     AIModel,
     Completion,

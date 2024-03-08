@@ -1,10 +1,11 @@
 import { Bedrock, CreateModelCustomizationJobCommand, FoundationModelSummary, GetModelCustomizationJobCommand, GetModelCustomizationJobCommandOutput, ModelCustomizationJobStatus, StopModelCustomizationJobCommand } from "@aws-sdk/client-bedrock";
 import { BedrockRuntime, InvokeModelCommandOutput, ResponseStream } from "@aws-sdk/client-bedrock-runtime";
 import { S3Client } from "@aws-sdk/client-s3";
-import { AIModel, AbstractDriver, BuiltinProviders, Completion, DataSource, DriverOptions, ExecutionOptions, PromptFormats, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
+import { AIModel, AbstractDriver, BuiltinProviders, Completion, DataSource, DriverOptions, ExecutionOptions, PromptFormats, PromptFormatters, PromptOptions, PromptSegment, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import mnemonist from "mnemonist";
+import { ClaudeMessagesPrompt } from "../../../core/src/formatters/claude.js";
 import { forceUploadFile } from "./s3.js";
 
 const { LRUCache } = mnemonist;
@@ -38,7 +39,9 @@ export interface BedrockDriverOptions extends DriverOptions {
     credentials?: AwsCredentialIdentity | Provider<AwsCredentialIdentity>;
 }
 
-export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> {
+export type BedrockPrompt = string | ClaudeMessagesPrompt;
+
+export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockPrompt> {
 
     provider = BuiltinProviders.bedrock;
 
@@ -74,7 +77,15 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
         return this._service;
     }
 
-    extractDataFromResponse(prompt: string, response: InvokeModelCommandOutput): Completion {
+    public createPrompt(segments: PromptSegment[], opts: PromptOptions): BedrockPrompt {
+        if (opts.model.includes('anthropic')) {
+            return PromptFormatters.claude(segments, opts);
+        } else {
+            return super.createPrompt(segments, opts) as string;
+        }
+    }
+
+    extractDataFromResponse(prompt: BedrockPrompt, response: InvokeModelCommandOutput): Completion {
 
         const decoder = new TextDecoder();
         const body = decoder.decode(response.body);
@@ -97,17 +108,19 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
 
         const text = getText();
 
+        const promptLength = typeof prompt === 'string' ? prompt.length :
+            (prompt.system || '').length + prompt.messages.reduce((acc, m) => acc + m.content.length, 0);
         return {
             result: text,
             token_usage: {
                 result: text?.length,
-                prompt: prompt.length,
-                total: text?.length + prompt.length,
+                prompt: promptLength,
+                total: text?.length + promptLength,
             }
         }
     }
 
-    async requestCompletion(prompt: string, options: ExecutionOptions): Promise<Completion> {
+    async requestCompletion(prompt: BedrockPrompt, options: ExecutionOptions): Promise<Completion> {
 
         const payload = this.preparePayload(prompt, options);
         const executor = this.getExecutor();
@@ -170,7 +183,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
 
 
 
-    preparePayload(prompt: string, options: ExecutionOptions) {
+    preparePayload(prompt: BedrockPrompt, options: ExecutionOptions) {
 
         //split arn on / should give provider
         //TODO: check if works with custom models
@@ -185,9 +198,9 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, string> 
             } as LLama2RequestPayload
         } else if (contains(options.model, "anthropic")) {
             return {
-                prompt: prompt,
+                ...(prompt as ClaudeMessagesPrompt),
                 temperature: options.temperature,
-                max_tokens_to_sample: options.max_tokens ?? 256,
+                max_tokens: options.max_tokens ?? 256,
             } as ClaudeRequestPayload;
         } else if (contains(options.model, "ai21")) {
             return {
@@ -402,10 +415,11 @@ interface LLama2RequestPayload {
     max_gen_len: number;
 }
 
-interface ClaudeRequestPayload {
+interface ClaudeRequestPayload extends ClaudeMessagesPrompt {
+    anthropic_version: "bedrock-2023-05-31",
+    max_tokens: number,
     prompt: string;
     temperature?: number;
-    max_tokens_to_sample?: number;
     top_p?: number,
     top_k?: number,
     stop_sequences?: [string];
