@@ -41,7 +41,7 @@ export function claudeMessages(segments: PromptSegment[]): ClaudeMessagesPrompt 
         if (!systemMessage) {
             throw new Error('Prompt must contain at least one message');
         }
-        messages.push({ content: [{ type: "text", text: systemMessage }], role: 'assistant' });
+        messages.push({ content: [{ type: "text", text: systemMessage }], role: 'user' });
         systemMessage = safety.join('\n');
     } else if (safety.length > 0) {
         systemMessage = systemMessage + '\n\nIMPORTANT: ' + safety.join('\n');
