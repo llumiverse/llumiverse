@@ -198,6 +198,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             } as LLama2RequestPayload
         } else if (contains(options.model, "anthropic")) {
             return {
+                anthropic_version: "bedrock-2023-05-31",
                 ...(prompt as ClaudeMessagesPrompt),
                 temperature: options.temperature,
                 max_tokens: options.max_tokens ?? 256,
