@@ -161,7 +161,9 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
             return transformAsyncIterator(res.body, (stream: ResponseStream) => {
                 const segment = JSON.parse(decoder.decode(stream.chunk?.bytes));
-                if (segment.completion) {
+                if (segment.delta) {
+                    return segment.delta.text || '';
+                } else if (segment.completion) {
                     return segment.completion;
                 } else if (segment.completions) {
                     return segment.completions[0].data?.text;
