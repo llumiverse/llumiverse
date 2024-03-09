@@ -79,7 +79,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
     public createPrompt(segments: PromptSegment[], opts: PromptOptions): BedrockPrompt {
         if (opts.model.includes('anthropic')) {
-            return PromptFormatters.claude(segments, opts);
+            return PromptFormatters.claude(segments, opts.resultSchema); //TODO: need to type better the types aren't checked properly by TS
         } else {
             return super.createPrompt(segments, opts) as string;
         }

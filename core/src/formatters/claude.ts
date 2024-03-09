@@ -56,6 +56,17 @@ ${JSON.stringify(schema)}
         systemMessage = systemMessage + '\n\nIMPORTANT: ' + safety.join('\n');
     }
 
+    /*start Claude's message to amke sure it answers properly in JSON
+    if enabled, this requires to add the { to Claude's response
+    if (schema) {
+        messages.push({
+            role: "assistant",
+            content: [{ 
+                type: "text", 
+                text: "{"
+        }]});
+    }*/
+
     // put system mesages first and safety last
     return {
         system: systemMessage,
