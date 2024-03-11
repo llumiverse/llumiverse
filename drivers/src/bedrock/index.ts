@@ -1,7 +1,7 @@
 import { Bedrock, CreateModelCustomizationJobCommand, FoundationModelSummary, GetModelCustomizationJobCommand, GetModelCustomizationJobCommandOutput, ModelCustomizationJobStatus, StopModelCustomizationJobCommand } from "@aws-sdk/client-bedrock";
 import { BedrockRuntime, InvokeModelCommandOutput, ResponseStream } from "@aws-sdk/client-bedrock-runtime";
 import { S3Client } from "@aws-sdk/client-s3";
-import { AIModel, AbstractDriver, BuiltinProviders, Completion, DataSource, DriverOptions, ExecutionOptions, PromptFormats, PromptFormatters, PromptOptions, PromptSegment, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
+import { AIModel, AbstractDriver, BuiltinProviders, Completion, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptFormats, PromptFormatters, PromptOptions, PromptSegment, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import mnemonist from "mnemonist";
@@ -374,7 +374,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         return aimodels;
     }
 
-    async generateEmbeddings(content: string, model: string = "amazon.titan-embed-text-v1"): Promise<{ embeddings: number[], model: string; }> {
+    async generateEmbeddings({ content, model = "amazon.titan-embed-text-v1" }: EmbeddingsOptions): Promise<EmbeddingsResult> {
 
         this.logger.info("[Bedrock] Generating embeddings with model " + model);
 
@@ -401,7 +401,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         }
 
         return {
-            embeddings: result.embedding,
+            values: result.embedding,
             model: model,
         };
 

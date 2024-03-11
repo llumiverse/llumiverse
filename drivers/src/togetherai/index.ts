@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, ExecutionOptions, PromptFormats } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, PromptFormats } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
 import { TogetherModelInfo } from "./interfaces.js";
@@ -104,8 +104,7 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
     validateConnection(): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
-    //@ts-ignore
-    generateEmbeddings(content: string, model?: string | undefined): Promise<{ embeddings: number[]; model: string; }> {
+    generateEmbeddings(): Promise<EmbeddingsResult> {
         throw new Error("Method not implemented.");
     }
 

@@ -1,4 +1,4 @@
-import { AIModel, AIModelStatus, CompletionStream, Driver, ExecutionOptions, ExecutionResponse, ModelType, PromptOptions, PromptSegment, TrainingJob } from "@llumiverse/core";
+import { AIModel, AIModelStatus, CompletionStream, Driver, EmbeddingsResult, ExecutionOptions, ExecutionResponse, ModelType, PromptOptions, PromptSegment, TrainingJob } from "@llumiverse/core";
 import { TestErrorCompletionStream } from "./TestErrorCompletionStream.js";
 import { TestValidationErrorCompletionStream } from "./TestValidationErrorCompletionStream.js";
 import { createValidationErrorCompletion, sleep, throwError } from "./utils.js";
@@ -83,7 +83,7 @@ export class TestDriver implements Driver<PromptSegment[]> {
     validateConnection(): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
-    generateEmbeddings(): Promise<{ embeddings: number[]; model: string; }> {
+    generateEmbeddings(): Promise<EmbeddingsResult> {
         throw new Error("Method not implemented.");
     }
 

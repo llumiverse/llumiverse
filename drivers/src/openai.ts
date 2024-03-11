@@ -5,6 +5,8 @@ import {
     Completion,
     DataSource,
     DriverOptions,
+    EmbeddingsOptions,
+    EmbeddingsResult,
     ExecutionOptions,
     ExecutionTokenUsage,
     ModelType,
@@ -211,7 +213,7 @@ export class OpenAIDriver extends AbstractDriver<
     }
 
 
-    async generateEmbeddings(content: string, model: string = "text-embedding-ada-002"): Promise<{ embeddings: number[], model: string; }> {
+    async generateEmbeddings({ content, model = "text-embedding-ada-002" }: EmbeddingsOptions): Promise<EmbeddingsResult> {
         const res = await this.service.embeddings.create({
             input: content,
             model: model,
@@ -223,7 +225,7 @@ export class OpenAIDriver extends AbstractDriver<
             throw new Error("No embedding found");
         }
 
-        return { embeddings, model };
+        return { values: embeddings, model } as EmbeddingsResult;
     }
 
 }

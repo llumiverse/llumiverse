@@ -12,6 +12,8 @@ import {
     CompletionStream,
     DataSource,
     DriverOptions,
+    EmbeddingsOptions,
+    EmbeddingsResult,
     ExecutionOptions,
     ExecutionResponse,
     Logger,
@@ -51,7 +53,6 @@ export function createLogger(logger: Logger | "console" | undefined) {
     }
 }
 
-
 export interface Driver<PromptT = unknown> {
 
     /**
@@ -86,7 +87,7 @@ export interface Driver<PromptT = unknown> {
     validateConnection(): Promise<boolean>;
 
     //generate embeddings for a given text
-    generateEmbeddings(content: string, model?: string): Promise<{ embeddings: number[], model: string; }>;
+    generateEmbeddings(options: EmbeddingsOptions): Promise<EmbeddingsResult>;
 
 }
 
@@ -211,7 +212,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     abstract validateConnection(): Promise<boolean>;
 
     //generate embeddings for a given text
-    abstract generateEmbeddings(content: string, model?: string): Promise<{ embeddings: number[], model: string; }>;
+    abstract generateEmbeddings(options: EmbeddingsOptions): Promise<EmbeddingsResult>;
 
 }
 

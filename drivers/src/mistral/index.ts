@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, ExecutionOptions, PromptFormats, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, PromptFormats, PromptSegment } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
 import { CompletionRequestParams, ListModelsResponse, ResponseFormat } from "./types.js";
@@ -131,8 +131,7 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
     validateConnection(): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
-    //@ts-ignore
-    generateEmbeddings(content: string, model?: string | undefined): Promise<{ embeddings: number[]; model: string; }> {
+    generateEmbeddings(): Promise<EmbeddingsResult> {
         throw new Error("Method not implemented.");
     }
 

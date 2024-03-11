@@ -9,6 +9,7 @@ import {
     AbstractDriver,
     BuiltinProviders,
     DriverOptions,
+    EmbeddingsResult,
     ExecutionOptions,
     PromptFormats
 } from "@llumiverse/core";
@@ -131,8 +132,7 @@ export class HuggingFaceIEDriver extends AbstractDriver<HuggingFaceIEDriverOptio
         }
     }
 
-    async generateEmbeddings(content: string, model?: string): Promise<{ embeddings: number[], model: string; }> {
-        this.logger?.debug(`[Huggingface] Generating embeddings for ${content} on ${model}`);
+    async generateEmbeddings(): Promise<EmbeddingsResult> {
         throw new Error("Method not implemented.");
     }
 

@@ -2,6 +2,41 @@ import { JSONSchema4 } from "json-schema";
 import { Readable } from "stream";
 import { JsonObject } from "./json.js";
 
+export interface EmbeddingsOptions {
+    /**
+     * The content to generate the embeddings for. Required.
+     */
+    content: string;
+    /**
+     * The model to use to generate the embeddings. Optional.
+     */
+    model?: string;
+    /**
+     * Additional options for the embeddings generation. Optional. 
+     * The supported properties depends on the target implementation.
+     */
+    [key: string]: any;
+}
+
+export interface EmbeddingsResult {
+    /**
+     * The embedding vectors corresponding to the words in the input text.
+     */
+    values: number[];
+    /**
+     * The model used to hgenerate the embeddings.
+     */
+    model?: string;
+    /**
+     * Number of tokens of the input text.
+     */
+    token_count?: number;
+    /**
+     * Additional properties. Depends on the target implementation.
+     */
+    [key: string]: any;
+}
+
 export interface ResultValidationError {
     code: 'validation_error' | 'json_error';
     message: string;

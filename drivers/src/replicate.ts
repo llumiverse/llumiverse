@@ -5,6 +5,7 @@ import {
     Completion,
     DataSource,
     DriverOptions,
+    EmbeddingsResult,
     ExecutionOptions,
     ModelSearchPayload,
     PromptFormats,
@@ -282,8 +283,7 @@ export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
         return models;
     }
 
-    generateEmbeddings(content: string, model?: string): Promise<{ embeddings: number[], model: string; }> {
-        this.logger?.debug(`[Replicate] Generating embeddings for ${content} on ${model}`);
+    async generateEmbeddings(): Promise<EmbeddingsResult> {
         throw new Error("Method not implemented.");
     }
 
