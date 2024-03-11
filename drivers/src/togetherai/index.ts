@@ -101,9 +101,6 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
 
     }
 
-    listTrainableModels(): Promise<AIModel<string>[]> {
-        throw new Error("Method not implemented.");
-    }
     validateConnection(): Promise<boolean> {
         throw new Error("Method not implemented.");
     }

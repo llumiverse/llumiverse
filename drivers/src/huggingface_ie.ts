@@ -106,11 +106,6 @@ export class HuggingFaceIEDriver extends AbstractDriver<HuggingFaceIEDriverOptio
 
     // ============== management API ==============
 
-    // Not implemented
-    async listTrainableModels(): Promise<AIModel<string>[]> {
-        return [];
-    }
-
     async listModels(): Promise<AIModel[]> {
         const res = await this.service.get("/");
         const hfModels = res.items as HuggingFaceIEModel[];

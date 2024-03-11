@@ -128,9 +128,6 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
         return aimodels;
     }
 
-    listTrainableModels(): Promise<AIModel<string>[]> {
-        throw new Error("Method not implemented.");
-    }
     validateConnection(): Promise<boolean> {
         throw new Error("Method not implemented.");
     }

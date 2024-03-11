@@ -191,14 +191,21 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
         return Promise.resolve(true);
     }
 
+    /**
+     * Get a list of models that can be trained.
+     * The default is to return an empty array
+     * @returns 
+     */
+    async listTrainableModels(): Promise<AIModel[]> {
+        return [];
+    }
+
     abstract requestCompletion(prompt: PromptT, options: ExecutionOptions): Promise<Completion>;
 
     abstract requestCompletionStream(prompt: PromptT, options: ExecutionOptions): Promise<AsyncIterable<string>>;
 
     //list models available for this environement
     abstract listModels(params?: ModelSearchPayload): Promise<AIModel[]>;
-
-    abstract listTrainableModels(): Promise<AIModel[]>;
 
     //check that it is possible to connect to the environment
     abstract validateConnection(): Promise<boolean>;

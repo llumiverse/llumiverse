@@ -72,12 +72,11 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
 
         return []; //TODO
     }
-    listTrainableModels(): Promise<AIModel<string>[]> {
-        throw new Error("Method not implemented.");
-    }
+
     validateConnection(): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
+
     generateEmbeddings(_content: string, _model?: string | undefined): Promise<{ embeddings: number[]; model: string; }> {
         throw new Error("Method not implemented.");
     }
