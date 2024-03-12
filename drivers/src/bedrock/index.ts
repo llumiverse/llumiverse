@@ -403,6 +403,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         return {
             values: result.embedding,
             model: model,
+            token_count: result.inputTextTokenCount
         };
 
     }
