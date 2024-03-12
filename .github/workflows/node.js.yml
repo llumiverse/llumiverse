@@ -24,6 +24,11 @@ jobs:
       with:
         credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
         create_credentials_file: true
+    - uses: 'aws-actions/configure-aws-credentials@v4.0.2'
+      with:
+        role-to-assume: arn:aws:iam::716085231028:role/ComposablePromptExecutor
+        role-session-name: github-actions
+        aws-region: us-east-1
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v3
       with:
