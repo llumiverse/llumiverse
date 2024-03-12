@@ -1,9 +1,9 @@
 //import { v1 } from "@google-cloud/aiplatform";
 import { GenerateContentRequest, VertexAI } from "@google-cloud/vertexai";
-import { AIModel, AbstractDriver, BuiltinProviders, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload, PromptFormats, PromptOptions, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, BuiltinProviders, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload, PromptFormats, PromptOptions, PromptSegment } from "@llumiverse/core";
 import { FetchClient } from "api-fetch-client";
+import { TextEmbeddingsOptions, getEmbeddingsForText } from "./embeddings/embeddings-text.js";
 import { BuiltinModels, getModelDefinition } from "./models.js";
-import { getEmbeddingsForText } from "./embeddings/embeddings-text.js";
 //import { GoogleAuth } from "google-auth-library";
 
 export interface VertexAIDriverOptions extends DriverOptions {
@@ -78,7 +78,7 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
         throw new Error("Method not implemented.");
     }
 
-    async generateEmbeddings(options: EmbeddingsOptions): Promise<EmbeddingsResult> {
+    async generateEmbeddings(options: TextEmbeddingsOptions): Promise<EmbeddingsResult> {
         return getEmbeddingsForText(this, options);
     }
 
