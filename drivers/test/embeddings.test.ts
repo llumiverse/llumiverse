@@ -1,4 +1,4 @@
-import { defaultProvider } from "@aws-sdk/credential-provider-node";
+//import { defaultProvider } from "@aws-sdk/credential-provider-node";
 import { Driver } from '@llumiverse/core';
 import 'dotenv/config';
 import { describe, expect, test } from "vitest";
@@ -7,9 +7,9 @@ import { BedrockDriver, OpenAIDriver, VertexAIDriver } from "../src/index.js";
 const TIMEOUT = 10000;
 const TEXT = "Hello";
 
-const credentials = defaultProvider({
-    profile: "default",
-})
+// const credentials = defaultProvider({
+//     profile: "default",
+// })
 
 const vertex = new VertexAIDriver({
     project: "dengenlabs",
@@ -17,7 +17,7 @@ const vertex = new VertexAIDriver({
 }) as Driver;
 const bedrock = new BedrockDriver({
     region: 'us-west-2',
-    credentials: credentials
+    //credentials: credentials
 });
 const openai = new OpenAIDriver({
     apiKey: process.env.OPENAI_API_KEY as string
