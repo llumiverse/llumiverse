@@ -242,6 +242,56 @@ console.log('# Response took', streamingResponse.execution_time, 'ms')
 console.log('# Token usage:', streamingResponse.token_usage);
 ```
 
+### Generate embeddings
+
+LLumiverse drivers expose a method to generate vector embeddings for a given text.
+Drivers supporting embeddings as of v0.10.0 are `bedrock`, `openai`, `vertexai`.
+If embeddings are not yet supported the generateEmbeddings method will throws an error.
+
+Here is an example on using the `vertexai` driver. For the example to work you need to define a `GOOGLE_APPLICATION_CREDENTIALS` env variable to be able to access your gcloud project
+
+```javascript
+import { VertexAIDriver } from "@llumiverse/drivers";
+
+const driver = new VertexAIDriver({
+    project: 'your-project-id',
+    region: 'us-central1' // your zone
+});
+
+const r = await vertex.generateEmbeddings({ content: "Hello world!" });
+
+// print the vector
+console.log('Embeddings: ', v.values);
+```
+
+The result object contains the vector as the `values` property, the `model` used to generate the embeddings and an optional `token_count` which if defined is the token count of the input text. 
+Depending on the driver, the result may contain additional properties. 
+
+Also you can specify a specific model to be used or pass other driver supported parameter. 
+
+**Example:**
+
+```javascript
+import { VertexAIDriver } from "@llumiverse/drivers";
+
+const driver = new VertexAIDriver({
+    project: 'your-project-id',
+    region: 'us-central1' // your zone
+});
+
+const r = await vertex.generateEmbeddings({ 
+    content: "Hello world!", 
+    model: "textembedding-gecko@002",  
+    task_type: "SEMANTIC_SIMILARITY"
+});
+
+// print the vector
+console.log('Embeddings: ', v.values);
+```
+
+The `task_type` parameter is specific to the [textembedding-gecko model](https://cloud.google.com/vertex-ai/generative-ai/docs/model-reference/text-embeddings). 
+
+
 ## Contributing
 
 Contributions are welcome!
