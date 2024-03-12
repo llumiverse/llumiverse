@@ -37,8 +37,8 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
                 model: options.model,
                 prompt: prompt,
                 response_format: this.getResponseFormat(options),
-                max_tokens: options.max_tokens ?? 1024,
-                temperature: options.temperature ?? 0.7,
+                max_tokens: options.max_tokens,
+                temperature: options.temperature,
                 stop: [
                     "</s>",
                     "[/INST]"
@@ -64,8 +64,8 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
             payload: {
                 model: options.model,
                 prompt: prompt,
-                max_tokens: options.max_tokens ?? 1024,
-                temperature: options.temperature ?? 0.7,
+                max_tokens: options.max_tokens,
+                temperature: options.temperature,
                 response_format: this.getResponseFormat(options),
                 stream: true,
                 stop: [

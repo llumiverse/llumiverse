@@ -74,7 +74,7 @@ export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
         const predictionData = {
             input: {
                 prompt: prompt,
-                max_new_tokens: options.max_tokens || 1024,
+                max_new_tokens: options.max_tokens,
                 temperature: options.temperature,
             },
             version: model.version,
@@ -114,7 +114,7 @@ export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
         const predictionData = {
             input: {
                 prompt: prompt,
-                max_new_tokens: options.max_tokens || 1024,
+                max_new_tokens: options.max_tokens,
                 temperature: options.temperature,
             },
             version: model.version,

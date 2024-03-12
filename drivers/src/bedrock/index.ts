@@ -203,7 +203,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 anthropic_version: "bedrock-2023-05-31",
                 ...(prompt as ClaudeMessagesPrompt),
                 temperature: options.temperature,
-                max_tokens: options.max_tokens ?? 256,
+                max_tokens: options.max_tokens,
             } as ClaudeRequestPayload;
         } else if (contains(options.model, "ai21")) {
             return {

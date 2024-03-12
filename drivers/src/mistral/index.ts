@@ -73,8 +73,8 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
             payload: _makeChatCompletionRequest({
                 model: options.model,
                 messages: messages,
-                maxTokens: options.max_tokens ?? 1024,
-                temperature: options.temperature ?? 0.7,
+                maxTokens: options.max_tokens,
+                temperature: options.temperature,
                 responseFormat: this.getResponseFormat(options),
             })
         })
@@ -97,8 +97,8 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
             payload: _makeChatCompletionRequest({
                 model: options.model,
                 messages: messages,
-                maxTokens: options.max_tokens ?? 1024,
-                temperature: options.temperature ?? 0.7,
+                maxTokens: options.max_tokens,
+                temperature: options.temperature,
                 responseFormat: this.getResponseFormat(options),
                 stream: true
             }),

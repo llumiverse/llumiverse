@@ -28,6 +28,11 @@ import {
 import { validateResult } from "./validation.js";
 
 
+const DEFAULT_EXECUTION_OPTIONS: Partial<ExecutionOptions> = {
+    max_tokens: 1024,
+    temperature: 0.7,
+}
+
 const ConsoleLogger: Logger = {
     debug: console.debug,
     info: console.info,
@@ -142,6 +147,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     }
 
     async execute(segments: PromptSegment[], options: ExecutionOptions): Promise<ExecutionResponse<PromptT>> {
+        options = Object.assign(DEFAULT_EXECUTION_OPTIONS, options);
         const prompt = this.createPrompt(segments, options);
         return this._execute(prompt, options);
     }
@@ -164,6 +170,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
 
     // by default no stream is supported. we block and we return all at once
     async stream(segments: PromptSegment[], options: ExecutionOptions): Promise<CompletionStream<PromptT>> {
+        options = Object.assign(DEFAULT_EXECUTION_OPTIONS, options);
         const canStream = await this.canStream(options);
         if (canStream) {
             return new DefaultCompletionStream(this, segments, options);
