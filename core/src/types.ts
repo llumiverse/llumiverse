@@ -1,6 +1,6 @@
 import { JSONSchema4 } from "json-schema";
 import { Readable } from "stream";
-import { JsonObject } from "./json.js";
+import { JSONObject } from "./json.js";
 
 export interface EmbeddingsOptions {
     /**
@@ -202,12 +202,12 @@ export interface DataSource {
 export interface TrainingOptions {
     name: string; // the new model name
     model: string; // the model to train 
-    params?: JsonObject; // the training parameters
+    params?: JSONObject; // the training parameters
 }
 
 export interface TrainingPromptOptions {
     segments: PromptSegment[];
-    completion: string | JsonObject;
+    completion: string | JSONObject;
     model: string; // the model to train 
     schema?: JSONSchema4; // the resuilt schema f any
 }

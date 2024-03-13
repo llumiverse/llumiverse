@@ -6,15 +6,15 @@ function extractJsonFromText(text: string): string {
     return text.replace(/\\n/g, "");
 }
 
-export function extractAndParseJSON(text: string): Json {
+export function extractAndParseJSON(text: string): JSONValue {
     return parseJSON(extractJsonFromText(text));
 }
 
-export type JsonPrimative = string | number | boolean | null;
-export type JsonArray = Json[];
-export type JsonObject = { [key: string]: Json };
-export type JsonComposite = JsonArray | JsonObject;
-export type Json = JsonPrimative | JsonComposite;
+export type JSONPrimitive = string | number | boolean | null;
+export type JSONArray = JSONValue[];
+export type JSONObject = { [key: string]: JSONValue };
+export type JSONComposite = JSONArray | JSONObject;
+export type JSONValue = JSONPrimitive | JSONComposite;
 
 
 
@@ -184,7 +184,7 @@ export class JsonParser {
 }
 
 
-export function parseJSON(text: string): Json {
+export function parseJSON(text: string): JSONValue {
     text = text.trim();
     try {
         return JSON.parse(text);
