@@ -1,6 +1,6 @@
 import { AIModel, ModelType, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
+import { getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import { VertexAIDriver } from "../index.js";
-import { getJSONSafetyNotice } from "../utils/prompts.js";
 import { AbstractPalmModelDefinition, NonStreamingPromptBase, PalmResponseMetadata, StreamingPromptBase } from "./palm-model-base.js";
 
 export interface Palm2ChatMessage {

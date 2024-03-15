@@ -1,5 +1,6 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, PromptFormats, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
+import { OpenAITextMessage, formatOpenAILikePrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import { FetchClient } from "api-fetch-client";
 import { CompletionRequestParams, ListModelsResponse, ResponseFormat } from "./types.js";
 
@@ -13,10 +14,9 @@ interface MistralAIDriverOptions extends DriverOptions {
     endpoint_url?: string;
 }
 
-export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMMessage[]> {
+export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, OpenAITextMessage[]> {
     provider: string;
     apiKey: string;
-    defaultFormat: PromptFormats;
     //client: MistralClient;
     client: FetchClient;
     endpointUrl?: string;
@@ -24,7 +24,6 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
     constructor(options: MistralAIDriverOptions) {
         super(options);
         this.provider = "MistralAI";
-        this.defaultFormat = PromptFormats.genericTextLLM;
         this.apiKey = options.apiKey;
         //this.client = new MistralClient(options.apiKey, options.endpointUrl);
         this.client = new FetchClient(options.endpoint_url || ENDPOINT).withHeaders({
@@ -34,41 +33,35 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
 
     getResponseFormat = (_options: ExecutionOptions): ResponseFormat | undefined => {
 
+        // const responseFormatJson: ResponseFormat = {
+        //     type: "json_object",
+        // } as ResponseFormat
 
-        /*const responseFormatJson: ResponseFormat = {
-            type: "json_object",
-        } as ResponseFormat
+        // const responseFormatText: ResponseFormat = {
+        //     type: "text",
+        // } as ResponseFormat;
 
-        const responseFormatText: ResponseFormat = {
-            type: "text",
-        } as ResponseFormat;
-        */
 
-        //return _options.resultSchema ? responseFormatJson : responseFormatText;
+        // return _options.resultSchema ? responseFormatJson : responseFormatText;
 
         //TODO remove this when Mistral properly supports the parameters - it makes an error for now
+        // some models like mixtral mistrall tiny or medium are throwing an error when using the response_format parameter
         return undefined
     }
 
-    createPrompt(segments: PromptSegment[], opts: ExecutionOptions): LLMMessage[] {
-        // use same format as OpenAI as that's what MistralAI uses
-        const prompts = super.createPrompt(segments, { ...opts, format: PromptFormats.openai })
-
+    protected formatPrompt(segments: PromptSegment[], opts: ExecutionOptions): OpenAITextMessage[] {
+        const messages = formatOpenAILikePrompt(segments);
         //Add JSON instruction is schema is provided
         if (opts.resultSchema) {
-            const content = "The user is explicitely instructing that the result should be a JSON object.\nThe schema is as follows: \n" + JSON.stringify(opts.resultSchema);
-            prompts.push({
+            messages.push({
                 role: "user",
-                content: content
+                content: "IMPORTANT: " + getJSONSafetyNotice(opts.resultSchema)
             });
         }
-
-        return prompts;
-
+        return messages;
     }
 
-    async requestCompletion(messages: LLMMessage[], options: ExecutionOptions): Promise<Completion<any>> {
-
+    async requestCompletion(messages: OpenAITextMessage[], options: ExecutionOptions): Promise<Completion<any>> {
         const res = await this.client.post('/v1/chat/completions', {
             payload: _makeChatCompletionRequest({
                 model: options.model,
@@ -91,8 +84,7 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
         };
     }
 
-    async requestCompletionStream(messages: LLMMessage[], options: ExecutionOptions): Promise<AsyncIterable<string>> {
-
+    async requestCompletionStream(messages: OpenAITextMessage[], options: ExecutionOptions): Promise<AsyncIterable<string>> {
         const stream = await this.client.post('/v1/chat/completions', {
             payload: _makeChatCompletionRequest({
                 model: options.model,
@@ -121,7 +113,6 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
                 name: m.id,
                 description: undefined,
                 provider: m.owned_by,
-                formats: [PromptFormats.genericTextLLM],
             }
         });
 
@@ -136,12 +127,6 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, LLMM
     }
 
 }
-
-interface LLMMessage {
-    role: string;
-    content: string;
-}
-
 
 /**
  * Creates a chat completion request

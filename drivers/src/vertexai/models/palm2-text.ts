@@ -1,6 +1,6 @@
 import { AIModel, ModelType, PromptOptions, PromptSegment } from "@llumiverse/core";
+import { formatTextPrompt } from "@llumiverse/core/formatters";
 import { VertexAIDriver } from "../index.js";
-import { getPromptAsText } from "../utils/prompts.js";
 import { AbstractPalmModelDefinition, NonStreamingPromptBase, PalmResponseMetadata, StreamingPromptBase } from "./palm-model-base.js";
 
 export type Palm2TextPrompt = NonStreamingPromptBase<{
@@ -50,7 +50,7 @@ export class Palm2TextDefinition extends AbstractPalmModelDefinition<Palm2TextPr
     createNonStreamingPrompt(_driver: VertexAIDriver, segments: PromptSegment[], opts: PromptOptions): Palm2TextPrompt {
         return {
             instances: [{
-                prompt: getPromptAsText(segments, opts)
+                prompt: formatTextPrompt(segments, opts.resultSchema)
             }],
             parameters: {
                 // put defauilts here

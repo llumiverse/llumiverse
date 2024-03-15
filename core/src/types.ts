@@ -1,5 +1,6 @@
 import { JSONSchema4 } from "json-schema";
 import { JSONObject } from "./json.js";
+import { PromptFormatter } from "./formatters/index.js";
 
 export interface EmbeddingsOptions {
     /**
@@ -80,7 +81,11 @@ export interface DriverOptions {
 
 export interface PromptOptions {
     model: string;
-    format?: PromptFormats;
+    /**
+     * A custom formatter to use for format the final model prompt from the input prompt segments. 
+     * If no one is specified the driver will choose a formatter compatible with the target model
+     */
+    format?: PromptFormatter;
     resultSchema?: JSONSchema4;
 }
 export interface ExecutionOptions extends PromptOptions {
@@ -169,13 +174,6 @@ export enum ModelType {
 
 // ============== Built-in formats and drivers =====================
 //TODO
-
-export enum PromptFormats {
-    openai = "openai",
-    llama2 = "llama2",
-    claude = "claude",
-    genericTextLLM = "genericTextLLM",
-}
 
 export enum BuiltinProviders {
     openai = 'openai',

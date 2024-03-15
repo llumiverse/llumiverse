@@ -10,8 +10,7 @@ import {
     BuiltinProviders,
     DriverOptions,
     EmbeddingsResult,
-    ExecutionOptions,
-    PromptFormats
+    ExecutionOptions
 } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
@@ -25,7 +24,6 @@ export class HuggingFaceIEDriver extends AbstractDriver<HuggingFaceIEDriverOptio
     service: FetchClient;
     provider = BuiltinProviders.huggingface_ie;
     _executor?: HfInferenceEndpoint;
-    defaultFormat = PromptFormats.genericTextLLM;
 
     constructor(
         options: HuggingFaceIEDriverOptions

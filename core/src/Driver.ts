@@ -5,7 +5,7 @@
  */
 
 import { DefaultCompletionStream, FallbackCompletionStream } from "./CompletionStream.js";
-import { PromptFormatters } from "./formatters/index.js";
+import { formatLlama2Prompt, formatTextPrompt } from "./formatters/index.js";
 import {
     AIModel,
     Completion,
@@ -18,7 +18,6 @@ import {
     ExecutionResponse,
     Logger,
     ModelSearchPayload,
-    PromptFormats,
     PromptOptions,
     PromptSegment,
     TrainingJob,
@@ -106,7 +105,6 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     logger: Logger;
 
     abstract provider: string; // the provider name
-    abstract defaultFormat: PromptFormats;
 
     constructor(opts: OptionsT) {
         this.options = opts;
@@ -181,11 +179,22 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
         }
     }
 
+    /**
+     * Override this method to provide a custom prompt formatter
+     * @param segments 
+     * @param options 
+     * @returns 
+     */
+    protected formatPrompt(segments: PromptSegment[], opts: PromptOptions): PromptT {
+        if (/\bllama2?\b/i.test(opts.model)) {
+            return formatLlama2Prompt(segments, opts.resultSchema) as PromptT;
+        } else {
+            return formatTextPrompt(segments, opts.resultSchema) as PromptT;
+        }
+    }
+
     public createPrompt(segments: PromptSegment[], opts: PromptOptions): PromptT {
-        return PromptFormatters[opts.format || this.defaultFormat](
-            segments,
-            opts.resultSchema
-        );
+        return opts.format ? opts.format(segments, opts.resultSchema) : this.formatPrompt(segments, opts);
     }
 
     /**

@@ -55,7 +55,6 @@ export async function uploadFile(s3: S3Client, source: ReadableStream, bucketNam
  * @returns 
  */
 export async function forceUploadFile(s3: S3Client, source: ReadableStream, bucketName: string, file: string, onProgress?: (progress: Progress) => void) {
-    console.log('!!!!!!!!s3', source);
     // make sure the bucket exists
     await tryCreateBucket(s3, bucketName);
     return uploadFile(s3, source, bucketName, file, onProgress);

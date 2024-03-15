@@ -1,17 +1,25 @@
 import { PromptRole } from "../index.js";
 import { PromptSegment } from "../types.js";
-import OpenAI from "openai";
 
-export function openAI(segments: PromptSegment[]) {
-    const system: OpenAI.Chat.ChatCompletionMessageParam[] = [];
-    const others: OpenAI.Chat.ChatCompletionMessageParam[] = [];
-    const safety: OpenAI.Chat.ChatCompletionMessageParam[] = [];
+export interface OpenAITextMessage {
+    content: string;
+    role: "system" | "user" | "assistant";
+}
+/**
+ * OpenAI text only prompts
+ * @param segments 
+ * @returns 
+ */
+export function formatOpenAILikePrompt(segments: PromptSegment[]) {
+    const system: OpenAITextMessage[] = [];
+    const others: OpenAITextMessage[] = [];
+    const safety: OpenAITextMessage[] = [];
 
     for (const msg of segments) {
         if (msg.role === PromptRole.system) {
             system.push({ content: msg.content, role: "system" });
         } else if (msg.role === PromptRole.safety) {
-            safety.push({ content: msg.content, role: "system" });
+            safety.push({ content: "IMPORTANT: " + msg.content, role: "system" });
         } else {
             others.push({ content: msg.content, role: "user" });
         }

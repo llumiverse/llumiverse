@@ -1,7 +1,7 @@
 import { JSONSchema4 } from "json-schema";
 import { PromptRole, PromptSegment } from "../index.js";
 
-export function llama2(messages: PromptSegment[], schema?: JSONSchema4) {
+export function formatLlama2Prompt(messages: PromptSegment[], schema?: JSONSchema4) {
     const BOS = "<s>";
     const EOS = "</s>";
     const INST = "[INST]";

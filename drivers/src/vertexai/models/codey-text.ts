@@ -1,6 +1,6 @@
 import { AIModel, ModelType, PromptOptions, PromptSegment } from "@llumiverse/core";
+import { formatTextPrompt } from "@llumiverse/core/formatters";
 import { VertexAIDriver } from "../index.js";
-import { getPromptAsText } from "../utils/prompts.js";
 import { AbstractPalmModelDefinition, NonStreamingPromptBase, PalmResponseMetadata, StreamingPromptBase } from "./palm-model-base.js";
 
 
@@ -50,7 +50,7 @@ export class CodeyTextDefinition extends AbstractPalmModelDefinition<CodeyTextPr
     createNonStreamingPrompt(_driver: VertexAIDriver, segments: PromptSegment[], opts: PromptOptions): CodeyTextPrompt {
         return {
             instances: [{
-                prefix: getPromptAsText(segments, opts)
+                prefix: formatTextPrompt(segments, opts.resultSchema)
             }],
             parameters: {
                 // put defauilts here

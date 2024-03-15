@@ -1,5 +1,6 @@
 import { JSONSchema4 } from "json-schema";
 import { PromptRole, PromptSegment } from "../index.js";
+import { getJSONSafetyNotice } from "./commons.js";
 
 export interface ClaudeMessage {
     role: 'user' | 'assistant',
@@ -19,7 +20,7 @@ export interface ClaudeMessagesPrompt {
  * A formatter user by Bedrock to format prompts for claude related models
  */
 
-export function claudeMessages(segments: PromptSegment[], schema?: JSONSchema4): ClaudeMessagesPrompt {
+export function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchema4): ClaudeMessagesPrompt {
     const system: string[] = [];
     const safety: string[] = [];
     const messages: ClaudeMessage[] = [];
@@ -35,12 +36,8 @@ export function claudeMessages(segments: PromptSegment[], schema?: JSONSchema4):
     }
 
     if (schema) {
-        safety.push(`You must answer using the following JSONSchema:
----
-${JSON.stringify(schema)}
----`);
+        safety.push(getJSONSafetyNotice(schema));
     }
-
 
     // messages must contains at least 1 item. If the prompt doesn;t contains a user message (but only system messages)
     // we need to put the system messages in the messages array

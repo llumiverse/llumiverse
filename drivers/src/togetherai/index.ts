@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, PromptFormats } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
 import { TogetherModelInfo } from "./interfaces.js";
@@ -10,13 +10,11 @@ interface TogetherAIDriverOptions extends DriverOptions {
 export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, string> {
     provider: string;
     apiKey: string;
-    defaultFormat: PromptFormats;
     fetchClient: FetchClient;
 
     constructor(options: TogetherAIDriverOptions) {
         super(options);
         this.provider = "togetherai";
-        this.defaultFormat = PromptFormats.genericTextLLM;
         this.apiKey = options.apiKey;
         this.fetchClient = new FetchClient('https://api.together.xyz').withHeaders({
             authorization: `Bearer ${this.apiKey}`
@@ -93,7 +91,6 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
                 name: m.display_name,
                 description: m.description,
                 provider: this.provider,
-                formats: [PromptFormats.genericTextLLM],
             }
         });
 

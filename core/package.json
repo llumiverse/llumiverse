@@ -32,6 +32,9 @@
         "*": {
             "async": [
                 "./lib/types/async.d.ts"
+            ],
+            "formatters": [
+                "./lib/types/formatters/index.d.ts"
             ]
         }
     },
@@ -47,6 +50,12 @@
             "default": "./lib/esm/async.js",
             "import": "./lib/esm/async.js",
             "require": "./lib/cjs/async.js"
+        },
+        "./formatters": {
+            "types": "./lib/types/formatters/index.d.ts",
+            "default": "./lib/esm/formatters/index.js",
+            "import": "./lib/esm/formatters/index.js",
+            "require": "./lib/cjs/formatters/index.js"
         }
     },
     "scripts": {
@@ -75,7 +84,8 @@
     "ts_dual_module": {
         "outDir": "lib",
         "exports": {
-            "async": "async.js"
+            "async": "async.js",
+            "formatters": "formatters/index.js"
         }
     }
 }

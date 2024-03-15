@@ -1,6 +1,6 @@
 //import { v1 } from "@google-cloud/aiplatform";
 import { GenerateContentRequest, VertexAI } from "@google-cloud/vertexai";
-import { AIModel, AbstractDriver, BuiltinProviders, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload, PromptFormats, PromptOptions, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, BuiltinProviders, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload, PromptOptions, PromptSegment } from "@llumiverse/core";
 import { FetchClient } from "api-fetch-client";
 import { TextEmbeddingsOptions, getEmbeddingsForText } from "./embeddings/embeddings-text.js";
 import { BuiltinModels, getModelDefinition } from "./models.js";
@@ -13,7 +13,6 @@ export interface VertexAIDriverOptions extends DriverOptions {
 
 export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, GenerateContentRequest> {
     provider = BuiltinProviders.vertexai;
-    defaultFormat = PromptFormats.genericTextLLM;
 
     //aiplatform: v1.ModelServiceClient;
     vertexai: VertexAI;

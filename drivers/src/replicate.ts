@@ -8,7 +8,6 @@ import {
     EmbeddingsResult,
     ExecutionOptions,
     ModelSearchPayload,
-    PromptFormats,
     TrainingJob,
     TrainingJobStatus,
     TrainingOptions
@@ -37,7 +36,6 @@ export interface ReplicateDriverOptions extends DriverOptions {
 export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
     provider = BuiltinProviders.replicate;
     service: Replicate;
-    defaultFormat = PromptFormats.genericTextLLM;
 
     static parseModelId(modelId: string) {
         const [owner, modelPart] = modelId.split("/");

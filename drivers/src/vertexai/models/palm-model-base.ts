@@ -2,8 +2,24 @@ import { AIModel, Completion, ExecutionOptions, PromptOptions, PromptSegment } f
 import { transformSSEStream } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
 import { ModelDefinition } from "../models.js";
-import { PromptParamatersBase } from "../utils/prompts.js";
 import { generateStreamingPrompt } from "../utils/tensor.js";
+
+
+export interface PromptParamatersBase {
+    temperature?: number,
+    maxOutputTokens?: number,
+    topK?: number,
+    topP?: number,
+    groundingConfig?: string,
+    stopSequences?: string[],
+    candidateCount?: number,
+    logprobs?: number,
+    presencePenalty?: number,
+    frequencyPenalty?: number,
+    logitBias?: Record<string, number>,
+    seed?: number,
+    echo?: boolean
+}
 
 export interface NonStreamingPromptBase<InstanceType = any> {
     instances: InstanceType[];

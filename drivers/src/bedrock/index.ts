@@ -1,11 +1,11 @@
 import { Bedrock, CreateModelCustomizationJobCommand, FoundationModelSummary, GetModelCustomizationJobCommand, GetModelCustomizationJobCommandOutput, ModelCustomizationJobStatus, StopModelCustomizationJobCommand } from "@aws-sdk/client-bedrock";
 import { BedrockRuntime, InvokeModelCommandOutput, ResponseStream } from "@aws-sdk/client-bedrock-runtime";
 import { S3Client } from "@aws-sdk/client-s3";
-import { AIModel, AbstractDriver, BuiltinProviders, Completion, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptFormats, PromptFormatters, PromptOptions, PromptSegment, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
+import { AIModel, AbstractDriver, BuiltinProviders, Completion, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptOptions, PromptSegment, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
+import { ClaudeMessagesPrompt, formatClaudePrompt } from "@llumiverse/core/formatters";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import mnemonist from "mnemonist";
-import { ClaudeMessagesPrompt } from "../../../core/src/formatters/claude.js";
 import { forceUploadFile } from "./s3.js";
 
 const { LRUCache } = mnemonist;
@@ -48,8 +48,6 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     private _executor?: BedrockRuntime;
     private _service?: Bedrock;
 
-    defaultFormat = PromptFormats.genericTextLLM;
-
     constructor(options: BedrockDriverOptions) {
         super(options);
         if (!options.region) {
@@ -77,11 +75,13 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         return this._service;
     }
 
-    public createPrompt(segments: PromptSegment[], opts: PromptOptions): BedrockPrompt {
+    protected formatPrompt(segments: PromptSegment[], opts: PromptOptions): BedrockPrompt {
+        //TODO move the anthropic test in abstract driver?
         if (opts.model.includes('anthropic')) {
-            return PromptFormatters.claude(segments, opts.resultSchema); //TODO: need to type better the types aren't checked properly by TS
+            //TODO: need to type better the types aren't checked properly by TS
+            return formatClaudePrompt(segments, opts.resultSchema);
         } else {
-            return super.createPrompt(segments, opts) as string;
+            return super.formatPrompt(segments, opts) as string;
         }
     }
 

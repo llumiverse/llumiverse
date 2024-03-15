@@ -10,13 +10,12 @@ import {
     ExecutionOptions,
     ExecutionTokenUsage,
     ModelType,
-    PromptFormats,
-    PromptSegment,
     TrainingJob,
     TrainingJobStatus,
     TrainingOptions,
-    TrainingPromptOptions
+    TrainingPromptOptions,
 } from "@llumiverse/core";
+import { formatOpenAILikePrompt } from "@llumiverse/core/formatters";
 import { asyncMap } from "@llumiverse/core/async";
 import OpenAI from "openai";
 import { Stream } from "openai/streaming";
@@ -41,18 +40,13 @@ export class OpenAIDriver extends AbstractDriver<
     generatedContentTypes: string[] = ["text/plain"];
     service: OpenAI;
     provider = BuiltinProviders.openai;
-    defaultFormat = PromptFormats.openai;
 
     constructor(opts: OpenAIDriverOptions) {
         super(opts);
         this.service = new OpenAI({
             apiKey: opts.apiKey,
         });
-    }
-
-    createPrompt(segments: PromptSegment[], opts: ExecutionOptions): OpenAI.Chat.Completions.ChatCompletionMessageParam[] {
-        // openai only supports opanai format -  force the format
-        return super.createPrompt(segments, { ...opts, format: PromptFormats.openai })
+        this.formatPrompt = formatOpenAILikePrompt;
     }
 
     extractDataFromResponse(
