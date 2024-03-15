@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { OpenAITextMessage, formatOpenAILikePrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import { FetchClient } from "api-fetch-client";
@@ -122,8 +122,20 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
     validateConnection(): Promise<boolean> {
         throw new Error("Method not implemented.");
     }
-    generateEmbeddings(): Promise<EmbeddingsResult> {
-        throw new Error("Method not implemented.");
+
+    async generateEmbeddings({ content, model = "mistral-embed" }: EmbeddingsOptions): Promise<EmbeddingsResult> {
+        const r = await this.client.post('/v1/embeddings', {
+            payload: {
+                model,
+                input: [content],
+                encoding_format: "float"
+            },
+        });
+        return {
+            values: r.data[0].embedding,
+            model,
+            token_count: r.usage.total_tokens
+        }
     }
 
 }

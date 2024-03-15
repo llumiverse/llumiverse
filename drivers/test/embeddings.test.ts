@@ -2,7 +2,7 @@
 import { Driver } from '@llumiverse/core';
 import 'dotenv/config';
 import { describe, expect, test } from "vitest";
-import { BedrockDriver, OpenAIDriver, VertexAIDriver } from "../src/index.js";
+import { BedrockDriver, MistralAIDriver, OpenAIDriver, VertexAIDriver } from "../src/index.js";
 
 const TIMEOUT = 10000;
 const TEXT = "Hello";
@@ -21,6 +21,9 @@ const bedrock = new BedrockDriver({
 });
 const openai = new OpenAIDriver({
     apiKey: process.env.OPENAI_API_KEY as string
+});
+const mistral = new MistralAIDriver({
+    apiKey: process.env.MISTRAL_API_KEY as string
 });
 
 
@@ -57,3 +60,11 @@ describe('OpenAI: embeddings generation', function () {
     }, TIMEOUT);
 })
 
+describe('MistralAI: embeddings generation', function () {
+    test('embeddings for text', async () => {
+        const r = await mistral.generateEmbeddings({ content: TEXT });
+        expect(r.values.length).toBeGreaterThan(0);
+        expect(r.model).toBe("mistral-embed");
+        expect(r.token_count).toBeGreaterThan(0);
+    }, TIMEOUT);
+})
