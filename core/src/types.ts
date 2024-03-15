@@ -1,5 +1,4 @@
 import { JSONSchema4 } from "json-schema";
-import { Readable } from "stream";
 import { JSONObject } from "./json.js";
 
 export interface EmbeddingsOptions {
@@ -193,9 +192,10 @@ export enum BuiltinProviders {
 // ============== training =====================
 
 
+
 export interface DataSource {
     name: string;
-    getStream(): Readable;
+    getStream(): ReadableStream<Uint8Array | string>;
     getURL(): Promise<string>;
 }
 

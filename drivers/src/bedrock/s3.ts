@@ -1,6 +1,5 @@
 import { CreateBucketCommand, HeadBucketCommand, S3Client } from "@aws-sdk/client-s3";
 import { Progress, Upload } from "@aws-sdk/lib-storage";
-import { Readable } from "stream";
 
 export async function doesBucketExist(s3: S3Client, bucketName: string): Promise<boolean> {
     try {
@@ -29,7 +28,7 @@ export async function tryCreateBucket(s3: S3Client, bucketName: string) {
 }
 
 
-export async function uploadFile(s3: S3Client, source: Readable | string | Buffer, bucketName: string, file: string, onProgress?: (progress: Progress) => void) {
+export async function uploadFile(s3: S3Client, source: ReadableStream, bucketName: string, file: string, onProgress?: (progress: Progress) => void) {
 
     const upload = new Upload({
         client: s3,
@@ -55,7 +54,8 @@ export async function uploadFile(s3: S3Client, source: Readable | string | Buffe
  * @param onProgress 
  * @returns 
  */
-export async function forceUploadFile(s3: S3Client, source: Readable | string | Buffer, bucketName: string, file: string, onProgress?: (progress: Progress) => void) {
+export async function forceUploadFile(s3: S3Client, source: ReadableStream, bucketName: string, file: string, onProgress?: (progress: Progress) => void) {
+    console.log('!!!!!!!!s3', source);
     // make sure the bucket exists
     await tryCreateBucket(s3, bucketName);
     return uploadFile(s3, source, bucketName, file, onProgress);
