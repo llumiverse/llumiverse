@@ -30,7 +30,8 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
             region: this.options.region,
             project: this.options.project,
         }).withAuthCallback(async () => {
-            const token = await this.vertexai.preview.token;
+            //@ts-ignore
+            const token = await this.vertexai.preview.googleAuth.getAccessToken();
             return `Bearer ${token}`;
         });
         // this.aiplatform = new v1.ModelServiceClient({

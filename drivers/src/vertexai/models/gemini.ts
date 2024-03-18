@@ -1,10 +1,10 @@
-import { Content, GenerateContentRequest, GenerativeModel, HarmBlockThreshold, HarmCategory, TextPart } from "@google-cloud/vertexai";
+import { Content, GenerateContentRequest, HarmBlockThreshold, HarmCategory, TextPart } from "@google-cloud/vertexai";
 import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, ModelType, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
 import { ModelDefinition } from "../models.js";
 
-function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions): GenerativeModel {
+function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
     return driver.vertexai.preview.getGenerativeModel({
         model: options.model,
         //TODO pass in the options
@@ -106,8 +106,8 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
         const response = await r.response;
         const usage = response.usageMetadata;
         const token_usage: ExecutionTokenUsage = {
-            prompt: usage?.prompt_token_count,
-            result: usage?.candidates_token_count,
+            prompt: usage?.promptTokenCount,
+            result: usage?.candidatesTokenCount,
             total: usage?.totalTokenCount,
         }
 
