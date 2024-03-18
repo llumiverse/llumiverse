@@ -19,20 +19,14 @@
     },
     "license": "MIT",
     "devDependencies": {
-        "@types/bun": "^1.0.4",
-        "@types/chai": "^4.3.11",
-        "@types/estree": "^1.0.1",
+        "@types/bun": "^1.0.8",
         "@types/eventsource": "^1.1.15",
         "@types/json-schema": "^7.0.15",
-        "@types/mocha": "^10.0.1",
-        "chai": "^4.3.8",
-        "mocha": "^10.2.0",
-        "tsx": "^3.12.10",
-        "typescript": "^5.3.3"
+        "typescript": "^5.4.2"
     },
     "dependencies": {
         "@llumiverse/core": "^0.10.0",
         "@llumiverse/drivers": "^0.10.0",
-        "dotenv": "^16.4.2"
+        "dotenv": "^16.4.5"
     }
 }
