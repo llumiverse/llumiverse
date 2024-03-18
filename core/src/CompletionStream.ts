@@ -60,7 +60,6 @@ export class DefaultCompletionStream<PromptT = any> implements CompletionStream<
 export class FallbackCompletionStream<PromptT = any> implements CompletionStream<PromptT> {
 
     prompt: PromptT;
-    chunks: string[];
     completion: ExecutionResponse<PromptT> | undefined;
 
     constructor(public driver: AbstractDriver<DriverOptions, PromptT>,
@@ -68,22 +67,16 @@ export class FallbackCompletionStream<PromptT = any> implements CompletionStream
         public options: ExecutionOptions) {
         this.driver = driver;
         this.prompt = this.driver.createPrompt(segments, options);
-        this.chunks = [];
     }
 
     async *[Symbol.asyncIterator]() {
         // reset state
         this.completion = undefined;
-        if (this.chunks.length > 0) {
-            this.chunks = [];
-        }
         this.driver.logger.debug(
             `[${this.driver.provider}] Streaming is not supported, falling back to blocking execution`
         );
         const completion = await this.driver._execute(this.prompt, this.options);
-
-        const content = completion.result === 'string' ? completion.result : JSON.stringify(completion.result);
-        this.chunks.push(content);
+        const content = typeof completion.result === 'string' ? completion.result : JSON.stringify(completion.result);
         yield content;
 
         this.completion = completion;
