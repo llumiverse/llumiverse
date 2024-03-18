@@ -1,10 +1,9 @@
-//import { v1 } from "@google-cloud/aiplatform";
 import { GenerateContentRequest, VertexAI } from "@google-cloud/vertexai";
 import { AIModel, AbstractDriver, BuiltinProviders, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload, PromptOptions, PromptSegment } from "@llumiverse/core";
 import { FetchClient } from "api-fetch-client";
 import { TextEmbeddingsOptions, getEmbeddingsForText } from "./embeddings/embeddings-text.js";
 import { BuiltinModels, getModelDefinition } from "./models.js";
-//import { GoogleAuth } from "google-auth-library";
+
 
 export interface VertexAIDriverOptions extends DriverOptions {
     project: string;
