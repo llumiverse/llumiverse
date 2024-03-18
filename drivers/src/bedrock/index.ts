@@ -104,6 +104,10 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             } else if (result.content) { // calude
                 return result.content[0]?.text || '';
                 //result.stop_reason --> the stop reason
+            } else if (result.outputs) {
+                // mistral
+                return result.outputs[0]?.text;
+                //result.outputs[0]?.stop_reason --> the stop reason
             } else {
                 return result.toString();
             }
@@ -173,6 +177,10 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                     return segment.generation;
                 } else if (segment.generations) {
                     return segment.generations[0].text;
+                } else if (segment.outputs) {
+                    // mistral.mixtral-8x7b-instruct-v0:1
+                    return segment.outputs[0].text;
+                    //segment.outputs[0].stop_reason;
                 } else {
                     segment.toString();
                 }
@@ -230,6 +238,12 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                     stopSequences: ["\n"],
                 },
             } as AmazonRequestPayload;
+        } else if (contains(options.model, "mistral")) {
+            return {
+                prompt: prompt,
+                temperature: options.temperature,
+                max_tokens: options.max_tokens,
+            } as MistralPayload;
         } else {
             throw new Error("Cannot prepare payload for unknown provider: " + options.model);
         }
@@ -452,6 +466,14 @@ interface AmazonRequestPayload {
         maxTokenCount: number,
         stopSequences: [string];
     };
+}
+
+interface MistralPayload {
+    prompt: string,
+    temperature: number,
+    max_tokens: number,
+    top_p?: number,
+    top_k?: number,
 }
 
 

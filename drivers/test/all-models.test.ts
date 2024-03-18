@@ -88,25 +88,25 @@ if (process.env.BEDROCK_REGION) {
 
 describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => {
 
-    test('list models', async () => {
+    test(`${name}: list models`, async () => {
         const r = await driver.listModels();
         expect(r.length).toBeGreaterThan(0);
         //console.log(r);
     }, TIMEOUT);
 
 
-    test.each(models)('execute prompt on %s', async (model) => {
+    test.each(models)(`${name}: execute prompt on %s`, async (model) => {
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 });
         assertCompletionOk(r);
         //console.log(r);
     }, TIMEOUT);
 
-    test.each(models)('execute prompt with streaming on %s', async (model) => {
+    test.each(models)(`${name}: execute prompt with streaming on %s`, async (model) => {
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 })
         await assertStreamingCompletionOk(r);
     }, TIMEOUT);
 
-    test.each(models)('execute prompt with schema on %s', async (model) => {
+    test.each(models)(`${name}: execute prompt with schema on %s`, async (model) => {
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, resultSchema: testSchema_color });
         assertCompletionOk(r);
         //console.log(r);
