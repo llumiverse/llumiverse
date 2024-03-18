@@ -101,8 +101,11 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             } else if (result.completions) {
                 //A21
                 return result.completions[0].data?.text;
+            } else if (result.content) { // calude
+                return result.content[0]?.text || '';
+                //result.stop_reason --> the stop reason
             } else {
-                result.toString();
+                return result.toString();
             }
         };
 
@@ -129,7 +132,6 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             contentType: "application/json",
             body: JSON.stringify(payload),
         });
-
         return this.extractDataFromResponse(prompt, res);
     }
 
