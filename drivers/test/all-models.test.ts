@@ -1,9 +1,10 @@
 import { AbstractDriver } from '@llumiverse/core';
 import 'dotenv/config';
 import { describe, expect, test } from "vitest";
-import { MistralAIDriver, OpenAIDriver, TogetherAIDriver } from '../src';
+import { BedrockDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver } from '../src';
 import { assertCompletionOk, assertStreamingCompletionOk } from './assertions';
 import { testPrompt_color, testSchema_color } from './samples';
+import { Bedrock } from '@aws-sdk/client-bedrock';
 
 const TIMEOUT = 120 * 1000;
 
@@ -64,6 +65,25 @@ if (process.env.OPENAI_API_KEY) {
     )
 } else {
     console.warn("OpenAI tests are skipped: OPENAI_API_KEY environment variable is not set");
+}
+
+if (process.env.BEDROCK_REGION) {
+    drivers.push({
+        name: "bedrock",
+        driver: new BedrockDriver({
+            region: process.env.BEDROCK_REGION as string,
+        }),
+        models: [
+            "anthropic.claude-3-sonnet-20240229-v1:0",
+            "anthropic.claude-v2:1",
+            "cohere.command-text-v14",
+            "ai21.j2-mid-v1",
+            "mistral.mixtral-8x7b-instruct-v0:1"
+        ]
+    }
+    )
+} else {
+    console.warn("Bedrock tests are skipped: BEDROCK_REGION environment variable is not set");
 }
 
 describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => {
