@@ -68,16 +68,10 @@ In this example, we will instantiate the Bedrock driver using credentials from t
 Learn more on how to [setup AWS credentials in node](https://docs.aws.amazon.com/sdk-for-javascript/v3/developer-guide/setting-credentials-node.html). 
 
 ```javascript
-import { defaultProvider } from "@aws-sdk/credential-provider-node";
 import { BedrockDriver } from "@llumiverse/drivers";
 
-const credentials = defaultProvider({
-    profile: "default",
-})
-
 const driver = new BedrockDriver({
-    region: 'us-west-2',
-    credentials: credentials
+    region: 'us-west-2'
 });
 ```
 
