@@ -15,11 +15,11 @@ import {
     TrainingOptions,
     TrainingPromptOptions,
 } from "@llumiverse/core";
-import { formatOpenAILikePrompt } from "@llumiverse/core/formatters";
 import { asyncMap } from "@llumiverse/core/async";
+import { formatOpenAILikePrompt } from "@llumiverse/core/formatters";
 import OpenAI from "openai";
+import { ChatCompletionTool } from "openai/resources/index.mjs";
 import { Stream } from "openai/streaming";
-import { ChatCompletionTool, FunctionDefinition } from "openai/resources/index.mjs";
 
 const supportFineTunning = new Set([
     "gpt-3.5-turbo-1106",
