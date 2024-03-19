@@ -19,6 +19,7 @@ import { formatOpenAILikePrompt } from "@llumiverse/core/formatters";
 import { asyncMap } from "@llumiverse/core/async";
 import OpenAI from "openai";
 import { Stream } from "openai/streaming";
+import { ChatCompletionTool, FunctionDefinition } from "openai/resources/index.mjs";
 
 const supportFineTunning = new Set([
     "gpt-3.5-turbo-1106",
@@ -68,7 +69,7 @@ export class OpenAIDriver extends AbstractDriver<
         }
 
         //we have a schema: get the content and return after validation
-        const data = result.choices[0]?.message.function_call?.arguments as any;
+        const data = result.choices[0]?.message.tool_calls?.[0].function.arguments;
         if (!data) {
             this.logger?.error("[OpenAI] Response is not valid", result);
             throw new Error("Response is not valid: no data");
@@ -84,7 +85,7 @@ export class OpenAIDriver extends AbstractDriver<
         const mapFn = options.resultSchema
             ? (chunk: OpenAI.Chat.Completions.ChatCompletionChunk) => {
                 return (
-                    chunk.choices[0]?.delta?.function_call?.arguments ?? ""
+                    chunk.choices[0]?.delta?.tool_calls?.[0].function?.arguments ?? ""
                 );
             }
             : (chunk: OpenAI.Chat.Completions.ChatCompletionChunk) => {
@@ -98,17 +99,22 @@ export class OpenAIDriver extends AbstractDriver<
             temperature: options.temperature,
             n: 1,
             max_tokens: options.max_tokens,
-            functions: options.resultSchema
+            tools: options.resultSchema
                 ? [
                     {
-                        name: "format_output",
-                        parameters: options.resultSchema as any,
-                    },
+                        function: {
+                            name: "format_output",
+                            parameters: options.resultSchema as any,
+                        },
+                        type: "function"
+                    } as ChatCompletionTool,
                 ]
                 : undefined,
-            function_call: options.resultSchema
-                ? { name: "format_output" }
-                : undefined,
+            tool_choice: options.resultSchema
+                ? {
+                    type: 'function',
+                    function: { name: "format_output" }
+                } : undefined,
         })) as Stream<OpenAI.Chat.Completions.ChatCompletionChunk>;
 
         return asyncMap(stream, mapFn);
@@ -118,9 +124,12 @@ export class OpenAIDriver extends AbstractDriver<
         const functions = options.resultSchema
             ? [
                 {
-                    name: "format_output",
-                    parameters: options.resultSchema as any,
-                },
+                    function: {
+                        name: "format_output",
+                        parameters: options.resultSchema as any,
+                    },
+                    type: 'function'
+                } as ChatCompletionTool,
             ]
             : undefined;
 
@@ -131,10 +140,16 @@ export class OpenAIDriver extends AbstractDriver<
             temperature: options.temperature,
             n: 1,
             max_tokens: options.max_tokens,
-            functions: functions,
-            function_call: options.resultSchema
-                ? { name: "format_output" }
-                : undefined,
+            tools: functions,
+            tool_choice: options.resultSchema
+                ? {
+                    type: 'function',
+                    function: { name: "format_output" }
+                } : undefined,
+            // functions: functions,
+            // function_call: options.resultSchema
+            //     ? { name: "format_output" }
+            //     : undefined,
         });
 
         return this.extractDataFromResponse(options, res);
