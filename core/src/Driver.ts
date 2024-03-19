@@ -53,7 +53,7 @@ export function createLogger(logger: Logger | "console" | undefined) {
 
 function applyExecutionDefaults(options: ExecutionOptions): ExecutionOptions {
     return {
-        max_tokens: 4096,
+        max_tokens: 2048,
         temperature: 0.7,
         ...options
     }
