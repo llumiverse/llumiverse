@@ -18,7 +18,6 @@ import {
 import { asyncMap } from "@llumiverse/core/async";
 import { formatOpenAILikePrompt } from "@llumiverse/core/formatters";
 import OpenAI from "openai";
-import { ChatCompletionTool } from "openai/resources/index.mjs";
 import { Stream } from "openai/streaming";
 
 const supportFineTunning = new Set([
@@ -107,7 +106,7 @@ export class OpenAIDriver extends AbstractDriver<
                             parameters: options.resultSchema as any,
                         },
                         type: "function"
-                    } as ChatCompletionTool,
+                    } as OpenAI.Chat.ChatCompletionTool,
                 ]
                 : undefined,
             tool_choice: options.resultSchema
@@ -129,7 +128,7 @@ export class OpenAIDriver extends AbstractDriver<
                         parameters: options.resultSchema as any,
                     },
                     type: 'function'
-                } as ChatCompletionTool,
+                } as OpenAI.Chat.ChatCompletionTool,
             ]
             : undefined;
 
