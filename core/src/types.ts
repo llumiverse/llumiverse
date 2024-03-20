@@ -49,10 +49,21 @@ export interface Completion<ResultT = any> {
     token_usage?: ExecutionTokenUsage;
 
     /**
+     * The finish reason as reported by the model: stop | length or other model specific values
+     */
+    finish_reason?: "stop" | "length" | string;
+
+    /**
      * Set only if a result validation error occured, otherwise if the result is valid the error field is undefined
      * This can only be set if the resultSchema is set and the reuslt could not be parsed as a json or if the result does not match the schema
      */
     error?: ResultValidationError;
+
+    /**
+     * The original response. Only included if the option include_original_response is set to true and the request is made using execute. Not supported when streaming.
+     */
+    original_response?: Record<string, any>;
+
 }
 
 export interface ExecutionResponse<PromptT = any> extends Completion {
@@ -91,6 +102,47 @@ export interface PromptOptions {
 export interface ExecutionOptions extends PromptOptions {
     temperature?: number;
     max_tokens?: number;
+    stop_sequence?: string | string[];
+
+    /** 
+     * restricts the selection of tokens to the “k” most likely options, based on their probabilities
+     * Lower values make the model more deterministic, more focused. Examples:
+     * - 10 - result will be highly controlled anc contextually relevant
+     * - 50 - result will be more creative but maintaining a balance between control and creativity
+     * - 100 - will lead to more creative and less predictable outputs
+     * It will be ignored on OpenAI since it does not support it
+     */
+    top_k?: number;
+
+    /**
+     * An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered.
+     * Either use temperature or top_p, not both
+     */
+    top_p?: number;
+
+    /**
+     * Only supported for OpenAI. Look at OpenAI documentation for more detailsx
+     */
+    top_logprobs?: number;
+
+    /**
+     * Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
+     * Ignored for models which doesn;t support it
+     */
+    presence_penalty?: number;
+
+    /**
+     * Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
+     * Ignored for models which doesn;t support it
+     */
+    frequency_penalty?: number;
+
+    /**
+     * If set to true the original response from the target LLM will be included in the response under the original_response field.
+     * This is useful for debugging and for some advanced use cases. 
+     * It is ignored on streaming requests
+     */
+    include_original_response?: boolean;
 }
 
 // ============== Prompts ===============

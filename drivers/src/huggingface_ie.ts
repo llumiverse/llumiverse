@@ -92,6 +92,10 @@ export class HuggingFaceIEDriver extends AbstractDriver<HuggingFaceIEDriverOptio
             },
         });
 
+        let finish_reason = res.details?.finish_reason;
+        if (finish_reason === "eos_token") {
+            finish_reason = "stop";
+        }
         return {
             result: res.generated_text,
             token_usage: {
@@ -99,6 +103,8 @@ export class HuggingFaceIEDriver extends AbstractDriver<HuggingFaceIEDriverOptio
                 prompt: prompt.length,
                 total: res.generated_text.length + prompt.length,
             },
+            finish_reason,
+            original_response: options.include_original_response ? res : undefined,
         };
 
     }

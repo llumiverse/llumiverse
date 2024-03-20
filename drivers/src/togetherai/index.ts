@@ -1,7 +1,7 @@
 import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
-import { TogetherModelInfo } from "./interfaces.js";
+import { TextCompletion, TogetherModelInfo } from "./interfaces.js";
 
 interface TogetherAIDriverOptions extends DriverOptions {
     apiKey: string;
@@ -42,9 +42,9 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
                     "[/INST]"
                 ],
             }
-        })
-
-        const text = res.choices[0]?.text ?? '';
+        }) as TextCompletion;
+        const choice = res.choices[0];
+        const text = choice.text ?? '';
         const usage = res.usage || {};
         return {
             result: text,
@@ -53,6 +53,8 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
                 result: usage.completion_tokens,
                 total: usage.total_tokens,
             },
+            finish_reason: choice.finish_reason,
+            original_response: options.include_original_response ? res : undefined,
         }
     }
 

@@ -79,7 +79,7 @@ export interface ChatCompletionResponseChoice {
         role: string;
         content: string;
     };
-    finish_reason: string;
+    finish_reason: string; // "stop" "length" "model_length" "error" "tool_calls"
 }
 
 export interface ChatCompletionResponseChunkChoice {
@@ -89,7 +89,7 @@ export interface ChatCompletionResponseChunkChoice {
         content?: string;
         tool_calls?: ToolCalls[];
     };
-    finish_reason: string;
+    finish_reason: string; // "stop" "length" "model_length" "error" "tool_calls"
 }
 
 export interface ChatCompletionResponse {

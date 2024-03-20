@@ -59,16 +59,20 @@ export class OpenAIDriver extends AbstractDriver<
             total: result.usage?.total_tokens,
         };
 
+        const choice = result.choices[0];
+        const finish_reason = choice.finish_reason;
+
         //if no schema, return content
         if (!options.resultSchema) {
             return {
-                result: result.choices[0]?.message.content as string,
+                result: choice.message.content as string,
                 token_usage: tokenInfo,
+                finish_reason
             }
         }
 
         //we have a schema: get the content and return after validation
-        const data = result.choices[0]?.message.tool_calls?.[0].function.arguments;
+        const data = choice?.message.tool_calls?.[0].function.arguments;
         if (!data) {
             this.logger?.error("[OpenAI] Response is not valid", result);
             throw new Error("Response is not valid: no data");
@@ -76,7 +80,8 @@ export class OpenAIDriver extends AbstractDriver<
 
         return {
             result: data,
-            token_usage: tokenInfo
+            token_usage: tokenInfo,
+            finish_reason
         };
     }
 
@@ -151,7 +156,11 @@ export class OpenAIDriver extends AbstractDriver<
             //     : undefined,
         });
 
-        return this.extractDataFromResponse(options, res);
+        const completion = this.extractDataFromResponse(options, res);
+        if (options.include_original_response) {
+            completion.original_response = res;
+        }
+        return completion;
     }
 
     createTrainingPrompt(options: TrainingPromptOptions): string {

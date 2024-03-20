@@ -2,7 +2,7 @@ import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, 
 import { transformSSEStream } from "@llumiverse/core/async";
 import { OpenAITextMessage, formatOpenAILikePrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import { FetchClient } from "api-fetch-client";
-import { CompletionRequestParams, ListModelsResponse, ResponseFormat } from "./types.js";
+import { ChatCompletionResponse, CompletionRequestParams, ListModelsResponse, ResponseFormat } from "./types.js";
 
 //TODO retry on 429
 //const RETRY_STATUS_CODES = [429, 500, 502, 503, 504];
@@ -70,9 +70,10 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
                 temperature: options.temperature,
                 responseFormat: this.getResponseFormat(options),
             })
-        })
+        }) as ChatCompletionResponse;
 
-        const result = res.choices[0]?.message.content;
+        const choice = res.choices[0];
+        const result = choice.message.content;
 
         return {
             result: result,
@@ -80,7 +81,9 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
                 prompt: res.usage.prompt_tokens,
                 result: res.usage.completion_tokens,
                 total: res.usage.total_tokens,
-            }
+            },
+            finish_reason: choice.finish_reason,
+            original_response: options.include_original_response ? res : undefined,
         };
     }
 

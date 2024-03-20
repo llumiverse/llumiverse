@@ -1,4 +1,4 @@
-import { Content, GenerateContentRequest, HarmBlockThreshold, HarmCategory, TextPart } from "@google-cloud/vertexai";
+import { Content, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, TextPart } from "@google-cloud/vertexai";
 import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, ModelType, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
@@ -7,12 +7,13 @@ import { ModelDefinition } from "../models.js";
 function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
     return driver.vertexai.preview.getGenerativeModel({
         model: options.model,
-        //TODO pass in the options
+        //TODO pass in the options        
         safety_settings: [{
             category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
             threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
         }],
         generation_config: {
+            candidate_count: 1,
             temperature: options.temperature,
             max_output_tokens: options.max_tokens
         },
@@ -111,9 +112,14 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
             total: usage?.totalTokenCount,
         }
 
-        let result: any;
+        let finish_reason: string | undefined, result: any;
         const candidate = response.candidates[0];
         if (candidate) {
+            switch (candidate.finishReason) {
+                case FinishReason.MAX_TOKENS: finish_reason = "length"; break;
+                case FinishReason.STOP: finish_reason = "stop"; break;
+                default: finish_reason = candidate.finishReason;
+            }
             const content = candidate.content;
             if (content) {
                 result = collectTextParts(content);
@@ -126,8 +132,10 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
 
         return {
             result: result ?? '',
-            token_usage
-        };
+            token_usage,
+            finish_reason,
+            original_response: options.include_original_response ? response : undefined,
+        } as Completion;
     }
 
     async requestCompletionStream(driver: VertexAIDriver, prompt: GenerateContentRequest, options: ExecutionOptions): Promise<AsyncIterable<string>> {

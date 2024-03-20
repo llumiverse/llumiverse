@@ -89,7 +89,9 @@ export abstract class AbstractPalmModelDefinition<NonStreamingPromptT extends No
                 prompt: inputTokens,
                 result: outputTokens,
                 total: inputTokens && outputTokens ? inputTokens + outputTokens : undefined,
-            }
+            },
+            //finish_reason not available
+            original_response: options.include_original_response ? response : undefined,
         } as Completion;
 
     }

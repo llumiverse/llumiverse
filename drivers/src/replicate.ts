@@ -138,6 +138,7 @@ export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
                 prompt: prompt.length,
                 total: res.output.length + prompt.length,
             },
+            original_response: options.include_original_response ? res : undefined,
         };
     }
 
