@@ -91,29 +91,33 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         const body = decoder.decode(response.body);
         const result = JSON.parse(body);
 
-        const getText = () => {
-            if (result.completion) {
-                return result.completion;
-            } else if (result.generation) {
-                return result.generation;
+        const getTextAnsStopReason = (): string[] => {
+            if (result.generation) {
+                // LLAMA2
+                return [result.generation, result.stop_reason]; // comes in coirrect format (stop, length)
             } else if (result.generations) {
-                return result.generations[0].text;
+                // COHERE                
+                return [result.generations[0].text, cohereFinishReason(result.generations[0].finish_reason)];
             } else if (result.completions) {
                 //A21
-                return result.completions[0].data?.text;
-            } else if (result.content) { // calude
-                return result.content[0]?.text || '';
-                //result.stop_reason --> the stop reason
+                return [result.completions[0].data?.text, a21FinishReason(result.completions[0].finishReason?.reason)];
+            } else if (result.content) {
+                // anthropic claude                
+                return [result.content[0]?.text || '', claudeFinishReason(result.stop_reason)];
             } else if (result.outputs) {
                 // mistral
-                return result.outputs[0]?.text;
-                //result.outputs[0]?.stop_reason --> the stop reason
+                return [result.outputs[0]?.text, result.outputs[0]?.stop_reason]; // the stop reason is in the expected format ("stop" and "length")
+            } else if (result.results) {
+                // Amazon Titan
+                return [result.results[0]?.outputText ?? '', titanFinishReason(result.results[0]?.completionReason)];
+            } else if (result.completion) { // TODO: who uses this?
+                return [result.completion];
             } else {
-                return result.toString();
+                return [result.toString()];
             }
         };
 
-        const text = getText();
+        const [text, finish_reason] = getTextAnsStopReason();
 
         const promptLength = typeof prompt === 'string' ? prompt.length :
             (prompt.system || '').length + prompt.messages.reduce((acc, m) => acc + m.content.length, 0);
@@ -123,7 +127,8 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 result: text?.length,
                 prompt: promptLength,
                 total: text?.length + promptLength,
-            }
+            },
+            finish_reason
         }
     }
 
@@ -136,7 +141,11 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             contentType: "application/json",
             body: JSON.stringify(payload),
         });
-        return this.extractDataFromResponse(prompt, res);
+        const completion = this.extractDataFromResponse(prompt, res);
+        if (options.include_original_response) {
+            completion.original_response = res;
+        }
+        return completion;
     }
 
     protected async canStream(options: ExecutionOptions): Promise<boolean> {
@@ -167,9 +176,9 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
             return transformAsyncIterator(res.body, (stream: ResponseStream) => {
                 const segment = JSON.parse(decoder.decode(stream.chunk?.bytes));
-                if (segment.delta) {
+                if (segment.delta) { // who is this?
                     return segment.delta.text || '';
-                } else if (segment.completion) {
+                } else if (segment.completion) { // who is this?
                     return segment.completion;
                 } else if (segment.completions) {
                     return segment.completions[0].data?.text;
@@ -181,6 +190,11 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                     // mistral.mixtral-8x7b-instruct-v0:1
                     return segment.outputs[0].text;
                     //segment.outputs[0].stop_reason;
+                } else if (segment.outputText) {
+                    // Amazon Titan
+                    return segment.outputText;
+                    //completionReason
+                    // token count too
                 } else {
                     segment.toString();
                 }
@@ -230,12 +244,12 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             } as CohereRequestPayload;
         } else if (contains(options.model, "amazon")) {
             return {
-                inputText: prompt,
+                inputText: "User: " + (prompt as string) + "\nBot:", // see https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-titan-text.html#model-parameters-titan-request-response
                 textGenerationConfig: {
                     temperature: options.temperature,
-                    topP: 0.9,
+                    topP: options.top_p,
                     maxTokenCount: options.max_tokens,
-                    stopSequences: ["\n"],
+                    //stopSequences: ["\n"],
                 },
             } as AmazonRequestPayload;
         } else if (contains(options.model, "mistral")) {
@@ -502,4 +516,38 @@ function jobInfo(job: GetModelCustomizationJobCommandOutput, jobId: string): Tra
 }
 
 
+function claudeFinishReason(reason: string | undefined) {
+    if (!reason) return undefined;
+    switch (reason) {
+        case 'end_turn': return "stop";
+        case 'max_tokens': return "length";
+        default: return reason; //stop_sequence
+    }
+}
 
+function cohereFinishReason(reason: string | undefined) {
+    if (!reason) return undefined;
+    switch (reason) {
+        case 'COMPLETE': return "stop";
+        case 'MAX_TOKENS': return "length";
+        default: return reason;
+    }
+}
+
+function a21FinishReason(reason: string | undefined) {
+    if (!reason) return undefined;
+    switch (reason) {
+        case 'endoftext': return "stop";
+        case 'length': return "length";
+        default: return reason;
+    }
+}
+
+function titanFinishReason(reason: string | undefined) {
+    if (!reason) return undefined;
+    switch (reason) {
+        case 'FINISH': return "stop";
+        case 'LENGTH': return "length";
+        default: return reason;
+    }
+}

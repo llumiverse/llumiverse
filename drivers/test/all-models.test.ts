@@ -4,7 +4,6 @@ import { describe, expect, test } from "vitest";
 import { BedrockDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver } from '../src';
 import { assertCompletionOk, assertStreamingCompletionOk } from './assertions';
 import { testPrompt_color, testSchema_color } from './samples';
-import { Bedrock } from '@aws-sdk/client-bedrock';
 
 const TIMEOUT = 120 * 1000;
 
@@ -78,7 +77,10 @@ if (process.env.BEDROCK_REGION) {
             "anthropic.claude-v2:1",
             "cohere.command-text-v14",
             "ai21.j2-mid-v1",
-            "mistral.mixtral-8x7b-instruct-v0:1"
+            "mistral.mixtral-8x7b-instruct-v0:1",
+            "meta.llama2-70b-chat-v1",
+            //"amazon.titan-tg1-large", ---> JSON Schema not working yet
+            //"stability.stable-diffusion-xl-v1" --> NOT IMPLEMENTED
         ]
     }
     )
@@ -91,7 +93,7 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
     test(`${name}: list models`, async () => {
         const r = await driver.listModels();
         expect(r.length).toBeGreaterThan(0);
-        //console.log(r);
+        console.log(r);
     }, TIMEOUT);
 
 

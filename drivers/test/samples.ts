@@ -14,9 +14,6 @@ export const testPrompt_color: PromptSegment[] = [
 export const testSchema_color: JSONSchema4 = {
     type: "object",
     properties: {
-        object: {
-            type: "string"
-        },
         color: {
             type: "string"
         }
