@@ -16,9 +16,5 @@
     "packageManager": "npm@10.4.0",
     "devDependencies": {
         "typescript": "^5.3.3"
-    },
-    "dependencies": {
-        "@types/json-schema": "^7.0.15",
-        "groq-sdk": "^0.3.2"
     }
 }
