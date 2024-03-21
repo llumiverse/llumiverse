@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, BuiltinProviders, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { OpenAITextMessage, formatOpenAILikePrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import { FetchClient } from "api-fetch-client";
@@ -23,7 +23,7 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
 
     constructor(options: MistralAIDriverOptions) {
         super(options);
-        this.provider = "MistralAI";
+        this.provider = BuiltinProviders.mistralai;
         this.apiKey = options.apiKey;
         //this.client = new MistralClient(options.apiKey, options.endpointUrl);
         this.client = new FetchClient(options.endpoint_url || ENDPOINT).withHeaders({

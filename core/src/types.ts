@@ -235,6 +235,7 @@ export enum BuiltinProviders {
     vertexai = 'vertexai',
     togetherai = 'togetherai',
     mistralai = 'mistralai',
+    groq = 'groq',
     //virtual = 'virtual',    
     //cohere = 'cohere',
 }

@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, BuiltinProviders, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { OpenAITextMessage, formatOpenAILikePrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import Groq from "groq-sdk";
@@ -18,7 +18,7 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
 
     constructor(options: GroqDriverOptions) {
         super(options);
-        this.provider = "Groq";
+        this.provider = BuiltinProviders.groq;
         this.apiKey = options.apiKey;
         this.client = new Groq({
             apiKey: options.apiKey,
@@ -29,8 +29,8 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
     getResponseFormat = (_options: ExecutionOptions): Groq.Chat.Completions.CompletionCreateParams.ResponseFormat | undefined => {
 
         const responseFormatJson: Groq.Chat.Completions.CompletionCreateParams.ResponseFormat = {
-             type: "json_object",
-        } 
+            type: "json_object",
+        }
 
         return _options.resultSchema ? responseFormatJson : undefined;
 
@@ -49,8 +49,8 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
     }
 
     async requestCompletion(messages: OpenAITextMessage[], options: ExecutionOptions): Promise<Completion<any>> {
-       
-       
+
+
         const res = await this.client.chat.completions.create({
             model: options.model,
             messages: messages,
@@ -76,7 +76,7 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
     }
 
     async requestCompletionStream(messages: OpenAITextMessage[], options: ExecutionOptions): Promise<AsyncIterable<string>> {
-        
+
         const res = await this.client.chat.completions.create({
             model: options.model,
             messages: messages,
@@ -116,7 +116,7 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
         throw new Error("Method not implemented.");
     }
 
-    async generateEmbeddings({  }: EmbeddingsOptions): Promise<EmbeddingsResult> {
+    async generateEmbeddings({ }: EmbeddingsOptions): Promise<EmbeddingsResult> {
         throw new Error("Method not implemented.");
     }
 
