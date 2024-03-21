@@ -105,7 +105,8 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
                 id: m.id,
                 name: m.id,
                 description: undefined,
-                provider: m.owned_by || '',
+                provider: this.provider,
+                owner: m.owned_by || '',
             }
         });
 

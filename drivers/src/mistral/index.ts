@@ -115,7 +115,8 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
                 id: m.id,
                 name: m.id,
                 description: undefined,
-                provider: m.owned_by,
+                provider: this.provider,
+                owner: m.owned_by,
             }
         });
 
