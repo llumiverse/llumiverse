@@ -1,7 +1,7 @@
 import { AbstractDriver } from '@llumiverse/core';
 import 'dotenv/config';
 import { describe, expect, test } from "vitest";
-import { BedrockDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver } from '../src';
+import { BedrockDriver, GroqDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver } from '../src';
 import { assertCompletionOk, assertStreamingCompletionOk } from './assertions';
 import { testPrompt_color, testSchema_color } from './samples';
 
@@ -86,6 +86,23 @@ if (process.env.BEDROCK_REGION) {
     )
 } else {
     console.warn("Bedrock tests are skipped: BEDROCK_REGION environment variable is not set");
+}
+
+if (process.env.GROQ_API_KEY) {
+
+    drivers.push({
+        name: "groq",
+        driver: new GroqDriver({
+            apiKey: process.env.GROQ_API_KEY as string
+        }),
+        models: [
+            "llama2-70b-4096",
+            "mixtral-8x7b-32768",
+            "gemma-7b-it"
+        ]
+    })
+} else {
+    console.warn("Groq tests are skipped: GROQ_API_KEY environment variable is not set");
 }
 
 describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => {

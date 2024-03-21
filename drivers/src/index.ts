@@ -6,4 +6,4 @@ export * from "./replicate.js";
 export * from "./test/index.js";
 export * from "./togetherai/index.js";
 export * from "./vertexai/index.js";
-
+export * from "./groq/index.js";
