@@ -19,6 +19,7 @@ The following LLM platforms are supported in the current version:
 | HuggingFace Inference Endpoints | ✅ | ✅ | N/A | N/A       |
 | Google Vertex AI | ✅ | ✅ | Partial | In Progress |
 | Together AI| ✅ | ✅ | ✅ | In Progress |
+| Groq | ✅ | ✅ | ✅ | N/A |
 
 New capabilities and platform can easily be added by creating a new driver for the platform.
 
