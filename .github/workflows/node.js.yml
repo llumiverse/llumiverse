@@ -20,7 +20,7 @@ jobs:
       matrix:
         node-version: [18.x, 20.x]
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@main
     - uses: 'google-github-actions/auth@v2'
       with:
         credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
@@ -32,7 +32,7 @@ jobs:
         role-session-name: github-actions
         aws-region: us-west-2
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v3
+      uses: actions/setup-node@main
       with:
         node-version: ${{ matrix.node-version }}
         cache: 'npm'
