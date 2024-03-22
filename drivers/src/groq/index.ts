@@ -26,14 +26,24 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
         });
     }
 
-    getResponseFormat = (_options: ExecutionOptions): Groq.Chat.Completions.CompletionCreateParams.ResponseFormat | undefined => {
+    // protected canStream(options: ExecutionOptions): Promise<boolean> {
+    //     if (options.resultSchema) {
+    //         // not yet streamign json responses
+    //         return Promise.resolve(false);
+    //     } else {
+    //         return Promise.resolve(true);
+    //     }
+    // }
 
-        const responseFormatJson: Groq.Chat.Completions.CompletionCreateParams.ResponseFormat = {
-            type: "json_object",
-        }
+    getResponseFormat(_options: ExecutionOptions): Groq.Chat.Completions.CompletionCreateParams.ResponseFormat | undefined {
+        //TODO: when forcing json_object type the streaming is not supported.
+        // either implement canStream as above or comment the code below:
+        // const responseFormatJson: Groq.Chat.Completions.CompletionCreateParams.ResponseFormat = {
+        //     type: "json_object",
+        // }
 
-        return _options.resultSchema ? responseFormatJson : undefined;
-
+        // return _options.resultSchema ? responseFormatJson : undefined;
+        return undefined;
     }
 
     protected formatPrompt(segments: PromptSegment[], opts: ExecutionOptions): OpenAITextMessage[] {
