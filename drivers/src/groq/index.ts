@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, BuiltinProviders, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { OpenAITextMessage, formatOpenAILikePrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import Groq from "groq-sdk";
@@ -11,14 +11,14 @@ interface GroqDriverOptions extends DriverOptions {
 
 
 export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMessage[]> {
-    provider: string;
+    static PROVIDER = "groq";
+    provider = GroqDriver.PROVIDER;
     apiKey: string;
     client: Groq;
     endpointUrl?: string;
 
     constructor(options: GroqDriverOptions) {
         super(options);
-        this.provider = BuiltinProviders.groq;
         this.apiKey = options.apiKey;
         this.client = new Groq({
             apiKey: options.apiKey,

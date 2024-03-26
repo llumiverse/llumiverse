@@ -8,13 +8,13 @@ interface TogetherAIDriverOptions extends DriverOptions {
 }
 
 export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, string> {
-    provider: string;
+    static PROVIDER = "togetherai";
+    provider = TogetherAIDriver.PROVIDER;
     apiKey: string;
     fetchClient: FetchClient;
 
     constructor(options: TogetherAIDriverOptions) {
         super(options);
-        this.provider = "togetherai";
         this.apiKey = options.apiKey;
         this.fetchClient = new FetchClient('https://api.together.xyz').withHeaders({
             authorization: `Bearer ${this.apiKey}`

@@ -1,7 +1,6 @@
 import {
     AIModel,
     AbstractDriver,
-    BuiltinProviders,
     Completion,
     DataSource,
     DriverOptions,
@@ -13,7 +12,7 @@ import {
     TrainingJob,
     TrainingJobStatus,
     TrainingOptions,
-    TrainingPromptOptions,
+    TrainingPromptOptions
 } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { formatOpenAILikePrompt } from "@llumiverse/core/formatters";
@@ -36,10 +35,11 @@ export class OpenAIDriver extends AbstractDriver<
     OpenAIDriverOptions,
     OpenAI.Chat.Completions.ChatCompletionMessageParam[]
 > {
+    static PROVIDER = "openai";
     inputContentTypes: string[] = ["text/plain"];
     generatedContentTypes: string[] = ["text/plain"];
     service: OpenAI;
-    provider = BuiltinProviders.openai;
+    provider = OpenAIDriver.PROVIDER;
 
     constructor(opts: OpenAIDriverOptions) {
         super(opts);

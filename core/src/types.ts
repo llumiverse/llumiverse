@@ -224,21 +224,6 @@ export enum ModelType {
     Unknown = "unknown"
 }
 
-// ============== Built-in formats and drivers =====================
-//TODO
-
-export enum BuiltinProviders {
-    openai = 'openai',
-    huggingface_ie = 'huggingface_ie',
-    replicate = 'replicate',
-    bedrock = 'bedrock',
-    vertexai = 'vertexai',
-    togetherai = 'togetherai',
-    mistralai = 'mistralai',
-    groq = 'groq',
-    //virtual = 'virtual',    
-    //cohere = 'cohere',
-}
 
 // ============== training =====================
 

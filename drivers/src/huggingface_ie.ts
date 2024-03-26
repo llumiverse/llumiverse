@@ -7,7 +7,6 @@ import {
     AIModel,
     AIModelStatus,
     AbstractDriver,
-    BuiltinProviders,
     DriverOptions,
     EmbeddingsResult,
     ExecutionOptions
@@ -21,8 +20,9 @@ export interface HuggingFaceIEDriverOptions extends DriverOptions {
 }
 
 export class HuggingFaceIEDriver extends AbstractDriver<HuggingFaceIEDriverOptions, string> {
+    static PROVIDER = "huggingface_ie";
+    provider = HuggingFaceIEDriver.PROVIDER;
     service: FetchClient;
-    provider = BuiltinProviders.huggingface_ie;
     _executor?: HfInferenceEndpoint;
 
     constructor(

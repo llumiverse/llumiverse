@@ -1,7 +1,6 @@
 import {
     AIModel,
     AbstractDriver,
-    BuiltinProviders,
     Completion,
     DataSource,
     DriverOptions,
@@ -34,7 +33,8 @@ export interface ReplicateDriverOptions extends DriverOptions {
 }
 
 export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
-    provider = BuiltinProviders.replicate;
+    static PROVIDER = "replicate";
+    provider = ReplicateDriver.PROVIDER;
     service: Replicate;
 
     static parseModelId(modelId: string) {

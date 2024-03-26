@@ -1,7 +1,7 @@
 import { Bedrock, CreateModelCustomizationJobCommand, FoundationModelSummary, GetModelCustomizationJobCommand, GetModelCustomizationJobCommandOutput, ModelCustomizationJobStatus, StopModelCustomizationJobCommand } from "@aws-sdk/client-bedrock";
 import { BedrockRuntime, InvokeModelCommandOutput, ResponseStream } from "@aws-sdk/client-bedrock-runtime";
 import { S3Client } from "@aws-sdk/client-s3";
-import { AIModel, AbstractDriver, BuiltinProviders, Completion, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptOptions, PromptSegment, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptOptions, PromptSegment, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { ClaudeMessagesPrompt, formatClaudePrompt } from "@llumiverse/core/formatters";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
@@ -43,7 +43,9 @@ export type BedrockPrompt = string | ClaudeMessagesPrompt;
 
 export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockPrompt> {
 
-    provider = BuiltinProviders.bedrock;
+    static PROVIDER = "bedrock";
+
+    provider = BedrockDriver.PROVIDER;
 
     private _executor?: BedrockRuntime;
     private _service?: Bedrock;
