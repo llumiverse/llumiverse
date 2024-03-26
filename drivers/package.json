@@ -1,6 +1,6 @@
 {
   "name": "@llumiverse/drivers",
-  "version": "0.12.1",
+  "version": "0.12.2",
   "type": "module",
   "description": "LLM driver implementations. Currently supported are: openai, huggingface, bedrock, replicate.",
   "files": [
@@ -63,7 +63,7 @@
     "@aws-sdk/lib-storage": "^3.535.0",
     "@google-cloud/vertexai": "^0.5.0",
     "@huggingface/inference": "^2.6.6",
-    "@llumiverse/core": "^0.12.1",
+    "@llumiverse/core": "^0.12.2",
     "api-fetch-client": "^0.8.6",
     "eventsource": "^2.0.2",
     "google-auth-library": "^9.7.0",
