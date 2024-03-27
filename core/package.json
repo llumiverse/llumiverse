@@ -1,6 +1,6 @@
 {
     "name": "@llumiverse/core",
-    "version": "0.12.2",
+    "version": "0.12.3",
     "type": "module",
     "description": "Provide an universal API to LLMs. Support for existing LLMs can be added by writing a driver.",
     "files": [
@@ -41,19 +41,16 @@
     "exports": {
         ".": {
             "types": "./lib/types/index.d.ts",
-            "default": "./lib/esm/index.js",
             "import": "./lib/esm/index.js",
             "require": "./lib/cjs/index.js"
         },
         "./async": {
             "types": "./lib/types/async.d.ts",
-            "default": "./lib/esm/async.js",
             "import": "./lib/esm/async.js",
             "require": "./lib/cjs/async.js"
         },
         "./formatters": {
             "types": "./lib/types/formatters/index.d.ts",
-            "default": "./lib/esm/formatters/index.js",
             "import": "./lib/esm/formatters/index.js",
             "require": "./lib/cjs/formatters/index.js"
         }
@@ -75,7 +72,7 @@
         "@types/json-schema": "^7.0.15",
         "api-fetch-client": "^0.8.6",
         "rimraf": "^5.0.5",
-        "ts-dual-module": "^0.6.2",
+        "ts-dual-module": "^0.6.3",
         "typescript": "^5.4.2",
         "vitest": "^1.4.0"
     },
