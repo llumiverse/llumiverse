@@ -373,7 +373,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 id: m.modelArn ?? m.modelId,
                 name: `${m.providerName} ${m.modelName}`,
                 provider: this.provider,
-                description: `id: ${m.modelId}`,
+                //description: ``,
                 owner: m.providerName,
                 canStream: m.responseStreamingSupported ?? false,
                 tags: m.outputModalities ?? [],
