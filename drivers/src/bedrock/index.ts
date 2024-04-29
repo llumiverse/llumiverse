@@ -350,11 +350,16 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     async _listModels(foundationFilter?: (m: FoundationModelSummary) => boolean): Promise<AIModel[]> {
         const service = this.getService();
         const [foundationals, customs] = await Promise.all([
-            service.listFoundationModels({}),
-            service.listCustomModels({}),
+            service.listFoundationModels({}).catch(() => {
+                this.logger.warn("[Bedrock] Can't list foundation models. Check if the user has the right permissions.");
+                return undefined
+                }),
+            service.listCustomModels({}).catch(() => {
+                this.logger.warn("[Bedrock] Can't list custom models. Check if the user has the right permissions.");
+                return undefined}),
         ]);
 
-        if (!foundationals.modelSummaries) {
+        if (!foundationals?.modelSummaries) {
             throw new Error("Foundation models not found");
         }
 
@@ -383,7 +388,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         });
 
         //add custom models
-        if (customs.modelSummaries) {
+        if (customs?.modelSummaries) {
             customs.modelSummaries.forEach((m) => {
 
                 if (!m.modelArn) {
