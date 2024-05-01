@@ -96,7 +96,7 @@ if (process.env.GROQ_API_KEY) {
             apiKey: process.env.GROQ_API_KEY as string
         }),
         models: [
-            "llama2-70b-4096",
+            "llama3-70b-8192",
             "mixtral-8x7b-32768",
             "gemma-7b-it"
         ]
