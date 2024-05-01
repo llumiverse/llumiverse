@@ -1,0 +1,13 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  packageRules: [
+    {
+      groupName: "gh-actions deps",
+      matchManagers: ["github-actions"],
+    },
+    {
+      groupName: "node deps",
+      matchManagers: ["npm", "nvm", "nodenv"],
+    },
+  ],
+}
