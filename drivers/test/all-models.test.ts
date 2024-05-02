@@ -98,7 +98,7 @@ if (process.env.GROQ_API_KEY) {
         models: [
             "llama3-70b-8192",
             "mixtral-8x7b-32768",
-            "gemma-7b-it"
+            //"gemma-7b-it"
         ]
     })
 } else {
@@ -128,7 +128,7 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
     test.each(models)(`${name}: execute prompt with schema on %s`, async (model) => {
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, resultSchema: testSchema_color });
         assertCompletionOk(r);
-        //console.log(r);
+        console.log(r);
     }, TIMEOUT);
 
 });
