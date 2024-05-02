@@ -92,7 +92,7 @@ export class HuggingFaceIEDriver extends AbstractDriver<HuggingFaceIEDriverOptio
             },
         });
 
-        let finish_reason = res.details?.finish_reason;
+        let finish_reason = res.details?.finish_reason as string;
         if (finish_reason === "eos_token") {
             finish_reason = "stop";
         }

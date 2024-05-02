@@ -8,14 +8,14 @@ function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
     return driver.vertexai.preview.getGenerativeModel({
         model: options.model,
         //TODO pass in the options        
-        safety_settings: [{
+        safetySettings: [{
             category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
             threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
         }],
-        generation_config: {
-            candidate_count: 1,
+        generationConfig: {
+            candidateCount: 1,
             temperature: options.temperature,
-            max_output_tokens: options.max_tokens
+            maxOutputTokens: options.max_tokens
         },
     });
 }
@@ -113,7 +113,7 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
         }
 
         let finish_reason: string | undefined, result: any;
-        const candidate = response.candidates[0];
+        const candidate = response.candidates && response.candidates[0];
         if (candidate) {
             switch (candidate.finishReason) {
                 case FinishReason.MAX_TOKENS: finish_reason = "length"; break;
@@ -143,7 +143,7 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
         const streamingResp = await model.generateContentStream(prompt);
 
         const stream = asyncMap(streamingResp.stream, async (item) => {
-            if (item.candidates.length > 0) {
+            if (item.candidates && item.candidates.length > 0) {
                 for (const candidate of item.candidates) {
                     if (candidate.content?.role === 'model') {
                         const text = collectTextParts(candidate.content);
