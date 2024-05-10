@@ -36,7 +36,7 @@ export function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchem
     }
 
     if (schema) {
-        safety.push(getJSONSafetyNotice(schema));
+        safety.push("IMPORTANT: " + getJSONSafetyNotice(schema));
     }
 
     // messages must contains at least 1 item. If the prompt doesn;t contains a user message (but only system messages)
@@ -53,16 +53,29 @@ export function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchem
         systemMessage = systemMessage + '\n\nIMPORTANT: ' + safety.join('\n');
     }
 
-    /*start Claude's message to amke sure it answers properly in JSON
-    if enabled, this requires to add the { to Claude's response
-    if (schema) {
+
+    /*if (schema) {
+        messages.push({
+            role: "user",
+            content: [{                
+                type: "text",
+                text: getJSONSafetyNotice(schema)
+            }]
+        });
+    }*/
+
+     /*start Claude's message to amke sure it answers properly in JSON
+    if enabled, this requires to add the { to Claude's response*/
+    if (schema) { 
         messages.push({
             role: "assistant",
             content: [{ 
                 type: "text", 
                 text: "{"
         }]});
-    }*/
+    }
+
+    console.log("XXXXXX claude", messages);
 
     // put system mesages first and safety last
     return {

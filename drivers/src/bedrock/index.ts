@@ -81,7 +81,8 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         //TODO move the anthropic test in abstract driver?
         if (opts.model.includes('anthropic')) {
             //TODO: need to type better the types aren't checked properly by TS
-            return formatClaudePrompt(segments, opts.resultSchema);
+            const prompt = formatClaudePrompt(segments, opts.resultSchema);
+            return prompt;
         } else {
             return super.formatPrompt(segments, opts) as string;
         }
@@ -104,8 +105,14 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 //A21
                 return [result.completions[0].data?.text, a21FinishReason(result.completions[0].finishReason?.reason)];
             } else if (result.content) {
-                // anthropic claude                
-                return [result.content[0]?.text || '', claudeFinishReason(result.stop_reason)];
+                // anthropic claude 
+                //if last prompt.messages is {, add { to the response
+                const p =  prompt as ClaudeMessagesPrompt;
+                const lastMessage = (p as ClaudeMessagesPrompt).messages[p.messages.length - 1];
+                const res = lastMessage.content[0].text === '{' ? '{' + result.content[0]?.text : result.content[0]?.text;
+
+                return [ res, claudeFinishReason(result.stop_reason)];
+                
             } else if (result.outputs) {
                 // mistral
                 return [result.outputs[0]?.text, result.outputs[0]?.stop_reason]; // the stop reason is in the expected format ("stop" and "length")
@@ -138,6 +145,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
         const payload = this.preparePayload(prompt, options);
         const executor = this.getExecutor();
+        console.log("Requesting completion", JSON.stringify(payload));
         const res = await executor.invokeModel({
             modelId: options.model,
             contentType: "application/json",
@@ -165,6 +173,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<string>> {
         const payload = this.preparePayload(prompt, options);
         const executor = this.getExecutor();
+        console.log("Requesting completion stream", JSON.stringify(payload));
         return executor.invokeModelWithResponseStream({
             modelId: options.model,
             contentType: "application/json",
@@ -224,7 +233,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 temperature: options.temperature,
                 max_gen_len: options.max_tokens,
             } as LLama2RequestPayload
-        } else if (contains(options.model, "anthropic")) {
+        } else if (contains(options.model, "claude")) {
             return {
                 anthropic_version: "bedrock-2023-05-31",
                 ...(prompt as ClaudeMessagesPrompt),
