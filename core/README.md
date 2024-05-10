@@ -229,7 +229,7 @@ for await (const chunk of stream) {
     process.stdout.write(chunk);
 }
 
-// when the response stream is consumed we can get the final reponse using stream.completion field.
+// when the response stream is consumed we can get the final response using stream.completion field.
 const streamingResponse = stream.completion!;
 
 console.log('\n# LLM response:', streamingResponse.result)

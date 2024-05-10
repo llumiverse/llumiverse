@@ -8,14 +8,14 @@ function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
     return driver.vertexai.preview.getGenerativeModel({
         model: options.model,
         //TODO pass in the options      
-        safety_settings: [{
+        safetySettings: [{
             category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
             threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
         }],
-        generation_config: {
-            candidate_count: 1,
+        generationConfig: {
+            candidateCount: 1,
             temperature: options.temperature,
-            max_output_tokens: options.max_tokens
+            maxOutputTokens: options.max_tokens
         },
     });
 }
