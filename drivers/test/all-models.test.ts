@@ -1,7 +1,7 @@
 import { AbstractDriver } from '@llumiverse/core';
 import 'dotenv/config';
 import { describe, expect, test } from "vitest";
-import { BedrockDriver, GroqDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver } from '../src';
+import { BedrockDriver, GroqDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver, WatsonxDriver } from '../src';
 import { assertCompletionOk, assertStreamingCompletionOk } from './assertions';
 import { testPrompt_color, testSchema_color } from './samples';
 
@@ -105,31 +105,51 @@ if (process.env.GROQ_API_KEY) {
     console.warn("Groq tests are skipped: GROQ_API_KEY environment variable is not set");
 }
 
+if (process.env.WATSONX_API_KEY) {
+
+    drivers.push({
+        name: "watsonx",
+        driver: new WatsonxDriver({
+            apiKey: process.env.WATSONX_API_KEY as string,
+            projectId: process.env.WATSONX_PROJECT_ID as string,
+            endpoint_url: process.env.WATSONX_ENDPOINT_URL as string
+        }),
+        models: [
+            "ibm/granite-8b-code-instruct",
+            //"meta-llama/llama-3-70b-instruct",
+            "mistralai/mixtral-8x7b-instruct-v01"
+        ]
+    })
+} else {
+    console.warn("Groq tests are skipped: WATSONX_API_KEY environment variable is not set");
+}
+
+
 describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => {
 
     test(`${name}: list models`, async () => {
         const r = await driver.listModels();
         expect(r.length).toBeGreaterThan(0);
-        //console.log(r);
     }, TIMEOUT);
 
 
     test.each(models)(`${name}: execute prompt on %s`, async (model) => {
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 });
-        assertCompletionOk(r);
         //console.log(r);
+        assertCompletionOk(r);
     }, TIMEOUT);
 
     test.each(models)(`${name}: execute prompt with streaming on %s`, async (model) => {
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 })
+        //console.log(JSON.stringify(r));
         await assertStreamingCompletionOk(r);
     }, TIMEOUT);
 
     test.each(models)(`${name}: execute prompt with schema on %s`, async (model) => {
         console.log("Executing with schema", testPrompt_color)
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, resultSchema: testSchema_color });
-        assertCompletionOk(r);
         //console.log(JSON.stringify(r));
+        assertCompletionOk(r);
     }, TIMEOUT);
 
 });
