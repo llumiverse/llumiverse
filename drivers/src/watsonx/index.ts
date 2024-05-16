@@ -103,7 +103,7 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
                 id: m.model_id,
                 name: m.label,
                 description: m.short_description,
-                provider: m.source,
+                provider: this.provider,
             }
         });
 
