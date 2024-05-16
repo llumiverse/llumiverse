@@ -1,7 +1,7 @@
 import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
-import { WatsonAuthToken, WatsonxListModelResponse, WatsonxTextGenerationPayload, WatsonxTextGenerationResponse } from "./interfaces";
+import { WatsonAuthToken, WatsonxListModelResponse, WatsonxModelSpec, WatsonxTextGenerationPayload, WatsonxTextGenerationResponse } from "./interfaces";
 
 interface WatsonxDriverOptions extends DriverOptions {
     apiKey: string;
@@ -98,7 +98,7 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
         const res = await fetcher.get(`/ml/v1/foundation_model_specs?version=${API_VERSION}`) as WatsonxListModelResponse;
         const models = res.resources;
 
-        const aimodels = models.map(m => {
+        const aimodels = models.map((m: WatsonxModelSpec) => {
             return {
                 id: m.model_id,
                 name: m.label,
