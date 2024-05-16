@@ -1,0 +1,15 @@
+{
+  "parties": [
+    {
+      "name": "Composable Prompts, Corp.",
+      "type": "Company"
+    },
+    {
+      "name": "Employee or Contractor",
+      "type": "Employee or Contractor"
+    }
+  ],
+  "effective_date": null,
+  "governing_law": "The laws of the State of Delaware (US), or, if impermissible, then by the laws of your State of primary employment, without regard to the conflict of laws provisions thereof.",
+  "jurisdiction": "Any legal action or proceeding relating to this Agreement shall be brought exclusively in the state or federal courts located in or with jurisdiction over Atlanta, Georgia, and each party consents to the jurisdiction thereof."
+}

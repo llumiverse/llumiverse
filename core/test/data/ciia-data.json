@@ -1,0 +1,15 @@
+{
+    "parties": [
+      {
+        "name": "Company, Corp.",
+        "type": "Company"
+      },
+      {
+        "name": "Employee or Contractor",
+        "type": "Employee"
+      }
+    ],
+    "effective_date": null,
+    "governing_law": "Delaware",
+    "jurisdiction": "Any legal action or proceeding relating to this Agreement shall be brought exclusively in the state or federal courts located in or with jurisdiction over Atlanta, Georgia, and each party consents to the jurisdiction thereof."
+  }

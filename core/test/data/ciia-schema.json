@@ -1,0 +1,45 @@
+{
+      "type": "object",
+      "properties": {
+        "parties": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "type": {
+                "type": "string",
+                "enum": [
+                  "Company",
+                  "Employee",
+                  "Contractor"
+                ]
+              }
+            },
+            "required": [
+              "name",
+              "type"
+            ]
+          },
+          "minItems": 2
+        },
+        "effective_date": {
+          "type": "string",
+          "format": "date"
+        },
+        "governing_law": {
+          "type": "string"
+        },
+        "jurisdiction": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "parties",
+        "effective_date",
+        "governing_law",
+        "jurisdiction"
+      ]
+    }
