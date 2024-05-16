@@ -6,7 +6,7 @@ import { WatsonAuthToken, WatsonxListModelResponse, WatsonxModelSpec, WatsonxTex
 interface WatsonxDriverOptions extends DriverOptions {
     apiKey: string;
     projectId: string;
-    endpoint_url: string;
+    endpointUrl: string;
 }
 
 const API_VERSION = "2024-03-14"
@@ -24,7 +24,7 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
         super(options);
         this.apiKey = options.apiKey;
         this.projectId = options.projectId;
-        this.endpoint_url = options.endpoint_url;
+        this.endpoint_url = options.endpointUrl;
 
     }
 
@@ -119,11 +119,11 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
             if (now < this.authToken.expiration) {
                 return this.authToken.access_token;
             } else {
-                console.log("Token expired, refetching", this.authToken, now)
+                this.logger.debug("Token expired, refetching", this.authToken, now)
             }
         }
 
-        console.log("Fetching Auth Token")
+        this.logger.debug("Fetching Auth Token")
         const authToken = await fetch('https://iam.cloud.ibm.com/identity/token', {
             method: 'POST',
             headers: {

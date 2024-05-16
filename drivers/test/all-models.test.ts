@@ -112,7 +112,7 @@ if (process.env.WATSONX_API_KEY) {
         driver: new WatsonxDriver({
             apiKey: process.env.WATSONX_API_KEY as string,
             projectId: process.env.WATSONX_PROJECT_ID as string,
-            endpoint_url: process.env.WATSONX_ENDPOINT_URL as string
+            endpointUrl: process.env.WATSONX_ENDPOINT_URL as string
         }),
         models: [
             "ibm/granite-8b-code-instruct",
