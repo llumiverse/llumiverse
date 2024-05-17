@@ -78,9 +78,6 @@ if (process.env.BEDROCK_REGION) {
             "cohere.command-text-v14",
             "ai21.j2-mid-v1",
             "mistral.mixtral-8x7b-instruct-v0:1",
-            "meta.llama2-70b-chat-v1",
-            //"amazon.titan-tg1-large", ---> JSON Schema not working yet
-            //"stability.stable-diffusion-xl-v1" --> NOT IMPLEMENTED
         ]
     }
     )
