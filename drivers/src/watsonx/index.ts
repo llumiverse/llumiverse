@@ -1,7 +1,7 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
-import { WatsonAuthToken, WatsonxListModelResponse, WatsonxModelSpec, WatsonxTextGenerationPayload, WatsonxTextGenerationResponse } from "./interfaces.js";
+import { GenerateEmbeddingPayload, GenerateEmbeddingResponse, WatsonAuthToken, WatsonxListModelResponse, WatsonxModelSpec, WatsonxTextGenerationPayload, WatsonxTextGenerationResponse } from "./interfaces.js";
 
 interface WatsonxDriverOptions extends DriverOptions {
     apiKey: string;
@@ -19,26 +19,14 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
     projectId: string;
     authToken?: WatsonAuthToken;
     fetcher?: FetchClient;
+    fetchClient: FetchClient
 
     constructor(options: WatsonxDriverOptions) {
         super(options);
         this.apiKey = options.apiKey;
         this.projectId = options.projectId;
         this.endpoint_url = options.endpointUrl;
-
-    }
-
-    async fetchClient() {
-        if (this.fetcher) {
-            return this.fetcher;
-        }
-
-        const authToken = await this.getAuthToken();
-        this.fetcher = new FetchClient(this.endpoint_url).withHeaders({
-            authorization: `Bearer ${authToken}`,
-        })
-
-        return this.fetcher;
+        this.fetchClient = new FetchClient(this.endpoint_url).withAuthCallback(async () => this.getAuthToken())
     }
 
     async requestCompletion(prompt: string, options: ExecutionOptions): Promise<Completion<any>> {
@@ -51,8 +39,8 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
             },
             project_id: this.projectId,
         }
-        const fetcher = await this.fetchClient();
-        const res = await fetcher.post(`/ml/v1/text/generation?version=${API_VERSION}`, { payload }) as WatsonxTextGenerationResponse;
+
+        const res = await this.fetchClient.post(`/ml/v1/text/generation?version=${API_VERSION}`, { payload }) as WatsonxTextGenerationResponse;
 
         const result = res.results[0];
 
@@ -80,8 +68,7 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
             project_id: this.projectId,
         }
 
-        const fetcher = await this.fetchClient();
-        const stream = await fetcher.post(`/ml/v1/text/generation_stream?version=${API_VERSION}`, {
+        const stream = await this.fetchClient.post(`/ml/v1/text/generation_stream?version=${API_VERSION}`, {
             payload: payload,
             reader: 'sse'
         })
@@ -93,12 +80,14 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
 
     }
 
-    async listModels(): Promise<AIModel<string>[]> {
-        const fetcher = await this.fetchClient();
-        const res = await fetcher.get(`/ml/v1/foundation_model_specs?version=${API_VERSION}`) as WatsonxListModelResponse;
-        const models = res.resources;
 
-        const aimodels = models.map((m: WatsonxModelSpec) => {
+
+    async listModels(params: ListModelsParams): Promise<AIModel<string>[]> {
+
+        const res = await this.fetchClient.get(`/ml/v1/foundation_model_specs?version=${API_VERSION}`)
+            .catch(err => this.logger.warn("Can't list models on Watsonx: " + err)) as WatsonxListModelResponse;
+
+        const aimodels = res.resources.map((m: WatsonxModelSpec) => {
             return {
                 id: m.model_id,
                 name: m.label,
@@ -112,7 +101,7 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
     }
 
     async getAuthToken(): Promise<string> {
- 
+
 
         if (this.authToken) {
             const now = Date.now() / 1000;
@@ -123,7 +112,6 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
             }
         }
 
-        this.logger.debug("Fetching Auth Token")
         const authToken = await fetch('https://iam.cloud.ibm.com/identity/token', {
             method: 'POST',
             headers: {
@@ -134,15 +122,40 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
 
         this.authToken = authToken;
 
-        return this.authToken.access_token;
+        return 'Bearer ' + this.authToken.access_token;
 
     }
 
-    validateConnection(): Promise<boolean> {
-        throw new Error("Method not implemented.");
-    }
-    generateEmbeddings(): Promise<EmbeddingsResult> {
-        throw new Error("Method not implemented.");
+    async validateConnection(): Promise<boolean> {
+        return this.listModels({ limit: 1, text: "" })
+            .then(() => true)
+            .catch((err) => {
+                this.logger.warn("Failed to connect to WatsonX", err);
+                return false
+            });
     }
 
+    async generateEmbeddings(options: EmbeddingsOptions): Promise<EmbeddingsResult> {
+
+        const payload: GenerateEmbeddingPayload = {
+            inputs: [options.content],
+            model_id: options.model ?? 'ibm/slate-125m-english-rtrvr',
+            project_id: this.projectId
+        }
+
+        const res = await this.fetchClient.post(`/ml/v1/text/embeddings?version=${API_VERSION}`, { payload }) as GenerateEmbeddingResponse;
+
+        return {
+            values: res.results[0].embedding,
+            model: res.model_id
+        }
+
+    }
+
+}
+
+
+
+interface ListModelsParams extends ModelSearchPayload {
+    limit?: number;
 }

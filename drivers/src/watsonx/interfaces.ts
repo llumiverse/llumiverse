@@ -22,7 +22,7 @@ export interface WatsonxTextGenerationResponse {
 }
 
 export interface GenerateEmbeddingPayload {
-    model: string;
+    model_id: string;
     inputs: string[];
     project_id: string;
 }
