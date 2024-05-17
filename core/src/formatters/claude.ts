@@ -75,8 +75,6 @@ export function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchem
         }]});
     }
 
-    console.log("XXXXXX claude", messages);
-
     // put system mesages first and safety last
     return {
         system: systemMessage,

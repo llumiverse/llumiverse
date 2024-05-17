@@ -129,7 +129,7 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
 
     test(`${name}: list models`, async () => {
         const r = await driver.listModels();
-        console.log(r)
+        //console.log(r)
         expect(r.length).toBeGreaterThan(0);
     }, TIMEOUT);
 
