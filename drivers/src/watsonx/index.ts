@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
 import { GenerateEmbeddingPayload, GenerateEmbeddingResponse, WatsonAuthToken, WatsonxListModelResponse, WatsonxModelSpec, WatsonxTextGenerationPayload, WatsonxTextGenerationResponse } from "./interfaces.js";
@@ -82,7 +82,9 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
 
 
 
-    async listModels(params: ListModelsParams): Promise<AIModel<string>[]> {
+    async listModels(): Promise<AIModel<string>[]> {
+
+
 
         const res = await this.fetchClient.get(`/ml/v1/foundation_model_specs?version=${API_VERSION}`)
             .catch(err => this.logger.warn("Can't list models on Watsonx: " + err)) as WatsonxListModelResponse;
@@ -127,7 +129,7 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
     }
 
     async validateConnection(): Promise<boolean> {
-        return this.listModels({ limit: 1, text: "" })
+        return this.listModels()
             .then(() => true)
             .catch((err) => {
                 this.logger.warn("Failed to connect to WatsonX", err);
@@ -156,6 +158,6 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
 
 
 
-interface ListModelsParams extends ModelSearchPayload {
+/*interface ListModelsParams extends ModelSearchPayload {
     limit?: number;
-}
+}*/
