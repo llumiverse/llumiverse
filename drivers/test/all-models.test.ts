@@ -1,7 +1,7 @@
 import { AbstractDriver } from '@llumiverse/core';
 import 'dotenv/config';
 import { describe, expect, test } from "vitest";
-import { BedrockDriver, GroqDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver, WatsonxDriver } from '../src';
+import { BedrockDriver, GroqDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver, VertexAIDriver, WatsonxDriver } from '../src';
 import { assertCompletionOk, assertStreamingCompletionOk } from './assertions';
 import { testPrompt_color, testSchema_color } from './samples';
 
@@ -102,6 +102,7 @@ if (process.env.GROQ_API_KEY) {
     console.warn("Groq tests are skipped: GROQ_API_KEY environment variable is not set");
 }
 
+
 if (process.env.WATSONX_API_KEY) {
 
     drivers.push({
@@ -121,6 +122,21 @@ if (process.env.WATSONX_API_KEY) {
     console.warn("Groq tests are skipped: WATSONX_API_KEY environment variable is not set");
 }
 
+
+if (process.env.GOOGLE_PROJECT_ID && process.env.GOOGLE_REGION) {
+    drivers.push({
+        name: "google-vertex",
+        driver: new VertexAIDriver({
+            project: process.env.GOOGLE_PROJECT_ID as string,
+            region: process.env.GOOGLE_REGION as string,
+        }),
+        models: [
+            "gemini-1.5-flash-preview-0514",
+            "gemini-1.5-pro-preview-0514",
+            "gemini-1.0-pro"
+        ]
+    })
+}
 
 describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => {
 

@@ -1,14 +1,16 @@
 import { AIModel, Completion, ExecutionOptions, ModelType, PromptOptions, PromptSegment } from "@llumiverse/core";
-import { GeminiModelDefinition } from "./models/gemini.js";
 import { VertexAIDriver } from "./index.js";
-import { Palm2TextDefinition } from "./models/palm2-text.js";
-import { Palm2ChatDefinition } from "./models/palm2-chat.js";
 import { CodeyChatDefinition } from "./models/codey-chat.js";
 import { CodeyTextDefinition } from "./models/codey-text.js";
+import { GeminiModelDefinition } from "./models/gemini.js";
+import { Palm2ChatDefinition } from "./models/palm2-chat.js";
+import { Palm2TextDefinition } from "./models/palm2-text.js";
 
 
 const Models: Record<string, ModelDefinition> = {
-    "gemini-pro": new GeminiModelDefinition(),
+    "gemini-1.5-flash-preview-0514": new GeminiModelDefinition("gemini-1.5-flash-preview-0514"),
+    "gemini-1.5-pro-preview-0514": new GeminiModelDefinition("gemini-1.5-pro-preview-0514"),
+    "gemini-1.0-pro": new GeminiModelDefinition(),
     "text-bison": new Palm2TextDefinition(),
     "chat-bison": new Palm2ChatDefinition(),
     "code-bison": new CodeyTextDefinition(),
@@ -29,7 +31,8 @@ export function getModelName(model: string) {
 }
 
 export function getModelDefinition(model: string): ModelDefinition {
-    const def = Models[getModelName(model)];
+    const modelName = getModelName(model);
+    const def = Models[modelName];
     if (!def) {
         throw new Error(`Unknown model ${model}`);
     }
@@ -43,8 +46,22 @@ export function getAIModels() {
 // Builtin models. VertexAI doesn't provide an API to list models. so we have to hardcode them here.
 export const BuiltinModels: AIModel<string>[] = [
     {
-        id: "gemini-pro",
-        name: "Gemini Pro",
+        id: "gemini-1.5-flash-preview-0514",
+        name: "Gemini Pro 1.5 Flash (0514 Preview)",
+        provider: "vertexai",
+        owner: "google",
+        type: ModelType.MultiModal,
+    },
+    {
+        id: "gemini-1.5-pro-preview-0514",
+        name: "Gemini Pro 1.5 Pro (0514 Preview)",
+        provider: "vertexai",
+        owner: "google",
+        type: ModelType.MultiModal,
+    },
+    {
+        id: "gemini-1.0-pro",
+        name: "Gemini Pro 1.0",
         provider: "vertexai",
         owner: "google",
         type: ModelType.Text,

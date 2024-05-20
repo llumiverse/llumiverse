@@ -1,5 +1,5 @@
 import { Content, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, TextPart } from "@google-cloud/vertexai";
-import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, ModelType, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
+import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
 import { ModelDefinition } from "../models.js";
@@ -36,14 +36,19 @@ function collectTextParts(content: Content) {
 
 export class GeminiModelDefinition implements ModelDefinition<GenerateContentRequest> {
 
-    model: AIModel = {
-        id: "gemini-pro",
-        name: "Gemini Pro",
-        provider: "vertexai",
-        owner: "google",
-        type: ModelType.Text,
-        canStream: true,
-    }
+    model: AIModel
+
+    constructor(modelId: string = "gemini-1.0-pro") {
+       this.model = {
+            id: modelId,
+            name: modelId,
+            provider: "vertexai",
+            owner: "google"
+        };
+
+        console.log("Initialized GeminiModelDefinition", this.model)
+       } 
+
 
     createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions): GenerateContentRequest {
         const schema = options.resultSchema;
