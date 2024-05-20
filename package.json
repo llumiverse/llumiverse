@@ -1,6 +1,6 @@
 {
     "name": "@llumiverse/parent",
-    "version": "0.12.3",
+    "version": "0.13.0",
     "private": true,
     "workspaces": [
         "./core",
@@ -16,6 +16,7 @@
     },
     "packageManager": "^npm@10.4.0",
     "devDependencies": {
+        "npm-ws-tools": "^0.1.2",
         "typescript": "^5.3.3"
     }
 }
