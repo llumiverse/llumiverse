@@ -101,13 +101,16 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 // LLAMA2
                 return [result.generation, result.stop_reason]; // comes in coirrect format (stop, length)
             } else if (result.generations) {
-                // COHERE                
+                // Cohere                
                 return [result.generations[0].text, cohereFinishReason(result.generations[0].finish_reason)];
+            } else if (result.chat_history) {
+                //Cohere Command R
+                return [result.text, cohereFinishReason(result.finish_reason)];
             } else if (result.completions) {
                 //A21
                 return [result.completions[0].data?.text, a21FinishReason(result.completions[0].finishReason?.reason)];
             } else if (result.content) {
-                // anthropic claude 
+                // Claude 
                 //if last prompt.messages is {, add { to the response
                 const p =  prompt as ClaudeMessagesPrompt;
                 const lastMessage = (p as ClaudeMessagesPrompt).messages[p.messages.length - 1];
@@ -175,7 +178,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<string>> {
         const payload = this.preparePayload(prompt, options);
         const executor = this.getExecutor();
-        console.log("Requesting completion stream", JSON.stringify(payload));
+        console.log("Requesting completion with Streaming for model " + options.model, JSON.stringify(payload));
         return executor.invokeModelWithResponseStream({
             modelId: options.model,
             contentType: "application/json",
@@ -189,10 +192,13 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
             return transformAsyncIterator(res.body, (stream: ResponseStream) => {
                 const segment = JSON.parse(decoder.decode(stream.chunk?.bytes));
+                //console.log("Debug Segment for model " + options.model, JSON.stringify(segment));
                 if (segment.delta) { // who is this?
                     return segment.delta.text || '';
                 } else if (segment.completion) { // who is this?
                     return segment.completion;
+                } else if (segment.text) { //cohere
+                    return segment.text;
                 } else if (segment.completions) {
                     return segment.completions[0].data?.text;
                 } else if (segment.generation) {

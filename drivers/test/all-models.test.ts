@@ -156,14 +156,14 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
 
     test.each(models)(`${name}: execute prompt with streaming on %s`, async (model) => {
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 })
-        //console.log(JSON.stringify(r));
+        //console.log("Result for " + model, JSON.stringify(r));
         await assertStreamingCompletionOk(r);
     }, TIMEOUT);
 
     test.each(models)(`${name}: execute prompt with schema on %s`, async (model) => {
         console.log("Executing with schema", testPrompt_color)
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, resultSchema: testSchema_color });
-        //console.log(JSON.stringify(r));
+        //console.log("Result for " + model, JSON.stringify(r));
         assertCompletionOk(r);
     }, TIMEOUT);
 
