@@ -78,6 +78,7 @@ if (process.env.BEDROCK_REGION) {
             "cohere.command-text-v14",
             "ai21.j2-mid-v1",
             "mistral.mixtral-8x7b-instruct-v0:1",
+            "cohere.command-r-plus-v1:0"
         ]
     }
     )

@@ -6,6 +6,7 @@ import { transformAsyncIterator } from "@llumiverse/core/async";
 import { ClaudeMessagesPrompt, formatClaudePrompt } from "@llumiverse/core/formatters";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import mnemonist from "mnemonist";
+import { AI21RequestPayload, AmazonRequestPayload, ClaudeRequestPayload, CohereCommandRPayload, CohereRequestPayload, LLama2RequestPayload, MistralPayload } from "./payloads.js";
 import { forceUploadFile } from "./s3.js";
 
 const { LRUCache } = mnemonist;
@@ -247,12 +248,19 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 temperature: options.temperature,
                 maxTokens: options.max_tokens,
             } as AI21RequestPayload;
-        } else if (contains(options.model, "cohere")) {
+        } else if (contains(options.model, "command-r-plus")) {
+            return {
+                message: prompt as string,
+                max_tokens: options.max_tokens,
+                temperature: options.temperature,
+            } as CohereCommandRPayload;
+
+        }
+        else if (contains(options.model, "cohere")) {
             return {
                 prompt: prompt,
                 temperature: options.temperature,
                 max_tokens: options.max_tokens,
-                p: 0.9,
             } as CohereRequestPayload;
         } else if (contains(options.model, "amazon")) {
             return {
@@ -457,55 +465,6 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
 }
 
-
-
-interface LLama2RequestPayload {
-    prompt: string;
-    temperature: number;
-    top_p?: number;
-    max_gen_len: number;
-}
-
-interface ClaudeRequestPayload extends ClaudeMessagesPrompt {
-    anthropic_version: "bedrock-2023-05-31",
-    max_tokens: number,
-    prompt: string;
-    temperature?: number;
-    top_p?: number,
-    top_k?: number,
-    stop_sequences?: [string];
-}
-
-interface AI21RequestPayload {
-    prompt: string;
-    temperature: number;
-    maxTokens: number;
-}
-
-interface CohereRequestPayload {
-    prompt: string;
-    temperature: number;
-    max_tokens?: number;
-    p?: number;
-}
-
-interface AmazonRequestPayload {
-    inputText: string,
-    textGenerationConfig: {
-        temperature: number,
-        topP: number,
-        maxTokenCount: number,
-        stopSequences: [string];
-    };
-}
-
-interface MistralPayload {
-    prompt: string,
-    temperature: number,
-    max_tokens: number,
-    top_p?: number,
-    top_k?: number,
-}
 
 
 function jobInfo(job: GetModelCustomizationJobCommandOutput, jobId: string): TrainingJob {
