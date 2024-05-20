@@ -42,6 +42,8 @@ export const BuiltinModels: AIModel<string>[] = [
         provider: "vertexai",
         owner: "google",
         type: ModelType.MultiModal,
+        canStream: true,
+
     },
     {
         id: "gemini-1.5-pro-preview-0514",
@@ -49,6 +51,8 @@ export const BuiltinModels: AIModel<string>[] = [
         provider: "vertexai",
         owner: "google",
         type: ModelType.MultiModal,
+        canStream: true,
+
     },
     {
         id: "gemini-1.0-pro",
@@ -56,6 +60,7 @@ export const BuiltinModels: AIModel<string>[] = [
         provider: "vertexai",
         owner: "google",
         type: ModelType.Text,
+        canStream: true,
     },
     { // ChatModel.from_pretrained("chat-bison@002")
         id: "chat-bison",
