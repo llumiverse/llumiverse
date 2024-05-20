@@ -2,7 +2,7 @@ import { Content, FinishReason, GenerateContentRequest, HarmBlockThreshold, Harm
 import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
-import { ModelDefinition } from "../models.js";
+import { BuiltinModels, ModelDefinition } from "../models.js";
 
 function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
     return driver.vertexai.preview.getGenerativeModel({
@@ -39,15 +39,14 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
     model: AIModel
 
     constructor(modelId: string = "gemini-1.0-pro") {
-       this.model = {
-            id: modelId,
-            name: modelId,
-            provider: "vertexai",
-            owner: "google"
-        };
 
-        console.log("Initialized GeminiModelDefinition", this.model)
-       } 
+        const model = BuiltinModels.find(m => m.id === modelId);
+        if (!model) {
+            throw new Error(`Unknown model ${modelId}`);
+        }
+        this.model = model;
+
+    }
 
 
     createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions): GenerateContentRequest {

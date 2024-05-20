@@ -7,15 +7,6 @@ import { Palm2ChatDefinition } from "./models/palm2-chat.js";
 import { Palm2TextDefinition } from "./models/palm2-text.js";
 
 
-const Models: Record<string, ModelDefinition> = {
-    "gemini-1.5-flash-preview-0514": new GeminiModelDefinition("gemini-1.5-flash-preview-0514"),
-    "gemini-1.5-pro-preview-0514": new GeminiModelDefinition("gemini-1.5-pro-preview-0514"),
-    "gemini-1.0-pro": new GeminiModelDefinition(),
-    "text-bison": new Palm2TextDefinition(),
-    "chat-bison": new Palm2ChatDefinition(),
-    "code-bison": new CodeyTextDefinition(),
-    "codechat-bison": new CodeyChatDefinition(),
-}
 
 export interface ModelDefinition<PromptT = any> {
     model: AIModel;
@@ -119,3 +110,15 @@ export const BuiltinModels: AIModel<string>[] = [
 
 
 ]
+
+
+
+const Models: Record<string, ModelDefinition> = {
+    "gemini-1.5-flash-preview-0514": new GeminiModelDefinition("gemini-1.5-flash-preview-0514"),
+    "gemini-1.5-pro-preview-0514": new GeminiModelDefinition("gemini-1.5-pro-preview-0514"),
+    "gemini-1.0-pro": new GeminiModelDefinition(),
+    "text-bison": new Palm2TextDefinition(),
+    "chat-bison": new Palm2ChatDefinition(),
+    "code-bison": new CodeyTextDefinition(),
+    "codechat-bison": new CodeyChatDefinition(),
+}
