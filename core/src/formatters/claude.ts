@@ -74,7 +74,6 @@ export function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchem
                 text: "{"
         }]});
     }
-
     // put system mesages first and safety last
     return {
         system: systemMessage,
