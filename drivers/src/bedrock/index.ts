@@ -6,6 +6,7 @@ import { transformAsyncIterator } from "@llumiverse/core/async";
 import { ClaudeMessagesPrompt, formatClaudePrompt } from "@llumiverse/core/formatters";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import mnemonist from "mnemonist";
+import { AI21RequestPayload, AmazonRequestPayload, ClaudeRequestPayload, CohereCommandRPayload, CohereRequestPayload, LLama2RequestPayload, MistralPayload } from "./payloads.js";
 import { forceUploadFile } from "./s3.js";
 
 const { LRUCache } = mnemonist;
@@ -100,13 +101,16 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 // LLAMA2
                 return [result.generation, result.stop_reason]; // comes in coirrect format (stop, length)
             } else if (result.generations) {
-                // COHERE                
+                // Cohere                
                 return [result.generations[0].text, cohereFinishReason(result.generations[0].finish_reason)];
+            } else if (result.chat_history) {
+                //Cohere Command R
+                return [result.text, cohereFinishReason(result.finish_reason)];
             } else if (result.completions) {
                 //A21
                 return [result.completions[0].data?.text, a21FinishReason(result.completions[0].finishReason?.reason)];
             } else if (result.content) {
-                // anthropic claude 
+                // Claude 
                 //if last prompt.messages is {, add { to the response
                 const p =  prompt as ClaudeMessagesPrompt;
                 const lastMessage = (p as ClaudeMessagesPrompt).messages[p.messages.length - 1];
@@ -174,7 +178,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<string>> {
         const payload = this.preparePayload(prompt, options);
         const executor = this.getExecutor();
-        console.log("Requesting completion stream", JSON.stringify(payload));
+        console.log("Requesting completion with Streaming for model " + options.model, JSON.stringify(payload));
         return executor.invokeModelWithResponseStream({
             modelId: options.model,
             contentType: "application/json",
@@ -188,10 +192,13 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
             return transformAsyncIterator(res.body, (stream: ResponseStream) => {
                 const segment = JSON.parse(decoder.decode(stream.chunk?.bytes));
+                //console.log("Debug Segment for model " + options.model, JSON.stringify(segment));
                 if (segment.delta) { // who is this?
                     return segment.delta.text || '';
                 } else if (segment.completion) { // who is this?
                     return segment.completion;
+                } else if (segment.text) { //cohere
+                    return segment.text;
                 } else if (segment.completions) {
                     return segment.completions[0].data?.text;
                 } else if (segment.generation) {
@@ -247,12 +254,19 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 temperature: options.temperature,
                 maxTokens: options.max_tokens,
             } as AI21RequestPayload;
-        } else if (contains(options.model, "cohere")) {
+        } else if (contains(options.model, "command-r-plus")) {
+            return {
+                message: prompt as string,
+                max_tokens: options.max_tokens,
+                temperature: options.temperature,
+            } as CohereCommandRPayload;
+
+        }
+        else if (contains(options.model, "cohere")) {
             return {
                 prompt: prompt,
                 temperature: options.temperature,
                 max_tokens: options.max_tokens,
-                p: 0.9,
             } as CohereRequestPayload;
         } else if (contains(options.model, "amazon")) {
             return {
@@ -457,55 +471,6 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
 }
 
-
-
-interface LLama2RequestPayload {
-    prompt: string;
-    temperature: number;
-    top_p?: number;
-    max_gen_len: number;
-}
-
-interface ClaudeRequestPayload extends ClaudeMessagesPrompt {
-    anthropic_version: "bedrock-2023-05-31",
-    max_tokens: number,
-    prompt: string;
-    temperature?: number;
-    top_p?: number,
-    top_k?: number,
-    stop_sequences?: [string];
-}
-
-interface AI21RequestPayload {
-    prompt: string;
-    temperature: number;
-    maxTokens: number;
-}
-
-interface CohereRequestPayload {
-    prompt: string;
-    temperature: number;
-    max_tokens?: number;
-    p?: number;
-}
-
-interface AmazonRequestPayload {
-    inputText: string,
-    textGenerationConfig: {
-        temperature: number,
-        topP: number,
-        maxTokenCount: number,
-        stopSequences: [string];
-    };
-}
-
-interface MistralPayload {
-    prompt: string,
-    temperature: number,
-    max_tokens: number,
-    top_p?: number,
-    top_k?: number,
-}
 
 
 function jobInfo(job: GetModelCustomizationJobCommandOutput, jobId: string): TrainingJob {
