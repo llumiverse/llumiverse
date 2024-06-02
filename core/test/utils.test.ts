@@ -1,7 +1,8 @@
+import Ajv from 'ajv';
 import { readFileSync } from 'fs';
-import { JSONSchema4, validate } from 'json-schema';
 import { describe, expect, test } from "vitest";
 import { JSONArray, JSONObject, extractAndParseJSON, parseJSON } from "../src/json";
+import { validateResult } from '../src/validation';
 import { readDataFile } from './utils';
 
 describe('Core Utilities', () => {
@@ -28,18 +29,25 @@ describe('Core Utilities', () => {
     });
 
     test('Validate JSON against schema', () => {
-        const schema = parseJSON(readDataFile('ciia-schema.json')) as JSONSchema4;
+        const ajv = new Ajv();
+        const schema = parseJSON(readDataFile('ciia-schema.json')) as any;
         const content = parseJSON(readDataFile('ciia-data.json')) as any;
-        const res = validate(content, schema);
+        const res = validateResult(content, schema);
         console.log(res);
     });
 
     test('Fail at validating JSON against schema', () => {
-        const schema = parseJSON(readDataFile('ciia-schema.json')) as JSONSchema4;
-        const content = parseJSON(readDataFile('ciia-data-wrong.json')) as any;
-        const res = validate(content, schema);
-        console.log(res);
+        const schema = parseJSON(readDataFile('ciia-schema.json')) as any;
+        const content = parseJSON(readDataFile('ciia-data-wrong.json')) as any;   
+        expect((content, schema) => validateResult(content, schema).toThrowError('validation_error')); 
+     
+    });
 
+    test('JSON parser should coerce types', () => {
+        const schema = parseJSON(readDataFile('ciia-schema.json')) as any;
+        const content = parseJSON(readDataFile('ciia-data-wrong-types.json')) as any;   
+        const res = validateResult(content, schema);
+        console.log(res);
     });
 
 })

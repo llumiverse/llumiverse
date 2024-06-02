@@ -1,6 +1,11 @@
-import { JSONSchema4, validate } from "json-schema";
+import Ajv from "ajv";
+import addFormats from "ajv-formats";
 import { extractAndParseJSON } from "./json.js";
 import { ResultValidationError } from "./types.js";
+
+
+const ajv = new Ajv({coerceTypes: true});
+addFormats(ajv)
 
 export class ValidationError extends Error implements ResultValidationError {
     constructor(
@@ -12,8 +17,9 @@ export class ValidationError extends Error implements ResultValidationError {
     }
 }
 
-export function validateResult(data: any, schema: JSONSchema4) {
+export function validateResult(data: any, schema: Object) {
     let json;
+
     if (typeof data === "string") {
         try {
             json = extractAndParseJSON(data);
@@ -23,11 +29,17 @@ export function validateResult(data: any, schema: JSONSchema4) {
     } else {
         json = data;
     }
-    const validation = validate(json, schema);
-    if (!validation.valid) {
-        throw new ValidationError(
-            "validation_error",
-            validation.errors.map(e => e.message).join(",\n"))
+
+    const validate = ajv.compile(schema);
+    const valid = validate(json);
+
+    if (!valid) {
+        const errors = validate.errors?.map(e => `${e.instancePath}: ${e.message}\n${JSON.stringify(e.params)}`).join(",\n\n");
+        if (errors) {
+            throw new ValidationError("validation_error", errors)
+        } else {
+            throw new ValidationError("validation_error", "Unknown validation error")
+        }
     }
 
     return json;
