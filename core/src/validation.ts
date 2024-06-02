@@ -1,10 +1,10 @@
-import Ajv from "ajv";
-import addFormats from "ajv-formats";
+import { Ajv } from 'ajv';
 import { extractAndParseJSON } from "./json.js";
 import { ResultValidationError } from "./types.js";
 
 
 const ajv = new Ajv({coerceTypes: true});
+const addFormats = require("ajv-formats"); //doesn't work well with imports
 addFormats(ajv)
 
 export class ValidationError extends Error implements ResultValidationError {
