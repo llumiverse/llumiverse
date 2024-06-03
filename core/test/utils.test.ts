@@ -29,7 +29,7 @@ describe('Core Utilities', () => {
     });
 
     test('Validate JSON against schema', () => {
-        const ajv = new Ajv();
+        const ajv = new Ajv({ coerceTypes: true, allowDate: true, strict: false});
         const schema = parseJSON(readDataFile('ciia-schema.json')) as any;
         const content = parseJSON(readDataFile('ciia-data.json')) as any;
         const res = validateResult(content, schema);

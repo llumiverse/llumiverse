@@ -4,7 +4,7 @@ import { extractAndParseJSON } from "./json.js";
 import { ResultValidationError } from "./types.js";
 
 
-const ajv = new Ajv({coerceTypes: true, strict: false});
+const ajv = new Ajv({ coerceTypes: true, allowDate: true, strict: false});
 
 //use ts ignore to avoid error with ESM and ajv-formats
 // @ts-ignore This expression is not callable
