@@ -77,8 +77,8 @@
         "vitest": "^1.4.0"
     },
     "dependencies": {
-        "ajv-formats": "^3.0.1",
-        "json-schema": "^0.4.0"
+        "ajv": "^8.14.0",
+        "ajv-formats": "^3.0.1"
     },
     "ts_dual_module": {
         "outDir": "lib",

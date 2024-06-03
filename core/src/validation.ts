@@ -1,10 +1,13 @@
 import { Ajv } from 'ajv';
+import addFormats from 'ajv-formats';
 import { extractAndParseJSON } from "./json.js";
 import { ResultValidationError } from "./types.js";
 
 
-const ajv = new Ajv({coerceTypes: true});
-const addFormats = require("ajv-formats"); //doesn't work well with imports
+const ajv = new Ajv({coerceTypes: true, strict: false});
+
+//use ts ignore to avoid error with ESM and ajv-formats
+// @ts-ignore This expression is not callable
 addFormats(ajv)
 
 export class ValidationError extends Error implements ResultValidationError {
