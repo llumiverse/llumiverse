@@ -70,7 +70,7 @@
     "devDependencies": {
         "@types/eventsource": "^1.1.15",
         "@types/json-schema": "^7.0.15",
-        "api-fetch-client": "^0.8.6",
+        "api-fetch-client": "^0.10.1",
         "rimraf": "^5.0.5",
         "ts-dual-module": "^0.6.3",
         "typescript": "^5.4.2",
