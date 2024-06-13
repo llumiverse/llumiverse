@@ -61,7 +61,7 @@
     "@aws-sdk/credential-providers": "^3.535.0",
     "@aws-sdk/lib-storage": "^3.535.0",
     "@google-cloud/vertexai": "^1.1.0",
-    "@huggingface/inference": "^2.6.6",
+    "@huggingface/inference": "2.6.7",
     "@llumiverse/core": "^0.13.0",
     "api-fetch-client": "^0.10.1",
     "eventsource": "^2.0.2",
