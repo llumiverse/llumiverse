@@ -1,5 +1,5 @@
 import { AbstractDriver } from "./Driver.js";
-import { ExecutionResponse, CompletionStream, DriverOptions, ExecutionOptions, PromptSegment } from "./types.js";
+import { CompletionStream, DriverOptions, ExecutionOptions, ExecutionResponse, PromptSegment } from "./types.js";
 
 export class DefaultCompletionStream<PromptT = any> implements CompletionStream<PromptT> {
 
@@ -38,8 +38,9 @@ export class DefaultCompletionStream<PromptT = any> implements CompletionStream<
         }
 
         const content = chunks.join('');
+
         const promptTokens = typeof this.prompt === 'string' ? this.prompt.length : JSON.stringify(this.prompt).length;
-        const resultTokens = content.length; //TODO use chunks.length ?
+        const resultTokens = content.length; //TODO use chunks.length ? 
 
         this.completion = {
             result: content,

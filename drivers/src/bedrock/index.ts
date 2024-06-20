@@ -175,7 +175,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         return canStream;
     }
 
-    async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<string>> {
+    async requestCompletionStream(prompt: BedrockPrompt, options: ExecutionOptions): Promise<AsyncIterable<string>> {
         const payload = this.preparePayload(prompt, options);
         const executor = this.getExecutor();
         console.log("Requesting completion with Streaming for model " + options.model, JSON.stringify(payload));
@@ -189,6 +189,9 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 throw new Error("Body not found");
             }
             const decoder = new TextDecoder();
+            const p =  prompt as ClaudeMessagesPrompt;
+            const lastMessage = (p as ClaudeMessagesPrompt).messages[p.messages.length - 1];
+            const addBracket = lastMessage.content[0].text === '{'
 
             return transformAsyncIterator(res.body, (stream: ResponseStream) => {
                 const segment = JSON.parse(decoder.decode(stream.chunk?.bytes));
@@ -218,7 +221,9 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                     segment.toString();
                 }
 
-            });
+            },
+                () => addBracket ? '{' : ''
+            );
 
         }).catch((err) => {
             this.logger.error("[Bedrock] Failed to stream", err);

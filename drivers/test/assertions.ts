@@ -1,5 +1,5 @@
 
-import { CompletionStream, ExecutionResponse } from '@llumiverse/core';
+import { CompletionStream, ExecutionResponse, extractAndParseJSON } from '@llumiverse/core';
 import { expect } from "vitest";
 
 export function assertCompletionOk(r: ExecutionResponse) {
@@ -23,11 +23,13 @@ export async function assertStreamingCompletionOk(stream: CompletionStream) {
         out.push(chunk)
     }
     const r = stream.completion as ExecutionResponse;
-    //console.log('###stream', r.result, out);
 
-    expect(r.result).toBe(out.join(''));
+    const jsonObject = extractAndParseJSON(out.join(''));
+    console.log("Result:", r.result, jsonObject);
+
+    expect(r.result).toStrictEqual(jsonObject);
     expect(r.error).toBeFalsy();
     expect(r.prompt).toBeTruthy();
     expect(r.token_usage).toBeTruthy();
-    expect(r.result?.length).toBeGreaterThan(2);
+    if (typeof r.result === "string")  expect(r.result?.length).toBeGreaterThan(2);
 }

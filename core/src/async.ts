@@ -104,8 +104,12 @@ export class EventStream<T, ReturnT = any> implements AsyncIterable<T>{
  **/
 export async function* transformAsyncIterator<T, V>(
     originalGenerator: AsyncIterable<T>,
-    transform: (value: T) => V | Promise<V>
+    transform: (value: T) => V | Promise<V>,
+    initCallback?: () => V | Promise<V>
 ): AsyncIterable<V> {
+    if (initCallback) {
+        yield initCallback();
+    }
     for await (const value of originalGenerator) {
         yield transform(value);
     }
