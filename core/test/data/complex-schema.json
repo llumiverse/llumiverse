@@ -1,0 +1,131 @@
+{
+    "type": "object",
+    "properties": {
+      "company": {
+        "type": "string"
+      },
+      "previous_fiscal_year": {
+        "type": "number"
+      },
+      "next_fiscal_year": {
+        "type": "number"
+      },
+      "change_in_sentiment": {
+        "type": "string"
+      },
+      "change_in_ key_trends": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "description": {
+              "type": "string",
+              "editor": "textarea"
+            }
+          },
+          "required": [
+            "name",
+            "description"
+          ]
+        }
+      },
+      "change_in_main_topics": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "detailed_summary": {
+              "type": "string",
+              "editor": "textarea"
+            }
+          },
+          "required": [
+            "type",
+            "detailed_summary"
+          ]
+        }
+      },
+      "change_in_risks": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "detailed_summary": {
+              "type": "string",
+              "editor": "textarea"
+            },
+            "level": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "type",
+            "detailed_summary",
+            "level"
+          ]
+        }
+      },
+      "change_in_growth_opportunities": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string"
+            },
+            "detailed_summary": {
+              "type": "string",
+              "editor": "textarea"
+            }
+          },
+          "required": [
+            "type",
+            "detailed_summary"
+          ]
+        }
+      },
+      "change_in_financial_metrics": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "metric_name": {
+              "type": "string"
+            },
+            "metric_value": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "metric_name",
+            "metric_value"
+          ]
+        }
+      },
+      "overall_assessment_of_change": {
+        "type": "string",
+        "editor": "textarea"
+      }
+    },
+    "required": [
+      "company",
+      "previous_fiscal_year",
+      "next_fiscal_year",
+      "change_in_sentiment",
+      "change_in_ key_trends",
+      "change_in_main_topics",
+      "change_in_risks",
+      "change_in_growth_opportunities",
+      "change_in_financial_metrics",
+      "overall_assessment_of_change"
+    ]
+  }

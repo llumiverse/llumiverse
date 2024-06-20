@@ -36,6 +36,14 @@ describe('Core Utilities', () => {
         console.log(res);
     });
 
+    test('Validate JSON against complex schema', () => {
+        const ajv = new Ajv({ coerceTypes: true, allowDate: true, strict: false});
+        const schema = parseJSON(readDataFile('complex-schema.json')) as any;
+        const content = parseJSON(readDataFile('complex-document.json')) as any;
+        const res = validateResult(content, schema);
+        console.log(res);
+    });
+
     test('Fail at validating JSON against schema', () => {
         const schema = parseJSON(readDataFile('ciia-schema.json')) as any;
         const content = parseJSON(readDataFile('ciia-data-wrong.json')) as any;   

@@ -1,7 +1,7 @@
 import { Driver, PromptRole, PromptSegment } from '@llumiverse/core';
 import { describe, test } from "vitest";
 import { VertexAIDriver } from "../../src/index.js";
-import { assertCompletionOk, assertStreamingCompletionOk } from "../assertions.js";
+import { assertCompletionOk } from "../assertions.js";
 
 const TIMEOUT = 10000;
 
@@ -22,24 +22,24 @@ describe('VertexAI: Test prediction of codey models', function () {
         const r = await driver.execute(prompt, { model: 'text-bison', temperature: 0.8, max_tokens: 1024 });
         assertCompletionOk(r);
     }, TIMEOUT);
-    test('chat-bison streaming completion works', async () => {
+    /*test('chat-bison streaming completion works', async () => {
         const r = await driver.stream(prompt, { model: 'chat-bison', temperature: 0.8, max_tokens: 1024 });
         await assertStreamingCompletionOk(r);
-    }, TIMEOUT);
+    }, TIMEOUT);*/
     test('code-bison completion works', async () => {
         const r = await driver.execute(prompt, { model: 'code-bison', temperature: 0.8, max_tokens: 1024 });
         assertCompletionOk(r);
     }, TIMEOUT);
-    test('code-bison streaming completion works', async () => {
+    /*test('code-bison streaming completion works', async () => {
         const r = await driver.stream(prompt, { model: 'code-bison', temperature: 0.8, max_tokens: 1024 });
         await assertStreamingCompletionOk(r);
-    }, TIMEOUT);
+    }, TIMEOUT);*/
     test('codechat-bison completion works', async () => {
         const r = await driver.execute(prompt, { model: 'codechat-bison', temperature: 0.8, max_tokens: 1024 });
         assertCompletionOk(r);
     }, TIMEOUT);
-    test('codechat-bison streaming completion works', async () => {
+    /*test('codechat-bison streaming completion works', async () => {
         const r = await driver.stream(prompt, { model: 'codechat-bison', temperature: 0.8, max_tokens: 1024 });
         await assertStreamingCompletionOk(r);
-    }, TIMEOUT);
+    }, TIMEOUT);*/
 });

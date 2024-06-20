@@ -1,0 +1,84 @@
+{
+"company": "VF Corp.",
+"previous_fiscal_year": 2023,
+"next_fiscal_year": 2024,
+"change_in_sentiment": "Sentiment remained mixed in both years",
+"change_in_ key_trends": [
+  {
+    "name": "Vans challenges",
+    "description": "Vans brand challenges worsened from 2023 to 2024. In 2023, Vans sales declined especially in the Americas due to executional issues. In 2024, the Vans turnaround took longer than expected with revenue down 22-29% in recent quarters."
+  },
+  {
+    "name": "Wholesale pressures",
+    "description": "VF Corp faced new significant pressures in its wholesale channel in 2024, especially in the Americas, as retailers took a cautious approach to inventory and orders. This was not called out as a key trend in 2023."
+  },
+  {
+    "name": "Cost reduction focus",
+    "description": "In 2024, VF implemented a new $300M cost reduction program and conducted a strategic portfolio review to improve efficiency. Cost reduction efforts were not highlighted in 2023."
+  },
+  {
+    "name": "Supply chain disruption",
+    "description": "Supply chain challenges including longer lead times, delayed deliveries and higher costs were called out as a key headwind in 2023. This was not mentioned as a top trend in 2024, suggesting some easing of supply chain pressures."
+  }
+],
+"change_in_main_topics": [
+  {
+    "type": "Financial performance",
+    "detailed_summary": "VF's financial performance deteriorated in 2024, with revenue down 4-17% in recent quarters vs. 3% growth in 2023. Gross margin was pressured by higher promotions and costs, and operating margin declined on deleverage, leading to a meaningful drop in EPS. Inventory and cash flow also became a bigger focus in 2024."
+  },
+  {
+    "type": "Americas performance",
+    "detailed_summary": "Underperformance in the Americas region, especially US wholesale, emerged as a major pain point in 2024 that weighed heavily on results. The Americas business was not singled out as a key topic in the 2023 summary, suggesting a worsening of trends."
+  },
+  {
+    "type": "Portfolio and organization",
+    "detailed_summary": "In 2024, VF conducted a strategic portfolio review, made leadership changes including a new CEO, and reorganized its commercial operations under a new Global Chief Commercial Officer. Portfolio management moves like exploring options for the non-core Packs business were mentioned in 2023 but not to the same extent."
+  }
+],
+"change_in_risks": [
+  {
+    "type": "Vans turnaround",
+    "detailed_summary": "Vans turnaround execution was flagged as a high risk in both 2023 and 2024. However, in 2024 there was increased uncertainty around how long it will take for Vans initiatives to gain traction given continued declines, suggesting the turnaround is even more protracted than anticipated in 2023.",
+    "level": "high"
+  },
+  {
+    "type": "US wholesale",
+    "detailed_summary": "Prolonged weakness in the US wholesale channel emerged as a new high risk in 2024, reflecting retailer caution and slow sell-through impacting orders and shipments across brands. US wholesale was not mentioned as a key risk in the 2023 summary.",
+    "level": "high"
+  },
+  {
+    "type": "Macroeconomic factors",
+    "detailed_summary": "Macroeconomic uncertainty including inflation, geopolitical tensions, COVID impacts and potential recession were cited as medium risks in both 2023 and 2024. However, the 2024 summary specifically called out the risk of a deterioration in consumer spending, especially in the US and Europe.",
+    "level": "medium"
+  }
+],
+"change_in_growth_opportunities": [
+  {
+    "type": "The North Face strength",
+    "detailed_summary": "The North Face was called out as a growth bright spot in both 2023 and 2024. In 2023, TNF delivered broad-based growth across regions, channels and product categories. This momentum continued in 2024 with TNF achieving strong growth even in a warm winter."
+  },
+  {
+    "type": "International markets",
+    "detailed_summary": "International markets were cited as a growth opportunity in both years. However, in 2024 it was noted that the international business, especially APAC and EMEA, significantly outperformed the US which was a change from 2023 when China was still recovering."
+  },
+  {
+    "type": "Direct-to-consumer",
+    "detailed_summary": "The direct-to-consumer business was consistently mentioned as a long-term growth and margin driver in both 2023 and 2024. However, in 2024 it was noted that DTC has been relatively more resilient than wholesale, despite continued Vans pressures."
+  }
+],
+"change_in_financial_metrics": [
+  {
+    "metric_name": "Revenue growth",
+    "metric_value": "Worsened from 3% growth in 2023 to -11% decline in 2024"
+  },
+  {
+    "metric_name": "Adjusted EPS",
+    "metric_value": "Decreased from $2.10 in 2023 to $0.74 in 2024"
+  },
+  {
+    "metric_name": "Free cash flow",
+    "metric_value": "Declined from $900M in 2023 to $800M+ in 2024"
+  }
+],
+"overall_assessment_of_change": "VF Corp faced increasing challenges in fiscal 2024 compared to 2023. The Vans turnaround stalled, wholesale channel pressures intensified especially in the Americas, and overall financial results deteriorated with revenue declines and margin pressure. New leadership is acting with urgency to transform the business through cost reductions, portfolio changes and operational initiatives, but this will take time. Relative bright spots of international growth, The North Face brand strength and DTC resilience continued from 2023. However, the overall tone shifted from stabilizing performance in a transitional 2023 to more aggressive turnaround actions to improve a worsening 2024 trajectory. Risks elevated particularly around Vans, US wholesale and the macro environment. While long-term growth opportunities remain, the path is more uncertain and dependent on strategic execution."
+}
