@@ -113,7 +113,6 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
                 this.logger.debug("Token expired, refetching", this.authToken, now)
             }
         }
-        console.log("Fetching new token")
         const authToken = await fetch('https://iam.cloud.ibm.com/identity/token', {
             method: 'POST',
             headers: {
