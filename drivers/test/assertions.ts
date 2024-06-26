@@ -32,4 +32,6 @@ export async function assertStreamingCompletionOk(stream: CompletionStream, json
     expect(r.prompt).toBeTruthy();
     expect(r.token_usage).toBeTruthy();
     if (typeof r.result === "string")  expect(r.result?.length).toBeGreaterThan(2);
+
+    return out;
 }

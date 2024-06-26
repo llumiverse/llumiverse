@@ -95,8 +95,7 @@ if (process.env.GROQ_API_KEY) {
         }),
         models: [
             "llama3-70b-8192",
-            "mixtral-8x7b-32768",
-            //"gemma-7b-it"
+            "mixtral-8x7b-32768"
         ]
     })
 } else {
@@ -115,7 +114,9 @@ if (process.env.WATSONX_API_KEY) {
         }),
         models: [
             "ibm/granite-8b-code-instruct",
-            //"meta-llama/llama-3-70b-instruct",
+            "ibm/granite-20b-multilingual",
+            "ibm/granite-34b-code-instruct",
+            "ibm/granite-20b-code-instruct",
             "mistralai/mixtral-8x7b-instruct-v01"
         ]
     })
@@ -150,27 +151,29 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
 
     test.each(models)(`${name}: execute prompt on %s`, async (model) => {
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 });
-        //console.log(r);
+        console.debug("Result for " + model, JSON.stringify(r));
         assertCompletionOk(r);
     }, { timeout: TIMEOUT, retry: 3 } );
 
     test.each(models)(`${name}: execute prompt with streaming on %s`, async (model) => {
         console.log("Executing with streaming", testPrompt_color)   
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 })
-        //console.log("Result for " + model, JSON.stringify(r));
-        await assertStreamingCompletionOk(r);
+        const out = await assertStreamingCompletionOk(r);
+        console.debug("Result for " + model, JSON.stringify(out));
     }, { timeout: TIMEOUT, retry: 3 } );
 
     test.each(models)(`${name}: execute prompt with schema on %s`, async (model) => {
         console.log("Executing with schema", testPrompt_color)
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, resultSchema: testSchema_color });
+        console.debug("Result for " + model, JSON.stringify(r.result));
         assertCompletionOk(r);
     }, { timeout: TIMEOUT, retry: 3 } );
 
     test.each(models)(`${name}: execute prompt with streaming and schema on %s`, async (model) => {
         console.log("Executing with streaming and schema", testPrompt_color, testSchema_color)
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, resultSchema: testSchema_color})
-        await assertStreamingCompletionOk(r, true);
+        const out = await assertStreamingCompletionOk(r, true);
+        console.debug("Result for " + model, JSON.stringify(out));
     }, { timeout: TIMEOUT, retry: 3 } );
 
 });

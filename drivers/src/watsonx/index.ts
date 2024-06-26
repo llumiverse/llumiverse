@@ -32,7 +32,7 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
     async requestCompletion(prompt: string, options: ExecutionOptions): Promise<Completion<any>> {
         const payload: WatsonxTextGenerationPayload = {
             model_id: options.model,
-            input: prompt,
+            input: prompt + "\n",
             parameters: {
                 max_new_tokens: options.max_tokens,
                 //time_limit: options.time_limit,
@@ -60,7 +60,7 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
 
         const payload: WatsonxTextGenerationPayload = {
             model_id: options.model,
-            input: prompt,
+            input: prompt + "\n",
             parameters: {
                 max_new_tokens: options.max_tokens,
                 //time_limit: options.time_limit,
