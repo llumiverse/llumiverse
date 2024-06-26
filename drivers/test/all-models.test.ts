@@ -145,33 +145,33 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
         const r = await driver.listModels();
         //console.log(r)
         expect(r.length).toBeGreaterThan(0);
-    }, TIMEOUT);
+    }, { timeout: TIMEOUT, retry: 1 } );
 
 
     test.each(models)(`${name}: execute prompt on %s`, async (model) => {
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 });
         //console.log(r);
         assertCompletionOk(r);
-    }, TIMEOUT);
+    }, { timeout: TIMEOUT, retry: 3 } );
 
     test.each(models)(`${name}: execute prompt with streaming on %s`, async (model) => {
         console.log("Executing with streaming", testPrompt_color)   
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 })
         //console.log("Result for " + model, JSON.stringify(r));
         await assertStreamingCompletionOk(r);
-    }, TIMEOUT);
+    }, { timeout: TIMEOUT, retry: 3 } );
 
     test.each(models)(`${name}: execute prompt with schema on %s`, async (model) => {
         console.log("Executing with schema", testPrompt_color)
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, resultSchema: testSchema_color });
         assertCompletionOk(r);
-    }, TIMEOUT);
+    }, { timeout: TIMEOUT, retry: 3 } );
 
     test.each(models)(`${name}: execute prompt with streaming and schema on %s`, async (model) => {
         console.log("Executing with streaming and schema", testPrompt_color, testSchema_color)
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, resultSchema: testSchema_color})
         await assertStreamingCompletionOk(r, true);
-    }, TIMEOUT);
+    }, { timeout: TIMEOUT, retry: 3 } );
 
 });
 
