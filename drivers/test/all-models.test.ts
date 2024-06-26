@@ -170,7 +170,7 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
     test.each(models)(`${name}: execute prompt with streaming and schema on %s`, async (model) => {
         console.log("Executing with streaming and schema", testPrompt_color, testSchema_color)
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, resultSchema: testSchema_color})
-        await assertStreamingCompletionOk(r);
+        await assertStreamingCompletionOk(r, true);
     }, TIMEOUT);
 
 });

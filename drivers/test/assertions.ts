@@ -16,18 +16,18 @@ export function assertCompletionOk(r: ExecutionResponse) {
 
 }
 
-export async function assertStreamingCompletionOk(stream: CompletionStream) {
+export async function assertStreamingCompletionOk(stream: CompletionStream, jsonMode: boolean=false) {
 
     const out: string[] = []
     for await (const chunk of stream) {
         out.push(chunk)
     }
+
     const r = stream.completion as ExecutionResponse;
+    const jsonObject = jsonMode ? extractAndParseJSON(out.join('')) : undefined;
 
-    const jsonObject = extractAndParseJSON(out.join(''));
-    console.log("Result:", r.result, jsonObject);
-
-    expect(r.result).toStrictEqual(jsonObject);
+    if (jsonMode) expect(r.result).toStrictEqual(jsonObject);
+    
     expect(r.error).toBeFalsy();
     expect(r.prompt).toBeTruthy();
     expect(r.token_usage).toBeTruthy();

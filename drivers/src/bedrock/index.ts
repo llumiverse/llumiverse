@@ -189,9 +189,15 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 throw new Error("Body not found");
             }
             const decoder = new TextDecoder();
-            const p =  prompt as ClaudeMessagesPrompt;
-            const lastMessage = (p as ClaudeMessagesPrompt).messages[p.messages.length - 1];
-            const addBracket = lastMessage.content[0].text === '{'
+
+            const addBracket = () => {
+                if (typeof prompt === 'object' && (prompt as ClaudeMessagesPrompt).messages) {
+                    const p = prompt as ClaudeMessagesPrompt;
+                    const lastMessage = p.messages[p.messages.length - 1];
+                    return lastMessage.content[0].text === '{';
+                }
+                return false;                
+            };
 
             return transformAsyncIterator(res.body, (stream: ResponseStream) => {
                 const segment = JSON.parse(decoder.decode(stream.chunk?.bytes));
@@ -222,7 +228,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 }
 
             },
-                () => addBracket ? '{' : ''
+                () => addBracket() ? '{' : ''
             );
 
         }).catch((err) => {
