@@ -16,7 +16,7 @@
     },
     "packageManager": "^npm@10.4.0",
     "devDependencies": {
-        "npm-ws-tools": "^0.1.2",
+        "npm-ws-tools": "^0.2.0",
         "typescript": "^5.3.3"
     }
 }
