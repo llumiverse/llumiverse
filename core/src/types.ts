@@ -98,6 +98,11 @@ export interface PromptOptions {
      */
     format?: PromptFormatter;
     resultSchema?: JSONSchema4;
+
+    /**
+     * If set to true the result will be validated against the resultSchema. If the result is not valid the driver will throw an error
+     */
+    validate?: boolean;
 }
 export interface ExecutionOptions extends PromptOptions {
     temperature?: number;
