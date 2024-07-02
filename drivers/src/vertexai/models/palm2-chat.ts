@@ -62,7 +62,7 @@ export class Palm2ChatDefinition extends AbstractPalmModelDefinition<Palm2ChatPr
         provider: "vertexai",
         owner: "google",
         type: ModelType.Chat,
-        canStream: true,
+        can_stream: true,
     }
 
     createNonStreamingPrompt(_driver: VertexAIDriver, segments: PromptSegment[], opts: PromptOptions): Palm2ChatPrompt {

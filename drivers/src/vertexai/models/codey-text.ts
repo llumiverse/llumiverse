@@ -44,7 +44,7 @@ export class CodeyTextDefinition extends AbstractPalmModelDefinition<CodeyTextPr
         provider: "vertexai",
         owner: "google",
         type: ModelType.Text,
-        canStream: true,
+        can_stream: true,
     }
 
     createNonStreamingPrompt(_driver: VertexAIDriver, segments: PromptSegment[], opts: PromptOptions): CodeyTextPrompt {

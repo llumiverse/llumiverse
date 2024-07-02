@@ -42,7 +42,7 @@ export const BuiltinModels: AIModel<string>[] = [
         provider: "vertexai",
         owner: "google",
         type: ModelType.MultiModal,
-        canStream: true,
+        can_stream: true,
 
     },
     {
@@ -51,7 +51,7 @@ export const BuiltinModels: AIModel<string>[] = [
         provider: "vertexai",
         owner: "google",
         type: ModelType.MultiModal,
-        canStream: true,
+        can_stream: true,
 
     },
     {
@@ -60,7 +60,7 @@ export const BuiltinModels: AIModel<string>[] = [
         provider: "vertexai",
         owner: "google",
         type: ModelType.Text,
-        canStream: true,
+        can_stream: true,
     },
     { // ChatModel.from_pretrained("chat-bison@002")
         id: "chat-bison",

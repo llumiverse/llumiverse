@@ -44,7 +44,7 @@ export class Palm2TextDefinition extends AbstractPalmModelDefinition<Palm2TextPr
         provider: "vertexai",
         owner: "google",
         type: ModelType.Text,
-        canStream: true,
+        can_stream: true,
     }
 
     createNonStreamingPrompt(_driver: VertexAIDriver, segments: PromptSegment[], opts: PromptOptions): Palm2TextPrompt {

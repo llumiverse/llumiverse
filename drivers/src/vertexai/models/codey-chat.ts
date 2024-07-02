@@ -57,7 +57,7 @@ export class CodeyChatDefinition extends AbstractPalmModelDefinition<CodeyChatPr
         provider: "vertexai",
         owner: "google",
         type: ModelType.Chat,
-        canStream: true,
+        can_stream: true,
     }
 
     createNonStreamingPrompt(_driver: VertexAIDriver, segments: PromptSegment[], opts: PromptOptions): CodeyChatPrompt {

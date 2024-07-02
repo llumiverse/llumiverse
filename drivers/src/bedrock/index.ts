@@ -415,7 +415,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 provider: this.provider,
                 //description: ``,
                 owner: m.providerName,
-                canStream: m.responseStreamingSupported ?? false,
+                can_stream: m.responseStreamingSupported ?? false,
                 tags: m.outputModalities ?? [],
             };
 
@@ -435,7 +435,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                     name: m.modelName ?? m.modelArn,
                     provider: this.provider,
                     description: `Custom model from ${m.baseModelName}`,
-                    isCustom: true,
+                    is_custom: true,
                 };
 
                 aimodels.push(model);
