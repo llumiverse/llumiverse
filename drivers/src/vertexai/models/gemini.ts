@@ -1,4 +1,4 @@
-import { Content, FileDataPart, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, TextPart } from "@google-cloud/vertexai";
+import { Content, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, InlineDataPart, TextPart } from "@google-cloud/vertexai";
 import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
@@ -65,13 +65,13 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
             if (msg.role === PromptRole.safety) {
                 safety.push(msg.content);
             } else {
-                const fileParts: (TextPart|FileDataPart)[]|undefined = msg.files?.map( f => {
+                const fileParts: (TextPart|InlineDataPart)[]|undefined = msg.files?.map( f => {
                     return {
-                        fileData: {
-                            fileUri: f.url,
-                            mimeType: f.type
+                        inlineData: {
+                            data: f.url,
+                            mimeType: f.mime_type
                         }
-                    } as FileDataPart
+                    } as InlineDataPart
                 })
 
                 const role = msg.role === PromptRole.assistant ? "model" : "user";
