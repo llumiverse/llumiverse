@@ -55,7 +55,7 @@ export interface Completion<ResultT = any> {
 
     /**
      * Set only if a result validation error occured, otherwise if the result is valid the error field is undefined
-     * This can only be set if the resultSchema is set and the reuslt could not be parsed as a json or if the result does not match the schema
+     * This can only be set if the result_schema is set and the reuslt could not be parsed as a json or if the result does not match the schema
      */
     error?: ResultValidationError;
 
@@ -97,7 +97,7 @@ export interface PromptOptions {
      * If no one is specified the driver will choose a formatter compatible with the target model
      */
     format?: PromptFormatter;
-    resultSchema?: JSONSchema4;
+    result_schema?: JSONSchema4;
 }
 export interface ExecutionOptions extends PromptOptions {
     temperature?: number;

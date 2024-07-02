@@ -83,7 +83,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         //TODO move the anthropic test in abstract driver?
         if (opts.model.includes('anthropic')) {
             //TODO: need to type better the types aren't checked properly by TS
-            const prompt = formatClaudePrompt(segments, opts.resultSchema);
+            const prompt = formatClaudePrompt(segments, opts.result_schema);
             return prompt;
         } else {
             return super.formatPrompt(segments, opts) as string;

@@ -86,8 +86,8 @@ export class Palm2ChatDefinition extends AbstractPalmModelDefinition<Palm2ChatPr
             }
         }
 
-        if (opts.resultSchema) {
-            safety.push(getJSONSafetyNotice(opts.resultSchema));
+        if (opts.result_schema) {
+            safety.push(getJSONSafetyNotice(opts.result_schema));
         }
 
         const context = []

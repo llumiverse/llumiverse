@@ -81,8 +81,8 @@ export class CodeyChatDefinition extends AbstractPalmModelDefinition<CodeyChatPr
             }
         }
 
-        if (opts.resultSchema) {
-            safety.push(getJSONSafetyNotice(opts.resultSchema));
+        if (opts.result_schema) {
+            safety.push(getJSONSafetyNotice(opts.result_schema));
         }
 
         const context = []

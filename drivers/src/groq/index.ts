@@ -27,7 +27,7 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
     }
 
     // protected canStream(options: ExecutionOptions): Promise<boolean> {
-    //     if (options.resultSchema) {
+    //     if (options.result_schema) {
     //         // not yet streamign json responses
     //         return Promise.resolve(false);
     //     } else {
@@ -42,17 +42,17 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
         //     type: "json_object",
         // }
 
-        // return _options.resultSchema ? responseFormatJson : undefined;
+        // return _options.result_schema ? responseFormatJson : undefined;
         return undefined;
     }
 
     protected formatPrompt(segments: PromptSegment[], opts: ExecutionOptions): OpenAITextMessage[] {
         const messages = formatOpenAILikePrompt(segments);
         //Add JSON instruction is schema is provided
-        if (opts.resultSchema) {
+        if (opts.result_schema) {
             messages.push({
                 role: "user",
-                content: "IMPORTANT: " + getJSONSafetyNotice(opts.resultSchema)
+                content: "IMPORTANT: " + getJSONSafetyNotice(opts.result_schema)
             });
         }
         return messages;

@@ -50,7 +50,7 @@ export class Palm2TextDefinition extends AbstractPalmModelDefinition<Palm2TextPr
     createNonStreamingPrompt(_driver: VertexAIDriver, segments: PromptSegment[], opts: PromptOptions): Palm2TextPrompt {
         return {
             instances: [{
-                prompt: formatTextPrompt(segments, opts.resultSchema)
+                prompt: formatTextPrompt(segments, opts.result_schema)
             }],
             parameters: {
                 // put defauilts here

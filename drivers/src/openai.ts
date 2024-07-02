@@ -63,7 +63,7 @@ export class OpenAIDriver extends AbstractDriver<
         const finish_reason = choice.finish_reason;
 
         //if no schema, return content
-        if (!options.resultSchema) {
+        if (!options.result_schema) {
             return {
                 result: choice.message.content as string,
                 token_usage: tokenInfo,
@@ -86,7 +86,7 @@ export class OpenAIDriver extends AbstractDriver<
     }
 
     async requestCompletionStream(prompt: OpenAI.Chat.Completions.ChatCompletionMessageParam[], options: ExecutionOptions): Promise<any> {
-        const mapFn = options.resultSchema
+        const mapFn = options.result_schema
             ? (chunk: OpenAI.Chat.Completions.ChatCompletionChunk) => {
                 return (
                     chunk.choices[0]?.delta?.tool_calls?.[0].function?.arguments ?? ""
@@ -103,18 +103,18 @@ export class OpenAIDriver extends AbstractDriver<
             temperature: options.temperature,
             n: 1,
             max_tokens: options.max_tokens,
-            tools: options.resultSchema
+            tools: options.result_schema
                 ? [
                     {
                         function: {
                             name: "format_output",
-                            parameters: options.resultSchema as any,
+                            parameters: options.result_schema as any,
                         },
                         type: "function"
                     } as OpenAI.Chat.ChatCompletionTool,
                 ]
                 : undefined,
-            tool_choice: options.resultSchema
+            tool_choice: options.result_schema
                 ? {
                     type: 'function',
                     function: { name: "format_output" }
@@ -125,12 +125,12 @@ export class OpenAIDriver extends AbstractDriver<
     }
 
     async requestCompletion(prompt: OpenAI.Chat.Completions.ChatCompletionMessageParam[], options: ExecutionOptions): Promise<any> {
-        const functions = options.resultSchema
+        const functions = options.result_schema
             ? [
                 {
                     function: {
                         name: "format_output",
-                        parameters: options.resultSchema as any,
+                        parameters: options.result_schema as any,
                     },
                     type: 'function'
                 } as OpenAI.Chat.ChatCompletionTool,
@@ -145,13 +145,13 @@ export class OpenAIDriver extends AbstractDriver<
             n: 1,
             max_tokens: options.max_tokens,
             tools: functions,
-            tool_choice: options.resultSchema
+            tool_choice: options.result_schema
                 ? {
                     type: 'function',
                     function: { name: "format_output" }
                 } : undefined,
             // functions: functions,
-            // function_call: options.resultSchema
+            // function_call: options.result_schema
             //     ? { name: "format_output" }
             //     : undefined,
         });

@@ -50,7 +50,7 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
 
 
     createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions): GenerateContentRequest {
-        const schema = options.resultSchema;
+        const schema = options.result_schema;
         const contents: Content[] = [];
         const safety: string[] = [];
 
@@ -127,7 +127,7 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
             const content = candidate.content;
             if (content) {
                 result = collectTextParts(content);
-                // if (options.resultSchema) {
+                // if (options.result_schema) {
                 //     result = candidate.;
                 // } else {
                 // }

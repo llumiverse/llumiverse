@@ -50,7 +50,7 @@ export class CodeyTextDefinition extends AbstractPalmModelDefinition<CodeyTextPr
     createNonStreamingPrompt(_driver: VertexAIDriver, segments: PromptSegment[], opts: PromptOptions): CodeyTextPrompt {
         return {
             instances: [{
-                prefix: formatTextPrompt(segments, opts.resultSchema)
+                prefix: formatTextPrompt(segments, opts.result_schema)
             }],
             parameters: {
                 // put defauilts here

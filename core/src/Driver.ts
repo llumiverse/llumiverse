@@ -112,7 +112,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     }
 
     createTrainingPrompt(options: TrainingPromptOptions): string {
-        const prompt = this.createPrompt(options.segments, { resultSchema: options.schema, model: options.model })
+        const prompt = this.createPrompt(options.segments, { result_schema: options.schema, model: options.model })
         return JSON.stringify({
             prompt,
             completion: typeof options.completion === 'string' ? options.completion : JSON.stringify(options.completion)
@@ -132,9 +132,9 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     }
 
     validateResult(result: Completion, options: ExecutionOptions) {
-        if (!result.error && options.resultSchema) {
+        if (!result.error && options.result_schema) {
             try {
-                result.result = validateResult(result.result, options.resultSchema);
+                result.result = validateResult(result.result, options.result_schema);
             } catch (error: any) {
                 this.logger?.error({ err: error, data: result.result }, `[${this.provider}] [${options.model}] ${error.code ? '[' + error.code + '] ' : ''}Result validation error: ${error.message}`);
                 result.error = {
@@ -187,14 +187,14 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
      */
     protected formatPrompt(segments: PromptSegment[], opts: PromptOptions): PromptT {
         if (/\bllama2?\b/i.test(opts.model)) {
-            return formatLlama2Prompt(segments, opts.resultSchema) as PromptT;
+            return formatLlama2Prompt(segments, opts.result_schema) as PromptT;
         } else {
-            return formatTextPrompt(segments, opts.resultSchema) as PromptT;
+            return formatTextPrompt(segments, opts.result_schema) as PromptT;
         }
     }
 
     public createPrompt(segments: PromptSegment[], opts: PromptOptions): PromptT {
-        return opts.format ? opts.format(segments, opts.resultSchema) : this.formatPrompt(segments, opts);
+        return opts.format ? opts.format(segments, opts.result_schema) : this.formatPrompt(segments, opts);
     }
 
     /**

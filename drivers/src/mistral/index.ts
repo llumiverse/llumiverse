@@ -42,7 +42,7 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
         // } as ResponseFormat;
 
 
-        // return _options.resultSchema ? responseFormatJson : responseFormatText;
+        // return _options.result_schema ? responseFormatJson : responseFormatText;
 
         //TODO remove this when Mistral properly supports the parameters - it makes an error for now
         // some models like mixtral mistrall tiny or medium are throwing an error when using the response_format parameter
@@ -52,10 +52,10 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
     protected formatPrompt(segments: PromptSegment[], opts: ExecutionOptions): OpenAITextMessage[] {
         const messages = formatOpenAILikePrompt(segments);
         //Add JSON instruction is schema is provided
-        if (opts.resultSchema) {
+        if (opts.result_schema) {
             messages.push({
                 role: "user",
-                content: "IMPORTANT: " + getJSONSafetyNotice(opts.resultSchema)
+                content: "IMPORTANT: " + getJSONSafetyNotice(opts.result_schema)
             });
         }
         return messages;
