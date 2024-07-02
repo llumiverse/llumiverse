@@ -416,6 +416,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 //description: ``,
                 owner: m.providerName,
                 can_stream: m.responseStreamingSupported ?? false,
+                is_multimodal: m.inputModalities?.includes("IMAGE") ?? false,
                 tags: m.outputModalities ?? [],
             };
 

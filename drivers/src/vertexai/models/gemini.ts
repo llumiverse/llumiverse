@@ -1,4 +1,4 @@
-import { Content, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, TextPart } from "@google-cloud/vertexai";
+import { Content, FileDataPart, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, TextPart } from "@google-cloud/vertexai";
 import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
@@ -55,18 +55,37 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
         const safety: string[] = [];
 
         let lastUserContent: Content | undefined = undefined;
+
+
         for (const msg of segments) {
+
+           
+
+
             if (msg.role === PromptRole.safety) {
                 safety.push(msg.content);
             } else {
+                const fileParts: (TextPart|FileDataPart)[]|undefined = msg.files?.map( f => {
+                    return {
+                        fileData: {
+                            fileUri: f.url,
+                            mimeType: f.type
+                        }
+                    } as FileDataPart
+                })
+
                 const role = msg.role === PromptRole.assistant ? "model" : "user";
+
                 if (lastUserContent && lastUserContent.role === role) {
                     lastUserContent.parts.push({ text: msg.content } as TextPart);
+                    fileParts?.forEach(p => lastUserContent?.parts.push(p));
                 } else {
                     const content: Content = {
                         role,
                         parts: [{ text: msg.content } as TextPart],
                     }
+                    fileParts?.forEach(p => content.parts.push(p));
+
                     if (role === 'user') {
                         lastUserContent = content;
                     }

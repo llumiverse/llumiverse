@@ -1,6 +1,6 @@
 import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
-import { OpenAITextMessage, formatOpenAILikePrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
+import { OpenAITextMessage, formatOpenAILikeTextPrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import Groq from "groq-sdk";
 
 
@@ -47,7 +47,7 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
     }
 
     protected formatPrompt(segments: PromptSegment[], opts: ExecutionOptions): OpenAITextMessage[] {
-        const messages = formatOpenAILikePrompt(segments);
+        const messages = formatOpenAILikeTextPrompt(segments);
         //Add JSON instruction is schema is provided
         if (opts.result_schema) {
             messages.push({

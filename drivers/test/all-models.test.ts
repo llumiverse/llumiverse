@@ -1,9 +1,9 @@
-import { AbstractDriver } from '@llumiverse/core';
+import { AIModel, AbstractDriver } from '@llumiverse/core';
 import 'dotenv/config';
 import { describe, expect, test } from "vitest";
 import { BedrockDriver, GroqDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver, VertexAIDriver, WatsonxDriver } from '../src';
 import { assertCompletionOk, assertStreamingCompletionOk } from './assertions';
-import { testPrompt_color, testSchema_color } from './samples';
+import { testPrompt_color, testPrompt_describeImage, testSchema_color } from './samples';
 
 const TIMEOUT = 120 * 1000;
 
@@ -142,39 +142,77 @@ if (process.env.GOOGLE_PROJECT_ID && process.env.GOOGLE_REGION) {
 
 describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => {
 
-    test(`${name}: list models`, async () => {
+    let fetchedModels: AIModel[]
+
+    test(`${name}: list models`, { timeout: TIMEOUT, retry: 1 }, async () => {
         const r = await driver.listModels();
-        //console.log(r)
+        fetchedModels = r;
         expect(r.length).toBeGreaterThan(0);
-    }, { timeout: TIMEOUT, retry: 1 } );
+        console.log(fetchedModels)
+    });
 
 
-    test.each(models)(`${name}: execute prompt on %s`, async (model) => {
+
+    test.each(models)(`${name}: prompt generation for %s`, {}, (model) => {
+        const p = driver.createPrompt(testPrompt_color, { model })
+        expect(p).toBeDefined();
+    });
+
+    test.each(models)(`${name}: prompt generation for %s`, {}, (model) => {
+        const p = driver.createPrompt(testPrompt_color, { model, result_schema: testSchema_color })
+        expect(p).toBeDefined();
+    });
+
+    test.each(models)(`${name}: multimodal prompt generation for %s`, {}, (model) => {
+        const p = driver.createPrompt(testPrompt_describeImage, { model })
+        expect(p).toBeDefined();
+    });
+
+    test.each(models)(`${name}: execute prompt on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 });
         console.debug("Result for " + model, JSON.stringify(r));
         assertCompletionOk(r);
-    }, { timeout: TIMEOUT, retry: 3 } );
+    });
 
-    test.each(models)(`${name}: execute prompt with streaming on %s`, async (model) => {
-        console.log("Executing with streaming", testPrompt_color)   
+    test.each(models)(`${name}: execute prompt with streaming on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 })
         const out = await assertStreamingCompletionOk(r);
         console.debug("Result for " + model, JSON.stringify(out));
-    }, { timeout: TIMEOUT, retry: 3 } );
+    });
 
-    test.each(models)(`${name}: execute prompt with schema on %s`, async (model) => {
-        console.log("Executing with schema", testPrompt_color)
+    test.each(models)(`${name}: execute prompt with schema on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, result_schema: testSchema_color });
         console.debug("Result for " + model, JSON.stringify(r.result));
         assertCompletionOk(r);
-    }, { timeout: TIMEOUT, retry: 3 } );
+    });
 
-    test.each(models)(`${name}: execute prompt with streaming and schema on %s`, async (model) => {
-        console.log("Executing with streaming and schema", testPrompt_color, testSchema_color)
-        const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, result_schema: testSchema_color})
+    test.each(models)(`${name}: execute prompt with streaming and schema on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
+        const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, result_schema: testSchema_color })
         const out = await assertStreamingCompletionOk(r, true);
-        console.debug("Result for " + model, JSON.stringify(out));
-    }, { timeout: TIMEOUT, retry: 3 } );
+        console.log("Result for " + model, JSON.stringify(out));
+    });
+
+
+    test.each(models)(`${name}: multimodal test - describe image with %s`, { timeout: TIMEOUT, retry: 2 }, async (model) => {
+    
+        if (!fetchedModels) {
+            fetchedModels = await driver.listModels();
+        }
+
+        const isMultiModal = fetchedModels?.find(r => r.id === model)?.is_multimodal;        
+        
+        console.log(`${model} is multimodal: ` + isMultiModal)
+        if (!isMultiModal) return;
+
+        const r = await driver.execute(testPrompt_describeImage, {
+            model: model,
+            temperature: 0.5,
+            max_tokens: 1024
+        })
+        console.log("Result", r)
+        assertCompletionOk(r);
+    });
+
 
 });
 

@@ -15,7 +15,7 @@ import {
     TrainingPromptOptions
 } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
-import { formatOpenAILikePrompt } from "@llumiverse/core/formatters";
+import { formatOpenAILikeMultimodalPrompt } from "@llumiverse/core/formatters";
 import OpenAI from "openai";
 import { Stream } from "openai/streaming";
 
@@ -46,7 +46,8 @@ export class OpenAIDriver extends AbstractDriver<
         this.service = new OpenAI({
             apiKey: opts.apiKey,
         });
-        this.formatPrompt = formatOpenAILikePrompt;
+        this.formatPrompt = formatOpenAILikeMultimodalPrompt as any //TODO: better type, we send back OpenAI.Chat.Completions.ChatCompletionMessageParam[] but just not compatbile with Function call that we don't use here
+
     }
 
     extractDataFromResponse(
@@ -217,7 +218,7 @@ export class OpenAIDriver extends AbstractDriver<
         return this._listModels();
     }
 
-    async _listModels(filter?: (m: OpenAI.Models.Model) => boolean) {
+    async _listModels(filter?: (m: OpenAI.Models.Model) => boolean): Promise<AIModel[]> {
         let result = await this.service.models.list();
         const models = filter ? result.data.filter(filter) : result.data;
         return models.map((m) => ({
@@ -226,6 +227,8 @@ export class OpenAIDriver extends AbstractDriver<
             provider: this.provider,
             owner: m.owned_by,
             type: m.object === "model" ? ModelType.Text : ModelType.Unknown,
+            can_stream: true,
+            is_multimodal: m.id.includes("gpt-4")
         }));
     }
 
