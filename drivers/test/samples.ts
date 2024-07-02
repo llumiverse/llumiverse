@@ -19,3 +19,38 @@ export const testSchema_color: JSONSchema4 = {
         }
     }
 }
+
+
+export const testPrompt_describeImage: PromptSegment[] = [
+    {
+        content: "You are a lab assistant analysing images of animals, the tag the images with accurate description of the animal shown in the picture.",
+        role: PromptRole.user,
+        files: [{
+            type: "image",
+            mime_type: "image/jpeg",
+            url: "https://lala.com"
+        }]
+    }
+]
+
+export const testSchema_animalDescription: JSONSchema4 =
+    {
+        type: "object",
+        properties: {
+            name: {
+                type: "string"
+            },
+            type: {
+                type: "string"
+            },
+            specy: {
+                type: "string"
+            },
+            characteristics: {
+                type: "array",
+                items: {
+                    type: "string"
+                }
+            }
+        }
+    }

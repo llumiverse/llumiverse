@@ -4,11 +4,13 @@ import { getJSONSafetyNotice } from "./commons.js";
 
 export interface ClaudeMessage {
     role: 'user' | 'assistant',
-    content: {
-        type: "image" | "text",
-        source?: string, // only set for images
-        text?: string // only set for text messages
-    }[]
+    content: ClaudeMessagePart[]
+}
+
+interface ClaudeMessagePart  {
+    type: "image" | "text",
+    source?: string, // only set for images
+    text?: string // only set for text messages
 }
 
 export interface ClaudeMessagesPrompt {
@@ -25,13 +27,29 @@ export function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchem
     const safety: string[] = [];
     const messages: ClaudeMessage[] = [];
 
-    for (const msg of segments) {
-        if (msg.role === PromptRole.system) {
-            system.push(msg.content);
-        } else if (msg.role === PromptRole.safety) {
-            safety.push(msg.content);
+    for (const segment of segments) {
+
+        const parts: ClaudeMessagePart[] = [];
+        segment.files?.forEach(f => {
+            parts.push({
+                type: 'image',
+                source: f.url
+            })
+        })
+        
+        if (segment.content) {
+            parts.push({
+                type: "text",
+                text: segment.content
+            })
+        }
+
+        if (segment.role === PromptRole.system) {
+            system.push(segment.content);
+        } else if (segment.role === PromptRole.safety) {
+            safety.push(segment.content);
         } else {
-            messages.push({ content: [{ type: "text", text: msg.content }], role: msg.role });
+            messages.push({ content: parts, role: segment.role });
         }
     }
 

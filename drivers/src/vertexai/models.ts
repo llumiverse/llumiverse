@@ -43,6 +43,7 @@ export const BuiltinModels: AIModel<string>[] = [
         owner: "google",
         type: ModelType.MultiModal,
         can_stream: true,
+        is_multimodal: true
 
     },
     {
@@ -52,6 +53,7 @@ export const BuiltinModels: AIModel<string>[] = [
         owner: "google",
         type: ModelType.MultiModal,
         can_stream: true,
+        is_multimodal: true
 
     },
     {

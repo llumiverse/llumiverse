@@ -12,7 +12,7 @@ export interface EmbeddingsOptions {
      */
     model?: string;
     /**
-     * Additional options for the embeddings generation. Optional. 
+     * Additional options for the embeddings generation. Optional.
      * The supported properties depends on the target implementation.
      */
     [key: string]: any;
@@ -44,7 +44,7 @@ export interface ResultValidationError {
 }
 
 export interface Completion<ResultT = any> {
-    // the driver impl must return the result and optionally the token_usage. the execution time is computed by the extended abstract driver 
+    // the driver impl must return the result and optionally the token_usage. the execution time is computed by the extended abstract driver
     result: ResultT;
     token_usage?: ExecutionTokenUsage;
 
@@ -93,7 +93,7 @@ export interface DriverOptions {
 export interface PromptOptions {
     model: string;
     /**
-     * A custom formatter to use for format the final model prompt from the input prompt segments. 
+     * A custom formatter to use for format the final model prompt from the input prompt segments.
      * If no one is specified the driver will choose a formatter compatible with the target model
      */
     format?: PromptFormatter;
@@ -104,7 +104,7 @@ export interface ExecutionOptions extends PromptOptions {
     max_tokens?: number;
     stop_sequence?: string | string[];
 
-    /** 
+    /**
      * restricts the selection of tokens to the “k” most likely options, based on their probabilities
      * Lower values make the model more deterministic, more focused. Examples:
      * - 10 - result will be highly controlled anc contextually relevant
@@ -139,7 +139,7 @@ export interface ExecutionOptions extends PromptOptions {
 
     /**
      * If set to true the original response from the target LLM will be included in the response under the original_response field.
-     * This is useful for debugging and for some advanced use cases. 
+     * This is useful for debugging and for some advanced use cases.
      * It is ignored on streaming requests
      */
     include_original_response?: boolean;
@@ -156,6 +156,13 @@ export enum PromptRole {
 export interface PromptSegment {
     role: PromptRole;
     content: string;
+    files?: FileAttachment[]
+}
+
+export interface FileAttachment {
+    url: string;
+    type: 'image' | 'video' | 'file' | 'data'
+    mime_type?: string
 }
 
 export interface ExecutionTokenUsage {
@@ -179,6 +186,7 @@ export interface AIModel<ProviderKeys = string> {
     status?: AIModelStatus; //status of the model
     can_stream?: boolean; //if the model's reponse can be streamed
     is_custom?: boolean; //if the model is a custom model (a trained model)
+    is_multimodal?: boolean //if the model support files and images
 }
 
 export enum AIModelStatus {
@@ -237,14 +245,14 @@ export interface DataSource {
 
 export interface TrainingOptions {
     name: string; // the new model name
-    model: string; // the model to train 
+    model: string; // the model to train
     params?: JSONObject; // the training parameters
 }
 
 export interface TrainingPromptOptions {
     segments: PromptSegment[];
     completion: string | JSONObject;
-    model: string; // the model to train 
+    model: string; // the model to train
     schema?: JSONSchema4; // the resuilt schema f any
 }
 
