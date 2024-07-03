@@ -24,7 +24,8 @@
             },
             "required": [
               "name",
-              "type"
+              "type",
+              "signature_date"
             ]
           },
           "minItems": 2
@@ -42,6 +43,7 @@
       },
       "required": [
         "parties",
+        "effective_date",
         "governing_law",
         "jurisdiction"
       ]

@@ -3,15 +3,15 @@
       {
         "name": "Company, Corp.",
         "type": "Company",
-        "signature_date": "2023-02-01"
+        "signature_date": null
       },
       {
         "name": "Employee or Contractor",
         "type": "Employee",
-        "signature_date": ""
+        "signature_date": null
       }
     ],
-    "effective_date": "2023-02-01",
+    "effective_date": null,
     "governing_law": "Delaware",
     "jurisdiction": "Any legal action or proceeding relating to this Agreement shall be brought exclusively in the state or federal courts located in or with jurisdiction over Atlanta, Georgia, and each party consents to the jurisdiction thereof."
   }

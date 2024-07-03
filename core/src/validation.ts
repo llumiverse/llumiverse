@@ -1,6 +1,7 @@
 import { Ajv } from 'ajv';
 import addFormats from 'ajv-formats';
 import { extractAndParseJSON } from "./json.js";
+import { resolveField } from './resolver.js';
 import { ResultValidationError } from "./types.js";
 
 
@@ -8,12 +9,14 @@ const ajv = new Ajv({
     coerceTypes: 'array',
     allowDate: true,
     strict: false,
-    useDefaults: 'empty',
+    useDefaults: true,
+    removeAdditional: "failing"
 });
 
 //use ts ignore to avoid error with ESM and ajv-formats
 // @ts-ignore This expression is not callable
 addFormats(ajv)
+
 
 export class ValidationError extends Error implements ResultValidationError {
     constructor(
@@ -41,12 +44,32 @@ export function validateResult(data: any, schema: Object) {
     const validate = ajv.compile(schema);
     const valid = validate(json);
 
-    if (!valid) {
-        const errors = validate.errors?.map(e => `${e.instancePath}: ${e.message}\n${JSON.stringify(e.params)}`).join(",\n\n");
-        if (errors) {
-            throw new ValidationError("validation_error", errors)
-        } else {
-            throw new ValidationError("validation_error", "Unknown validation error")
+    if (!valid && validate.errors) {
+        let errors = [];    
+
+        for (const e of validate.errors) {
+            console.debug(">>> Handling error", e)
+            const path = e.instancePath.split("/").slice(1);
+            const value = resolveField(json, path);
+            const schemaPath = e.schemaPath.split("/").slice(1);
+            const schemaFieldFormat = resolveField(schema, schemaPath);
+            const schemaField = resolveField(schema, schemaPath.slice(0, -3));
+
+            console.log("Value: " + path.join('.'), value);
+            console.log("FieldFormat: " + schemaPath.join('.'), schemaFieldFormat);
+            console.log("Field: " + schemaPath.slice(0, -2).join('.'), schemaField);
+            //ignore date if empty or null
+            if (!value && schemaFieldFormat === "date" && !schemaField?.required.includes(path[path.length - 1])) {
+                continue;
+            } else {
+                errors.push(e);
+            }
+        }
+
+        //console.log("Errors", errors)
+        if (errors.length > 0) {
+            const errorsMessage = errors.map(e => `${e.instancePath}: ${e.message}\n${JSON.stringify(e.params)}`).join(",\n\n");
+            throw new ValidationError("validation_error", errorsMessage)
         }
     }
 

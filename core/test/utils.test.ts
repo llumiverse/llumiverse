@@ -33,7 +33,7 @@ describe('Core Utilities', () => {
         const schema = parseJSON(readDataFile('ciia-schema.json')) as any;
         const content = parseJSON(readDataFile('ciia-data.json')) as any;
         const res = validateResult(content, schema);
-        console.log(res);
+        console.debug(res);
     });
 
     test('Validate JSON against complex schema', () => {
@@ -41,7 +41,7 @@ describe('Core Utilities', () => {
         const schema = parseJSON(readDataFile('complex-schema.json')) as any;
         const content = parseJSON(readDataFile('complex-document.json')) as any;
         const res = validateResult(content, schema);
-        console.log(res);
+        console.debug(res);
     });
 
     test('Fail at validating JSON against schema', () => {
@@ -55,7 +55,35 @@ describe('Core Utilities', () => {
         const schema = parseJSON(readDataFile('ciia-schema.json')) as any;
         const content = parseJSON(readDataFile('ciia-data-wrong-types.json')) as any;   
         const res = validateResult(content, schema);
-        console.log(res);
+        console.debug(res);
+    });
+
+    test('JSON parser should validate if date is empty string', () => {
+        const schema = parseJSON(readDataFile('ciia-schema.json')) as any;
+        const content = parseJSON(readDataFile('ciia-data-date-empty.json')) as any;   
+        const res = validateResult(content, schema);
+        console.debug(res);
+    });
+
+    test('JSON parser should validate if date is null', () => {
+        const schema = parseJSON(readDataFile('ciia-schema.json')) as any;
+        const content = parseJSON(readDataFile('ciia-data-date-null.json')) as any;   
+        const res = validateResult(content, schema);
+        console.debug(res);
+    });
+
+    test('JSON parser should not validate if date is wrong', () => {
+        const schema = parseJSON(readDataFile('ciia-schema.json')) as any;
+        const content = parseJSON(readDataFile('ciia-data-date-wrong.json')) as any;   
+        expect((content, schema) => validateResult(content, schema).toThrowError('validation_error'));
+        console.debug(content, schema);
+    });
+
+    test('JSON parser should not validate if date is required but null', () => {
+        const schema = parseJSON(readDataFile('ciia-schema-date-required.json')) as any;
+        const content = parseJSON(readDataFile('ciia-data-date-empty.json')) as any;   
+        expect((content, schema) => validateResult(content, schema).toThrowError('validation_error'));
+        console.debug(content, schema);
     });
 
 })
