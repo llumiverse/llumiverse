@@ -177,8 +177,8 @@ export interface AIModel<ProviderKeys = string> {
     tags?: string[]; //tags for searching
     owner?: string; //owner of the model
     status?: AIModelStatus; //status of the model
-    canStream?: boolean; //if the model's reponse can be streamed
-    isCustom?: boolean; //if the model is a custom model (a trained model)
+    can_stream?: boolean; //if the model's reponse can be streamed
+    is_custom?: boolean; //if the model is a custom model (a trained model)
 }
 
 export enum AIModelStatus {
