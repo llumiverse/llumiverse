@@ -62,14 +62,14 @@ function applyExecutionDefaults(options: ExecutionOptions): ExecutionOptions {
 export interface Driver<PromptT = unknown> {
 
     /**
-     * 
-     * @param segments 
-     * @param completion 
+     *
+     * @param segments
+     * @param completion
      * @param model the model to train
      */
-    createTrainingPrompt(options: TrainingPromptOptions): string;
+    createTrainingPrompt(options: TrainingPromptOptions): Promise<string>;
 
-    createPrompt(segments: PromptSegment[], opts: PromptOptions): PromptT;
+    createPrompt(segments: PromptSegment[], opts: PromptOptions): Promise<PromptT>;
 
     execute(segments: PromptSegment[], options: ExecutionOptions): Promise<ExecutionResponse<PromptT>>;
 
@@ -111,8 +111,8 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
         this.logger = createLogger(opts.logger);
     }
 
-    createTrainingPrompt(options: TrainingPromptOptions): string {
-        const prompt = this.createPrompt(options.segments, { result_schema: options.schema, model: options.model })
+    async createTrainingPrompt(options: TrainingPromptOptions): Promise<string> {
+        const prompt = await this.createPrompt(options.segments, { result_schema: options.schema, model: options.model })
         return JSON.stringify({
             prompt,
             completion: typeof options.completion === 'string' ? options.completion : JSON.stringify(options.completion)
@@ -148,7 +148,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
 
     async execute(segments: PromptSegment[], options: ExecutionOptions): Promise<ExecutionResponse<PromptT>> {
         options = applyExecutionDefaults(options);
-        const prompt = this.createPrompt(segments, options);
+        const prompt = await this.createPrompt(segments, options);
         return this._execute(prompt, options);
     }
 
@@ -171,21 +171,22 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     // by default no stream is supported. we block and we return all at once
     async stream(segments: PromptSegment[], options: ExecutionOptions): Promise<CompletionStream<PromptT>> {
         options = applyExecutionDefaults(options);
+        const prompt = await this.createPrompt(segments, options);
         const canStream = await this.canStream(options);
         if (canStream) {
-            return new DefaultCompletionStream(this, segments, options);
+            return new DefaultCompletionStream(this, prompt, options);
         } else {
-            return new FallbackCompletionStream(this, segments, options);
+            return new FallbackCompletionStream(this, prompt, options);
         }
     }
 
     /**
      * Override this method to provide a custom prompt formatter
-     * @param segments 
-     * @param options 
-     * @returns 
+     * @param segments
+     * @param options
+     * @returns
      */
-    protected formatPrompt(segments: PromptSegment[], opts: PromptOptions): PromptT {
+    protected async formatPrompt(segments: PromptSegment[], opts: PromptOptions): Promise<PromptT> {
         if (/\bllama2?\b/i.test(opts.model)) {
             return formatLlama2Prompt(segments, opts.result_schema) as PromptT;
         } else {
@@ -193,13 +194,13 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
         }
     }
 
-    public createPrompt(segments: PromptSegment[], opts: PromptOptions): PromptT {
-        return opts.format ? opts.format(segments, opts.result_schema) : this.formatPrompt(segments, opts);
+    public async createPrompt(segments: PromptSegment[], opts: PromptOptions): Promise<PromptT> {
+        return await (opts.format ? opts.format(segments, opts.result_schema) : this.formatPrompt(segments, opts));
     }
 
     /**
      * Must be overrided if the implementation cannot stream.
-     * Some implementation may be able to stream for certain models but not for others. 
+     * Some implementation may be able to stream for certain models but not for others.
      * You must overwrite and return false if the current model doesn't support streaming.
      * The default implementation returns true, so it is assumed that the streaming can be done.
      * If this method returns false then the streaming execution will fallback on a blocking execution streaming the entire response as a single event.
@@ -213,7 +214,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     /**
      * Get a list of models that can be trained.
      * The default is to return an empty array
-     * @returns 
+     * @returns
      */
     async listTrainableModels(): Promise<AIModel[]> {
         return [];
@@ -233,4 +234,3 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     abstract generateEmbeddings(options: EmbeddingsOptions): Promise<EmbeddingsResult>;
 
 }
-

@@ -156,13 +156,7 @@ export enum PromptRole {
 export interface PromptSegment {
     role: PromptRole;
     content: string;
-    files?: FileAttachment[]
-}
-
-export interface FileAttachment {
-    url: string;
-    type: 'image' | 'video' | 'file' | 'data'
-    mime_type?: string
+    files?: DataSource[]
 }
 
 export interface ExecutionTokenUsage {
@@ -239,7 +233,8 @@ export enum ModelType {
 
 export interface DataSource {
     name: string;
-    getStream(): ReadableStream<Uint8Array | string>;
+    mime_type?: string;
+    getStream(): Promise<ReadableStream<Uint8Array | string>>;
     getURL(): Promise<string>;
 }
 

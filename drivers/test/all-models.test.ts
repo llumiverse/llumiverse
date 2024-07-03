@@ -3,7 +3,7 @@ import 'dotenv/config';
 import { describe, expect, test } from "vitest";
 import { BedrockDriver, GroqDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver, VertexAIDriver, WatsonxDriver } from '../src';
 import { assertCompletionOk, assertStreamingCompletionOk } from './assertions';
-import { testPrompt_color, testPrompt_describeImage, testSchema_color } from './samples';
+import { testPrompt_color, testPrompt_describeImage, testSchema_animalDescription, testSchema_color } from './samples';
 
 const TIMEOUT = 120 * 1000;
 
@@ -57,7 +57,8 @@ if (process.env.OPENAI_API_KEY) {
             apiKey: process.env.OPENAI_API_KEY as string
         }),
         models: [
-            "gpt-4-turbo-preview",
+            //"gpt-4-turbo-preview",
+            "gpt-4o",
             "gpt-3.5-turbo",
         ]
     }
@@ -153,18 +154,18 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
 
 
 
-    test.each(models)(`${name}: prompt generation for %s`, {}, (model) => {
-        const p = driver.createPrompt(testPrompt_color, { model })
+    test.each(models)(`${name}: prompt generation for %s`, {}, async (model) => {
+        const p = await driver.createPrompt(testPrompt_color, { model })
         expect(p).toBeDefined();
     });
 
-    test.each(models)(`${name}: prompt generation for %s`, {}, (model) => {
-        const p = driver.createPrompt(testPrompt_color, { model, result_schema: testSchema_color })
+    test.each(models)(`${name}: prompt generation for %s`, {}, async (model) => {
+        const p = await driver.createPrompt(testPrompt_color, { model, result_schema: testSchema_color })
         expect(p).toBeDefined();
     });
 
-    test.each(models)(`${name}: multimodal prompt generation for %s`, {}, (model) => {
-        const p = driver.createPrompt(testPrompt_describeImage, { model })
+    test.each(models)(`${name}: multimodal prompt generation for %s`, {}, async (model) => {
+        const p = await driver.createPrompt(testPrompt_describeImage, { model })
         expect(p).toBeDefined();
     });
 
@@ -194,20 +195,21 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
 
 
     test.each(models)(`${name}: multimodal test - describe image with %s`, { timeout: TIMEOUT, retry: 2 }, async (model) => {
-    
+
         if (!fetchedModels) {
             fetchedModels = await driver.listModels();
         }
 
-        const isMultiModal = fetchedModels?.find(r => r.id === model)?.is_multimodal;        
-        
+        const isMultiModal = fetchedModels?.find(r => r.id === model)?.is_multimodal;
+
         console.log(`${model} is multimodal: ` + isMultiModal)
         if (!isMultiModal) return;
 
         const r = await driver.execute(testPrompt_describeImage, {
             model: model,
             temperature: 0.5,
-            max_tokens: 1024
+            max_tokens: 1024,
+            result_schema: testSchema_animalDescription
         })
         console.log("Result", r)
         assertCompletionOk(r);
@@ -215,4 +217,3 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
 
 
 });
-

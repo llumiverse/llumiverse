@@ -49,7 +49,7 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
         return undefined
     }
 
-    protected formatPrompt(segments: PromptSegment[], opts: ExecutionOptions): OpenAITextMessage[] {
+    protected async formatPrompt(segments: PromptSegment[], opts: ExecutionOptions): Promise<OpenAITextMessage[]> {
         const messages = formatOpenAILikeTextPrompt(segments);
         //Add JSON instruction is schema is provided
         if (opts.result_schema) {

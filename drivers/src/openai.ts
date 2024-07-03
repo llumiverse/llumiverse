@@ -164,11 +164,11 @@ export class OpenAIDriver extends AbstractDriver<
         return completion;
     }
 
-    createTrainingPrompt(options: TrainingPromptOptions): string {
+    createTrainingPrompt(options: TrainingPromptOptions): Promise<string> {
         if (options.model.includes("gpt")) {
             return super.createTrainingPrompt(options);
         } else {
-            // babbage, davinci not yet implemented 
+            // babbage, davinci not yet implemented
             throw new Error("Unsupported model for training: " + options.model);
         }
     }

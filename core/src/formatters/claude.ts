@@ -1,15 +1,20 @@
 import { JSONSchema4 } from "json-schema";
 import { PromptRole, PromptSegment } from "../index.js";
 import { getJSONSafetyNotice } from "./commons.js";
+import { readStreamAsBase64 } from "../stream.js";
 
 export interface ClaudeMessage {
     role: 'user' | 'assistant',
     content: ClaudeMessagePart[]
 }
 
-interface ClaudeMessagePart  {
+interface ClaudeMessagePart {
     type: "image" | "text",
-    source?: string, // only set for images
+    source?: {
+        type: "base64",
+        media_type: string,
+        data: string,
+    }, // only set for images
     text?: string // only set for text messages
 }
 
@@ -22,21 +27,28 @@ export interface ClaudeMessagesPrompt {
  * A formatter user by Bedrock to format prompts for claude related models
  */
 
-export function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchema4): ClaudeMessagesPrompt {
+export async function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchema4): Promise<ClaudeMessagesPrompt> {
     const system: string[] = [];
     const safety: string[] = [];
     const messages: ClaudeMessage[] = [];
 
+    //TODO type: 'image' -> detect from f.mime_type
     for (const segment of segments) {
 
         const parts: ClaudeMessagePart[] = [];
-        segment.files?.forEach(f => {
+        if (segment.files) for (const f of segment.files) {
+            const source = await f.getStream();
+            const data = await readStreamAsBase64(source);
             parts.push({
                 type: 'image',
-                source: f.url
+                source: {
+                    type: "base64",
+                    media_type: f.mime_type || 'image/png',
+                    data
+                }
             })
-        })
-        
+        }
+
         if (segment.content) {
             parts.push({
                 type: "text",
@@ -75,22 +87,23 @@ export function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchem
     /*if (schema) {
         messages.push({
             role: "user",
-            content: [{                
+            content: [{
                 type: "text",
                 text: getJSONSafetyNotice(schema)
             }]
         });
     }*/
 
-     /*start Claude's message to amke sure it answers properly in JSON
-    if enabled, this requires to add the { to Claude's response*/
-    if (schema) { 
+    /*start Claude's message to amke sure it answers properly in JSON
+   if enabled, this requires to add the { to Claude's response*/
+    if (schema) {
         messages.push({
             role: "assistant",
-            content: [{ 
-                type: "text", 
+            content: [{
+                type: "text",
                 text: "{"
-        }]});
+            }]
+        });
     }
     // put system mesages first and safety last
     return {

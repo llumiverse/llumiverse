@@ -1,4 +1,5 @@
 import { PromptRole } from "../index.js";
+import { readStreamAsBase64 } from "../stream.js";
 import { PromptSegment } from "../types.js";
 
 
@@ -28,8 +29,8 @@ export interface OpenAIContentPartImage {
 
 /**
  * OpenAI text only prompts
- * @param segments 
- * @returns 
+ * @param segments
+ * @returns
  */
 export function formatOpenAILikeTextPrompt(segments: PromptSegment[]): OpenAITextMessage[] {
     const system: OpenAITextMessage[] = [];
@@ -53,7 +54,7 @@ export function formatOpenAILikeTextPrompt(segments: PromptSegment[]): OpenAITex
     return system.concat(user).concat(safety);
 }
 
-export function formatOpenAILikeMultimodalPrompt(segments: PromptSegment[]): OpenAIMessage[] {
+export async function formatOpenAILikeMultimodalPrompt(segments: PromptSegment[]): Promise<OpenAIMessage[]> {
     const system: OpenAIMessage[] = [];
     const safety: OpenAIMessage[] = [];
     const others: OpenAIMessage[] = [];
@@ -65,13 +66,12 @@ export function formatOpenAILikeMultimodalPrompt(segments: PromptSegment[]): Ope
         //generate the parts based on promptsegment
         if (msg.files) {
             for (const file of msg.files) {
+                const stream = await file.getStream();
+                const data = await readStreamAsBase64(stream);
                 parts.push({
-                    image_url: {
-                        url: file.url
-                    },
+                    image_url: { url: `data:${file.mime_type || "image/jpeg"};base64,${data}` },
                     type: "image_url"
-                }
-                )
+                })
             }
         } else {
             parts.push({
@@ -80,35 +80,35 @@ export function formatOpenAILikeMultimodalPrompt(segments: PromptSegment[]): Ope
             })
         }
 
-       
 
-            if (msg.role === PromptRole.system) {
-                system.push({
-                    role: "system",
-                    content: parts
-                })
 
-            } else if (msg.role === PromptRole.safety) {
-                const safetyMsg: OpenAIMessage = {
-                    role: "system",
-                    content: parts
-                }
+        if (msg.role === PromptRole.system) {
+            system.push({
+                role: "system",
+                content: parts
+            })
 
-                safetyMsg.content.forEach( c => {
-                    if (c.type === "text") c.text = "DO NOT IGNORE - IMPORTANT: " + c.text;
-                })
-
-                system.push(safetyMsg)
- 
-            } else {
-                others.push({
-                    role: msg.role ?? 'user',
-                    content: parts
-                })
+        } else if (msg.role === PromptRole.safety) {
+            const safetyMsg: OpenAIMessage = {
+                role: "system",
+                content: parts
             }
 
+            safetyMsg.content.forEach(c => {
+                if (c.type === "text") c.text = "DO NOT IGNORE - IMPORTANT: " + c.text;
+            })
 
-       
+            system.push(safetyMsg)
+
+        } else {
+            others.push({
+                role: msg.role ?? 'user',
+                content: parts
+            })
+        }
+
+
+
     }
 
     // put system mesages first and safety last

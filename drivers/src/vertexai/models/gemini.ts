@@ -3,11 +3,12 @@ import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, PromptOptio
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
 import { BuiltinModels, ModelDefinition } from "../models.js";
+import { readStreamAsBase64 } from "../../../../core/src/stream.js";
 
 function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
     return driver.vertexai.preview.getGenerativeModel({
         model: options.model,
-        //TODO pass in the options      
+        //TODO pass in the options
         safetySettings: [{
             category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
             threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
@@ -48,31 +49,32 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
 
     }
 
-
-    createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions): GenerateContentRequest {
+    async createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions): Promise<GenerateContentRequest> {
         const schema = options.result_schema;
         const contents: Content[] = [];
         const safety: string[] = [];
 
         let lastUserContent: Content | undefined = undefined;
 
-
         for (const msg of segments) {
-
-           
-
 
             if (msg.role === PromptRole.safety) {
                 safety.push(msg.content);
             } else {
-                const fileParts: (TextPart|InlineDataPart)[]|undefined = msg.files?.map( f => {
-                    return {
-                        inlineData: {
-                            data: f.url,
-                            mimeType: f.mime_type
-                        }
-                    } as InlineDataPart
-                })
+                let fileParts: InlineDataPart[] | undefined;
+                if (msg.files) {
+                    fileParts = [];
+                    for (const f of msg.files) {
+                        const stream = await f.getStream();
+                        const data = await readStreamAsBase64(stream);
+                        fileParts.push({
+                            inlineData: {
+                                data,
+                                mimeType: f.mime_type!
+                            }
+                        });
+                    }
+                }
 
                 const role = msg.role === PromptRole.assistant ? "model" : "user";
 

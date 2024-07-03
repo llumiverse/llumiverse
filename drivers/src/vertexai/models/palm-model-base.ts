@@ -64,7 +64,7 @@ export abstract class AbstractPalmModelDefinition<NonStreamingPromptT extends No
 
     abstract extractContentFromResponseChunk(chunk: any): string;
 
-    createPrompt(driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions) {
+    async createPrompt(driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions) {
         return this.createNonStreamingPrompt(driver, segments, options);
     }
 
@@ -126,4 +126,3 @@ export abstract class AbstractPalmModelDefinition<NonStreamingPromptT extends No
     }
 
 }
-
