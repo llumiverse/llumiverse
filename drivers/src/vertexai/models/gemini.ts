@@ -1,13 +1,14 @@
-import { Content, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, TextPart } from "@google-cloud/vertexai";
+import { Content, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, InlineDataPart, TextPart } from "@google-cloud/vertexai";
 import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
 import { BuiltinModels, ModelDefinition } from "../models.js";
+import { readStreamAsBase64 } from "@llumiverse/core";
 
 function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
     return driver.vertexai.preview.getGenerativeModel({
         model: options.model,
-        //TODO pass in the options      
+        //TODO pass in the options
         safetySettings: [{
             category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
             threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
@@ -48,25 +49,45 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
 
     }
 
-
-    createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions): GenerateContentRequest {
+    async createPrompt(_driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions): Promise<GenerateContentRequest> {
         const schema = options.result_schema;
         const contents: Content[] = [];
         const safety: string[] = [];
 
         let lastUserContent: Content | undefined = undefined;
+
         for (const msg of segments) {
+
             if (msg.role === PromptRole.safety) {
                 safety.push(msg.content);
             } else {
+                let fileParts: InlineDataPart[] | undefined;
+                if (msg.files) {
+                    fileParts = [];
+                    for (const f of msg.files) {
+                        const stream = await f.getStream();
+                        const data = await readStreamAsBase64(stream);
+                        fileParts.push({
+                            inlineData: {
+                                data,
+                                mimeType: f.mime_type!
+                            }
+                        });
+                    }
+                }
+
                 const role = msg.role === PromptRole.assistant ? "model" : "user";
+
                 if (lastUserContent && lastUserContent.role === role) {
                     lastUserContent.parts.push({ text: msg.content } as TextPart);
+                    fileParts?.forEach(p => lastUserContent?.parts.push(p));
                 } else {
                     const content: Content = {
                         role,
                         parts: [{ text: msg.content } as TextPart],
                     }
+                    fileParts?.forEach(p => content.parts.push(p));
+
                     if (role === 'user') {
                         lastUserContent = content;
                     }

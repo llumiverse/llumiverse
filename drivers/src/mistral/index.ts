@@ -1,6 +1,6 @@
 import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
-import { OpenAITextMessage, formatOpenAILikePrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
+import { OpenAITextMessage, formatOpenAILikeTextPrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import { FetchClient } from "api-fetch-client";
 import { ChatCompletionResponse, CompletionRequestParams, ListModelsResponse, ResponseFormat } from "./types.js";
 
@@ -49,8 +49,8 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
         return undefined
     }
 
-    protected formatPrompt(segments: PromptSegment[], opts: ExecutionOptions): OpenAITextMessage[] {
-        const messages = formatOpenAILikePrompt(segments);
+    protected async formatPrompt(segments: PromptSegment[], opts: ExecutionOptions): Promise<OpenAITextMessage[]> {
+        const messages = formatOpenAILikeTextPrompt(segments);
         //Add JSON instruction is schema is provided
         if (opts.result_schema) {
             messages.push({

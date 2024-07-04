@@ -24,7 +24,7 @@ export interface BedrockDriverOptions extends DriverOptions {
      */
     region: string;
     /**
-     * Tthe bucket name to be used for training. 
+     * Tthe bucket name to be used for training.
      * It will be created oif nto already exixts
      */
     training_bucket?: string;
@@ -63,7 +63,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             this._executor = new BedrockRuntime({
                 region: this.options.region,
                 credentials: this.options.credentials,
-                
+
             });
         }
         return this._executor;
@@ -79,14 +79,13 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         return this._service;
     }
 
-    protected formatPrompt(segments: PromptSegment[], opts: PromptOptions): BedrockPrompt {
+    protected async formatPrompt(segments: PromptSegment[], opts: PromptOptions): Promise<BedrockPrompt> {
         //TODO move the anthropic test in abstract driver?
         if (opts.model.includes('anthropic')) {
             //TODO: need to type better the types aren't checked properly by TS
-            const prompt = formatClaudePrompt(segments, opts.result_schema);
-            return prompt;
+            return await formatClaudePrompt(segments, opts.result_schema);
         } else {
-            return super.formatPrompt(segments, opts) as string;
+            return await super.formatPrompt(segments, opts) as string;
         }
     }
 
@@ -101,7 +100,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 // LLAMA2
                 return [result.generation, result.stop_reason]; // comes in coirrect format (stop, length)
             } else if (result.generations) {
-                // Cohere                
+                // Cohere
                 return [result.generations[0].text, cohereFinishReason(result.generations[0].finish_reason)];
             } else if (result.chat_history) {
                 //Cohere Command R
@@ -110,14 +109,14 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 //A21
                 return [result.completions[0].data?.text, a21FinishReason(result.completions[0].finishReason?.reason)];
             } else if (result.content) {
-                // Claude 
+                // Claude
                 //if last prompt.messages is {, add { to the response
-                const p =  prompt as ClaudeMessagesPrompt;
+                const p = prompt as ClaudeMessagesPrompt;
                 const lastMessage = (p as ClaudeMessagesPrompt).messages[p.messages.length - 1];
                 const res = lastMessage.content[0].text === '{' ? '{' + result.content[0]?.text : result.content[0]?.text;
 
-                return [ res, claudeFinishReason(result.stop_reason)];
-                
+                return [res, claudeFinishReason(result.stop_reason)];
+
             } else if (result.outputs) {
                 // mistral
                 return [result.outputs[0]?.text, result.outputs[0]?.stop_reason]; // the stop reason is in the expected format ("stop" and "length")
@@ -196,7 +195,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                     const lastMessage = p.messages[p.messages.length - 1];
                     return lastMessage.content[0].text === '{';
                 }
-                return false;                
+                return false;
             };
 
             return transformAsyncIterator(res.body, (stream: ResponseStream) => {
@@ -314,7 +313,8 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         }
 
         const s3 = new S3Client({ region: this.options.region, credentials: this.options.credentials });
-        const upload = await forceUploadFile(s3, dataset.getStream(), this.options.training_bucket, dataset.name);
+        const stream = await dataset.getStream();
+        const upload = await forceUploadFile(s3, stream, this.options.training_bucket, dataset.name);
 
         const service = this.getService();
         const response = await service.send(new CreateModelCustomizationJobCommand({
@@ -388,10 +388,11 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             service.listFoundationModels({}).catch(() => {
                 this.logger.warn("[Bedrock] Can't list foundation models. Check if the user has the right permissions.");
                 return undefined
-                }),
+            }),
             service.listCustomModels({}).catch(() => {
                 this.logger.warn("[Bedrock] Can't list custom models. Check if the user has the right permissions.");
-                return undefined}),
+                return undefined
+            }),
         ]);
 
         if (!foundationals?.modelSummaries) {
@@ -416,6 +417,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 //description: ``,
                 owner: m.providerName,
                 can_stream: m.responseStreamingSupported ?? false,
+                is_multimodal: m.inputModalities?.includes("IMAGE") ?? false,
                 tags: m.outputModalities ?? [],
             };
 

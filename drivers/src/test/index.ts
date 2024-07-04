@@ -14,7 +14,7 @@ export enum TestDriverModels {
 export class TestDriver implements Driver<PromptSegment[]> {
     provider = "test";
 
-    createTrainingPrompt(): string {
+    createTrainingPrompt(): Promise<string> {
         throw new Error("Method not implemented.");
     }
 
@@ -30,7 +30,7 @@ export class TestDriver implements Driver<PromptSegment[]> {
         throw new Error("Method not implemented.");
     }
 
-    createPrompt(segments: PromptSegment[], _opts: PromptOptions): PromptSegment[] {
+    async createPrompt(segments: PromptSegment[], _opts: PromptOptions): Promise<PromptSegment[]> {
         return segments;
     }
     execute(segments: PromptSegment[], options: ExecutionOptions): Promise<ExecutionResponse<PromptSegment[]>> {
@@ -99,4 +99,3 @@ export class TestDriver implements Driver<PromptSegment[]> {
     }
 
 }
-

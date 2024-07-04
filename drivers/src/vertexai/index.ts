@@ -45,7 +45,7 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
         return Promise.resolve(getModelDefinition(options.model).model.can_stream === true);
     }
 
-    public createPrompt(segments: PromptSegment[], options: PromptOptions): GenerateContentRequest {
+    public createPrompt(segments: PromptSegment[], options: PromptOptions): Promise<GenerateContentRequest> {
         return getModelDefinition(options.model).createPrompt(this, segments, options);
     }
 

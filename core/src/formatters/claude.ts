@@ -1,14 +1,21 @@
 import { JSONSchema4 } from "json-schema";
 import { PromptRole, PromptSegment } from "../index.js";
 import { getJSONSafetyNotice } from "./commons.js";
+import { readStreamAsBase64 } from "../stream.js";
 
 export interface ClaudeMessage {
     role: 'user' | 'assistant',
-    content: {
-        type: "image" | "text",
-        source?: string, // only set for images
-        text?: string // only set for text messages
-    }[]
+    content: ClaudeMessagePart[]
+}
+
+interface ClaudeMessagePart {
+    type: "image" | "text",
+    source?: {
+        type: "base64",
+        media_type: string,
+        data: string,
+    }, // only set for images
+    text?: string // only set for text messages
 }
 
 export interface ClaudeMessagesPrompt {
@@ -20,18 +27,41 @@ export interface ClaudeMessagesPrompt {
  * A formatter user by Bedrock to format prompts for claude related models
  */
 
-export function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchema4): ClaudeMessagesPrompt {
+export async function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchema4): Promise<ClaudeMessagesPrompt> {
     const system: string[] = [];
     const safety: string[] = [];
     const messages: ClaudeMessage[] = [];
 
-    for (const msg of segments) {
-        if (msg.role === PromptRole.system) {
-            system.push(msg.content);
-        } else if (msg.role === PromptRole.safety) {
-            safety.push(msg.content);
+    //TODO type: 'image' -> detect from f.mime_type
+    for (const segment of segments) {
+
+        const parts: ClaudeMessagePart[] = [];
+        if (segment.files) for (const f of segment.files) {
+            const source = await f.getStream();
+            const data = await readStreamAsBase64(source);
+            parts.push({
+                type: 'image',
+                source: {
+                    type: "base64",
+                    media_type: f.mime_type || 'image/png',
+                    data
+                }
+            })
+        }
+
+        if (segment.content) {
+            parts.push({
+                type: "text",
+                text: segment.content
+            })
+        }
+
+        if (segment.role === PromptRole.system) {
+            system.push(segment.content);
+        } else if (segment.role === PromptRole.safety) {
+            safety.push(segment.content);
         } else {
-            messages.push({ content: [{ type: "text", text: msg.content }], role: msg.role });
+            messages.push({ content: parts, role: segment.role });
         }
     }
 
@@ -57,22 +87,23 @@ export function formatClaudePrompt(segments: PromptSegment[], schema?: JSONSchem
     /*if (schema) {
         messages.push({
             role: "user",
-            content: [{                
+            content: [{
                 type: "text",
                 text: getJSONSafetyNotice(schema)
             }]
         });
     }*/
 
-     /*start Claude's message to amke sure it answers properly in JSON
-    if enabled, this requires to add the { to Claude's response*/
-    if (schema) { 
+    /*start Claude's message to amke sure it answers properly in JSON
+   if enabled, this requires to add the { to Claude's response*/
+    if (schema) {
         messages.push({
             role: "assistant",
-            content: [{ 
-                type: "text", 
+            content: [{
+                type: "text",
                 text: "{"
-        }]});
+            }]
+        });
     }
     // put system mesages first and safety last
     return {

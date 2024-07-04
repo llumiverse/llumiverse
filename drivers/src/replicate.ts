@@ -150,7 +150,7 @@ export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
         const job = await this.service.trainings.create(owner, model, version, {
             destination: options.name as any,
             input: {
-                train_data: dataset.getURL(),
+                train_data: await dataset.getURL(),
             },
         })
         return jobInfo(job, options.name);
@@ -159,8 +159,8 @@ export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
     /**
      * This method is not returning a consistent TrainingJob like the one returned by startTraining
      * Instead of returning the full model name `owner/model:version` it returns only the version `version
-     * @param jobId 
-     * @returns 
+     * @param jobId
+     * @returns
      */
     async cancelTraining(jobId: string): Promise<TrainingJob> {
         const job = await this.service.trainings.cancel(jobId);
@@ -170,8 +170,8 @@ export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
     /**
      * This method is not returning a consistent TrainingJob like the one returned by startTraining
      * Instead of returning the full model name `owner/model:version` it returns only the version `version
-     * @param jobId 
-     * @returns 
+     * @param jobId
+     * @returns
      */
     async getTrainingJob(jobId: string): Promise<TrainingJob> {
         const job = await this.service.trainings.get(jobId);

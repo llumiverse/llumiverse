@@ -11,7 +11,7 @@ import { Palm2TextDefinition } from "./models/palm2-text.js";
 export interface ModelDefinition<PromptT = any> {
     model: AIModel;
     versions?: string[]; // the versions of the model that are available. ex: ['001', '002']
-    createPrompt: (driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions) => PromptT;
+    createPrompt: (driver: VertexAIDriver, segments: PromptSegment[], options: PromptOptions) => Promise<PromptT>;
     requestCompletion: (driver: VertexAIDriver, prompt: PromptT, options: ExecutionOptions) => Promise<Completion>;
     requestCompletionStream: (driver: VertexAIDriver, promp: PromptT, options: ExecutionOptions) => Promise<AsyncIterable<string>>;
 }
@@ -43,6 +43,7 @@ export const BuiltinModels: AIModel<string>[] = [
         owner: "google",
         type: ModelType.MultiModal,
         can_stream: true,
+        is_multimodal: true
 
     },
     {
@@ -52,6 +53,7 @@ export const BuiltinModels: AIModel<string>[] = [
         owner: "google",
         type: ModelType.MultiModal,
         can_stream: true,
+        is_multimodal: true
 
     },
     {
