@@ -3,7 +3,7 @@ import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, PromptOptio
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
 import { BuiltinModels, ModelDefinition } from "../models.js";
-import { readStreamAsBase64 } from "../../../../core/src/stream.js";
+import { readStreamAsBase64 } from "@llumiverse/core";
 
 function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
     return driver.vertexai.preview.getGenerativeModel({
