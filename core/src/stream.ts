@@ -19,10 +19,17 @@ export class Base64Stream extends TransformStream {
 }
 
 export async function readStreamAsBase64(stream: ReadableStream) {
-    const out: string[] = [];
+    const out: Buffer[] = [];
+
     for await (const chunk of stream as any) {
-        const encoded = Buffer.from(chunk).toString('base64');
-        out.push(encoded);
+        out.push(Buffer.from(chunk));
+        //const encoded = Buffer.from(chunk).toString('base64');
+        //out.push(encoded);
     }
-    return out.join('');
+
+    return Buffer.concat(out).toString('base64');
+    // console.log("#============================================================#");
+    // console.log(out.join(''));
+    // console.log("#============================================================#");
+    //return out.join('');
 }
