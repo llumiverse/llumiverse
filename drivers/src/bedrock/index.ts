@@ -177,7 +177,6 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     async requestCompletionStream(prompt: BedrockPrompt, options: ExecutionOptions): Promise<AsyncIterable<string>> {
         const payload = this.preparePayload(prompt, options);
         const executor = this.getExecutor();
-        console.log("Requesting completion with Streaming for model " + options.model, JSON.stringify(payload));
         return executor.invokeModelWithResponseStream({
             modelId: options.model,
             contentType: "application/json",
