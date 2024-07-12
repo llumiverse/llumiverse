@@ -154,8 +154,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
 
     async _execute(prompt: PromptT, options: ExecutionOptions): Promise<ExecutionResponse<PromptT>> {
         this.logger.debug(
-            `[${this.provider}] Executing ${options.model} with prompt`, prompt,
-        );
+            `[${this.provider}] Executing prompt on ${options.model}`);
         try {
             const start = Date.now();
             const result = await this.requestCompletion(prompt, options);
