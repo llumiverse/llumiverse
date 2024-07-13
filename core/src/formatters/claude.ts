@@ -1,7 +1,7 @@
 import { JSONSchema4 } from "json-schema";
 import { PromptRole, PromptSegment } from "../index.js";
-import { getJSONSafetyNotice } from "./commons.js";
 import { readStreamAsBase64 } from "../stream.js";
+import { getJSONSafetyNotice } from "./commons.js";
 
 export interface ClaudeMessage {
     role: 'user' | 'assistant',
@@ -60,9 +60,17 @@ export async function formatClaudePrompt(segments: PromptSegment[], schema?: JSO
             system.push(segment.content);
         } else if (segment.role === PromptRole.safety) {
             safety.push(segment.content);
+        } else if (messages.length > 0 && messages[messages.length - 1].role === segment.role) {
+            //concatenate messages of the same role (Claude requires alternative user and assistant roles)
+            messages[messages.length - 1].content.push(...parts);
         } else {
-            messages.push({ content: parts, role: segment.role });
+            messages.push({
+                role: segment.role,
+                content: parts
+            });
         }
+
+
     }
 
     if (schema) {
