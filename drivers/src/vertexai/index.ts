@@ -3,11 +3,13 @@ import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, E
 import { FetchClient } from "api-fetch-client";
 import { TextEmbeddingsOptions, getEmbeddingsForText } from "./embeddings/embeddings-text.js";
 import { BuiltinModels, getModelDefinition } from "./models.js";
+import { GoogleAuthOptions } from "google-auth-library";
 
 
 export interface VertexAIDriverOptions extends DriverOptions {
     project: string;
     region: string;
+    googleAuthOptions?: GoogleAuthOptions;
 }
 
 export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, GenerateContentRequest> {
@@ -26,6 +28,7 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
         this.vertexai = new VertexAI({
             project: this.options.project,
             location: this.options.region,
+            googleAuthOptions: this.options.googleAuthOptions,
         });
         this.fetchClient = createFetchClient({
             region: this.options.region,
