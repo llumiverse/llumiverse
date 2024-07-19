@@ -48,16 +48,12 @@ export function validateResult(data: any, schema: Object) {
         let errors = [];    
 
         for (const e of validate.errors) {
-            console.debug(">>> Handling error", e)
             const path = e.instancePath.split("/").slice(1);
             const value = resolveField(json, path);
             const schemaPath = e.schemaPath.split("/").slice(1);
             const schemaFieldFormat = resolveField(schema, schemaPath);
             const schemaField = resolveField(schema, schemaPath.slice(0, -3));
 
-            console.log("Value: " + path.join('.'), value);
-            console.log("FieldFormat: " + schemaPath.join('.'), schemaFieldFormat);
-            console.log("Field: " + schemaPath.slice(0, -2).join('.'), schemaField);
             //ignore date if empty or null
             if (!value 
                 && ["date", "date-time"].includes(schemaFieldFormat)
