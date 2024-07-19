@@ -1,0 +1,14 @@
+{
+    "name": "Transfers",
+    "description": "a list of transfers with their IDs, content, and timestamps.",
+    "keywords": [
+        "transfers",
+        "transactions"
+    ],
+    "author": null,
+    "date_created": null,
+    "location": null,
+    "format": null,
+    "resolution": null,
+    "copyright": null
+}

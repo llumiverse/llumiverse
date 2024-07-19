@@ -59,7 +59,9 @@ export function validateResult(data: any, schema: Object) {
             console.log("FieldFormat: " + schemaPath.join('.'), schemaFieldFormat);
             console.log("Field: " + schemaPath.slice(0, -2).join('.'), schemaField);
             //ignore date if empty or null
-            if (!value && schemaFieldFormat === "date" && !schemaField?.required?.includes(path[path.length - 1])) {
+            if (!value 
+                && ["date", "date-time"].includes(schemaFieldFormat)
+                && !schemaField?.required?.includes(path[path.length - 1])) {
                 continue;
             } else {
                 errors.push(e);

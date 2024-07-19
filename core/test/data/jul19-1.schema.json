@@ -1,0 +1,45 @@
+{
+    "type": "object",
+    "properties": {
+        "name": {
+            "type": "string",
+            "description": "Name or title of the image"
+        },
+        "description": {
+            "type": "string",
+            "description": "Description of the image"
+        },
+        "keywords": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Keywords or tags related to the image"
+        },
+        "author": {
+            "type": "string",
+            "description": "Creator or author of the image"
+        },
+        "date_created": {
+            "type": "string",
+            "format": "date-time",
+            "description": "Date and time the image was created"
+        },
+        "location": {
+            "type": "string",
+            "description": "Geographical location where the image was taken"
+        },
+        "format": {
+            "type": "string",
+            "description": "File format of the image (e.g., JPEG, PNG)"
+        },
+        "resolution": {
+            "type": "string",
+            "description": "Resolution of the image (e.g., 1920x1080)"
+        },
+        "copyright": {
+            "type": "string",
+            "description": "Copyright information for the image"
+        }
+    }
+}

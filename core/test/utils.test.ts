@@ -1,5 +1,5 @@
 import Ajv from 'ajv';
-import { readFileSync } from 'fs';
+import fs, { readFileSync } from 'fs';
 import { describe, expect, test } from "vitest";
 import { JSONArray, JSONObject, extractAndParseJSON, parseJSON } from "../src/json";
 import { validateResult } from '../src/validation';
@@ -84,6 +84,17 @@ describe('Core Utilities', () => {
         const content = parseJSON(readDataFile('ciia-data-date-empty.json')) as any;   
         expect((content, schema) => validateResult(content, schema).toThrowError('validation_error'));
         console.debug(content, schema);
+    });
+
+
+    const dataFiles = fs.readdirSync(new URL("./data", import.meta.url)).filter((f) => f.endsWith('.data.json'));
+
+    test.each(dataFiles)('Validate JSON against schema: %s', (dataFile) => {
+        const base = dataFile.replace('.data.json', '');
+        const schema = parseJSON(readDataFile(`${base}.schema.json`)) as any;
+        const content = parseJSON(readDataFile(dataFile)) as any;
+        const res = validateResult(content, schema);
+        console.debug(res);
     });
 
 })
