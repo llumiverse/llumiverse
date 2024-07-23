@@ -55,12 +55,12 @@
     "vitest": "^1.4.0"
   },
   "dependencies": {
-    "@aws-sdk/client-bedrock": "^3.535.0",
-    "@aws-sdk/client-bedrock-runtime": "^3.535.0",
-    "@aws-sdk/client-s3": "^3.535.0",
-    "@aws-sdk/credential-providers": "^3.535.0",
-    "@aws-sdk/lib-storage": "^3.535.0",
-    "@google-cloud/vertexai": "^1.1.0",
+    "@aws-sdk/client-bedrock": "^3.616.0",
+    "@aws-sdk/client-bedrock-runtime": "^3.616.0",
+    "@aws-sdk/client-s3": "^3.616.0",
+    "@aws-sdk/credential-providers": "^3.616.0",
+    "@aws-sdk/lib-storage": "^3.616.0",
+    "@google-cloud/vertexai": "^1.4.0",
     "@huggingface/inference": "2.6.7",
     "@llumiverse/core": "^0.13.0",
     "api-fetch-client": "0.12.0",

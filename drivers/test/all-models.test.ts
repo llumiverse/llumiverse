@@ -134,8 +134,8 @@ if (process.env.GOOGLE_PROJECT_ID && process.env.GOOGLE_REGION) {
             region: process.env.GOOGLE_REGION as string,
         }),
         models: [
-            "gemini-1.5-flash-preview-0514",
-            "gemini-1.5-pro-preview-0514",
+            "gemini-1.5-flash",
+            "gemini-1.5-pro",
             "gemini-1.0-pro"
         ]
     })

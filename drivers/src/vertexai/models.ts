@@ -37,8 +37,8 @@ export function getAIModels() {
 // Builtin models. VertexAI doesn't provide an API to list models. so we have to hardcode them here.
 export const BuiltinModels: AIModel<string>[] = [
     {
-        id: "gemini-1.5-flash-preview-0514",
-        name: "Gemini Pro 1.5 Flash (0514 Preview)",
+        id: "gemini-1.5-flash",
+        name: "Gemini Pro 1.5 Flash",
         provider: "vertexai",
         owner: "google",
         type: ModelType.MultiModal,
@@ -47,8 +47,8 @@ export const BuiltinModels: AIModel<string>[] = [
 
     },
     {
-        id: "gemini-1.5-pro-preview-0514",
-        name: "Gemini Pro 1.5 Pro (0514 Preview)",
+        id: "gemini-1.5-pro",
+        name: "Gemini Pro 1.5 Pro",
         provider: "vertexai",
         owner: "google",
         type: ModelType.MultiModal,
@@ -121,8 +121,8 @@ export const BuiltinModels: AIModel<string>[] = [
 
 
 const Models: Record<string, ModelDefinition> = {
-    "gemini-1.5-flash-preview-0514": new GeminiModelDefinition("gemini-1.5-flash-preview-0514"),
-    "gemini-1.5-pro-preview-0514": new GeminiModelDefinition("gemini-1.5-pro-preview-0514"),
+    "gemini-1.5-flash": new GeminiModelDefinition("gemini-1.5-flash"),
+    "gemini-1.5-pro": new GeminiModelDefinition("gemini-1.5-pro"),
     "gemini-1.0-pro": new GeminiModelDefinition(),
     "text-bison": new Palm2TextDefinition(),
     "chat-bison": new Palm2ChatDefinition(),

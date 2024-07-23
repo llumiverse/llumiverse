@@ -1,12 +1,15 @@
 import { Content, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, InlineDataPart, TextPart } from "@google-cloud/vertexai";
-import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, PromptOptions, PromptRole, PromptSegment } from "@llumiverse/core";
+import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, PromptOptions, PromptRole, PromptSegment, readStreamAsBase64 } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
 import { BuiltinModels, ModelDefinition } from "../models.js";
-import { readStreamAsBase64 } from "@llumiverse/core";
 
 function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
-    return driver.vertexai.preview.getGenerativeModel({
+
+    const jsonMode = options.result_schema && options.model.includes("1.5");
+    const jsonModeWithSchema = jsonMode && options.model.includes("pro");
+
+    const model = driver.vertexai.getGenerativeModel({
         model: options.model,
         //TODO pass in the options
         safetySettings: [{
@@ -14,11 +17,15 @@ function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
             threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
         }],
         generationConfig: {
+            responseMimeType: jsonMode ? "application/json" : "text/plain",
+            responseSchema: jsonModeWithSchema ? options.result_schema : undefined, //not yet supported in the node client
             candidateCount: 1,
             temperature: options.temperature,
             maxOutputTokens: options.max_tokens
-        },
+        } as any,
     });
+
+    return model;
 }
 
 
@@ -39,7 +46,7 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
 
     model: AIModel
 
-    constructor(modelId: string = "gemini-1.0-pro") {
+    constructor(modelId: string = "gemini-1.5-pro") {
 
         const model = BuiltinModels.find(m => m.id === modelId);
         if (!model) {
@@ -53,6 +60,7 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
         const schema = options.result_schema;
         const contents: Content[] = [];
         const safety: string[] = [];
+        const jsonModeInConfig = options.result_schema && options.model.includes("1.5") && options.model.includes("pro");
 
         let lastUserContent: Content | undefined = undefined;
 
@@ -97,16 +105,7 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
         }
 
         let tools: any = undefined;
-        if (schema) {
-
-            // tools = [{
-            //     function_declarations: [{
-            //         name: "validate_json_response",
-            //         description: "Validate the given JSON response",
-            //         parameters: schema as any,
-            //     }]
-            // } as Tool];
-
+        if (schema && !jsonModeInConfig) {
             safety.push("The answer must be a JSON object using the following JSON Schema:\n" + JSON.stringify(schema));
         }
 
