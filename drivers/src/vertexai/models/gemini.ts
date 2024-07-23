@@ -7,7 +7,7 @@ import { BuiltinModels, ModelDefinition } from "../models.js";
 function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
 
     const jsonMode = options.result_schema && options.model.includes("1.5");
-    const jsonModeWithSchema = jsonMode && options.model.includes("pro");
+    //const jsonModeWithSchema = jsonMode && options.model.includes("pro");
 
     const model = driver.vertexai.getGenerativeModel({
         model: options.model,
@@ -18,7 +18,7 @@ function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
         }],
         generationConfig: {
             responseMimeType: jsonMode ? "application/json" : "text/plain",
-            responseSchema: jsonModeWithSchema ? options.result_schema : undefined, //not yet supported in the node client
+            //responseSchema: jsonModeWithSchema ? options.result_schema : undefined, //doesn't seem quite ready yet
             candidateCount: 1,
             temperature: options.temperature,
             maxOutputTokens: options.max_tokens
