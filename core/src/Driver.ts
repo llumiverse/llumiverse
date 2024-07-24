@@ -5,7 +5,7 @@
  */
 
 import { DefaultCompletionStream, FallbackCompletionStream } from "./CompletionStream.js";
-import { formatLlama2Prompt, formatTextPrompt } from "./formatters/index.js";
+import { formatLlama2Prompt, formatLlama3Prompt, formatTextPrompt } from "./formatters/index.js";
 import {
     AIModel,
     Completion,
@@ -186,8 +186,10 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
      * @returns
      */
     protected async formatPrompt(segments: PromptSegment[], opts: PromptOptions): Promise<PromptT> {
-        if (/\bllama2?\b/i.test(opts.model)) {
+        if (/\bllama.?2\b/i.test(opts.model)) {
             return formatLlama2Prompt(segments, opts.result_schema) as PromptT;
+        } else if (/\bllama.?3\b/i.test(opts.model)) {
+            return formatLlama3Prompt(segments, opts.result_schema) as PromptT;
         } else {
             return formatTextPrompt(segments, opts.result_schema) as PromptT;
         }

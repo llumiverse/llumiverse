@@ -79,7 +79,8 @@ if (process.env.BEDROCK_REGION) {
             "cohere.command-text-v14",
             "ai21.j2-mid-v1",
             "mistral.mixtral-8x7b-instruct-v0:1",
-            "cohere.command-r-plus-v1:0"
+            "cohere.command-r-plus-v1:0",
+            "meta.llama3-1-70b-instruct-v1:0"
         ]
     }
     )
@@ -96,7 +97,8 @@ if (process.env.GROQ_API_KEY) {
         }),
         models: [
             "llama3-70b-8192",
-            "mixtral-8x7b-32768"
+            "mixtral-8x7b-32768",
+            "llama-3.1-70b-versatile"
         ]
     })
 } else {
@@ -170,25 +172,25 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
     });
 
     test.each(models)(`${name}: execute prompt on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
-        const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 });
+        const r = await driver.execute(testPrompt_color, { model, temperature: 0.5, max_tokens: 1024 });
         console.debug("Result for " + model, JSON.stringify(r));
         assertCompletionOk(r);
     });
 
     test.each(models)(`${name}: execute prompt with streaming on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
-        const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024 })
+        const r = await driver.stream(testPrompt_color, { model, temperature: 0.5, max_tokens: 1024 })
         const out = await assertStreamingCompletionOk(r);
         console.debug("Result for " + model, JSON.stringify(out));
     });
 
     test.each(models)(`${name}: execute prompt with schema on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
-        const r = await driver.execute(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, result_schema: testSchema_color });
+        const r = await driver.execute(testPrompt_color, { model, temperature: 0.5, max_tokens: 1024, result_schema: testSchema_color });
         console.debug("Result for " + model, JSON.stringify(r.result));
         assertCompletionOk(r);
     });
 
     test.each(models)(`${name}: execute prompt with streaming and schema on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
-        const r = await driver.stream(testPrompt_color, { model, temperature: 0.8, max_tokens: 1024, result_schema: testSchema_color })
+        const r = await driver.stream(testPrompt_color, { model, temperature: 0.5, max_tokens: 1024, result_schema: testSchema_color })
         const out = await assertStreamingCompletionOk(r, true);
         console.log("Result for " + model, JSON.stringify(out));
     });
