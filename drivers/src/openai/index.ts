@@ -16,7 +16,7 @@ import {
 } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { formatOpenAILikeMultimodalPrompt } from "@llumiverse/core/formatters";
-import OpenAI from "openai";
+import OpenAI, { AzureOpenAI } from "openai";
 import { Stream } from "openai/streaming";
 
 const supportFineTunning = new Set([
@@ -27,25 +27,18 @@ const supportFineTunning = new Set([
     "gpt-4-0613"
 ]);
 
-export interface OpenAIDriverOptions extends DriverOptions {
-    apiKey: string;
+export interface BaseOpenAIDriverOptions extends DriverOptions {
 }
 
-export class OpenAIDriver extends AbstractDriver<
-    OpenAIDriverOptions,
+export abstract class BaseOpenAIDriver extends AbstractDriver<
+    BaseOpenAIDriverOptions,
     OpenAI.Chat.Completions.ChatCompletionMessageParam[]
 > {
-    static PROVIDER = "openai";
-    inputContentTypes: string[] = ["text/plain"];
-    generatedContentTypes: string[] = ["text/plain"];
-    service: OpenAI;
-    provider = OpenAIDriver.PROVIDER;
+    abstract provider: "azure_openai" | "openai";
+    abstract service: OpenAI | AzureOpenAI ;
 
-    constructor(opts: OpenAIDriverOptions) {
+    constructor(opts: BaseOpenAIDriverOptions) {
         super(opts);
-        this.service = new OpenAI({
-            apiKey: opts.apiKey,
-        });
         this.formatPrompt = formatOpenAILikeMultimodalPrompt as any //TODO: better type, we send back OpenAI.Chat.Completions.ChatCompletionMessageParam[] but just not compatbile with Function call that we don't use here
 
     }

@@ -1,7 +1,7 @@
 import { AIModel, AbstractDriver } from '@llumiverse/core';
 import 'dotenv/config';
 import { describe, expect, test } from "vitest";
-import { BedrockDriver, GroqDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver, VertexAIDriver, WatsonxDriver } from '../src';
+import { AzureOpenAIDriver, BedrockDriver, GroqDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver, VertexAIDriver, WatsonxDriver } from '../src';
 import { assertCompletionOk, assertStreamingCompletionOk } from './assertions';
 import { testPrompt_color, testPrompt_describeImage, testSchema_animalDescription, testSchema_color } from './samples';
 
@@ -56,16 +56,50 @@ if (process.env.OPENAI_API_KEY) {
         driver: new OpenAIDriver({
             apiKey: process.env.OPENAI_API_KEY as string
         }),
-        models: [
-            //"gpt-4-turbo-preview",
+        models:[
             "gpt-4o",
-            "gpt-3.5-turbo",
+            "gpt-3.5-turbo"
         ]
     }
     )
 } else {
     console.warn("OpenAI tests are skipped: OPENAI_API_KEY environment variable is not set");
 }
+
+const AZURE_OPENAI_MODELS = [
+    "gpt-4o",
+    "gpt-3.5-turbo"
+]
+
+if (process.env.AZURE_OPENAI_DEFAULTAUTH) {
+    drivers.push({
+        name: "azure-openai-default-auth",
+        driver: new AzureOpenAIDriver({
+            endpoint: process.env.AZURE_OPENAI_ENDPOINT as string,
+            deployment: process.env.AZURE_OPENAI_DEPLOYMENT as string
+        }),
+        models: AZURE_OPENAI_MODELS
+    }
+    )
+} else {
+    console.warn("OpenAI tests are skipped: OPENAI_API_KEY environment variable is not set");
+}
+
+
+if (process.env.AZURE_OPENAI_KEY && process.env.AZURE_OPENAI_ENDPOINT) {
+    drivers.push({
+        name: "azure-openai-key",
+        driver: new AzureOpenAIDriver({
+            apiKey: process.env.AZURE_OPENAI_KEY as string,
+            endpoint: process.env.AZURE_OPENAI_ENDPOINT as string,
+            deployment: process.env.AZURE_OPENAI_DEPLOYMENT as string
+        }),
+        models: AZURE_OPENAI_MODELS
+        })
+} else {
+    console.warn("OpenAI tests are skipped: OPENAI_API_KEY environment variable is not set");
+}
+
 
 if (process.env.BEDROCK_REGION) {
     drivers.push({
