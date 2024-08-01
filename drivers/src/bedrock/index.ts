@@ -251,11 +251,22 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 max_gen_len: options.max_tokens,
             } as LLama2RequestPayload
         } else if (contains(options.model, "claude")) {
+
+            const maxToken = () => {
+                if (options.max_tokens) {
+                    return options.max_tokens;
+                
+                } else if (contains(options.model, "claude-3-5")) {
+                    return 8192;
+                } else {
+                    return 4096
+                }
+            }
             return {
                 anthropic_version: "bedrock-2023-05-31",
                 ...(prompt as ClaudeMessagesPrompt),
                 temperature: options.temperature,
-                max_tokens: options.max_tokens,
+                max_tokens: maxToken(),
             } as ClaudeRequestPayload;
         } else if (contains(options.model, "ai21")) {
             return {
