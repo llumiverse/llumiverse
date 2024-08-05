@@ -41,7 +41,7 @@ if (process.env.TOGETHER_API_KEY) {
             apiKey: process.env.TOGETHER_API_KEY as string
         }),
         models: [
-            "togethercomputer/CodeLlama-34b-Instruct",
+            //"meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
             //"mistralai/Mixtral-8x7B-Instruct-v0.1" too slow in tests for now
         ]
     }
@@ -185,7 +185,6 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
         const r = await driver.listModels();
         fetchedModels = r;
         expect(r.length).toBeGreaterThan(0);
-        console.log(fetchedModels)
     });
 
 
@@ -214,19 +213,19 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
     test.each(models)(`${name}: execute prompt with streaming on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.5, max_tokens: 1024 })
         const out = await assertStreamingCompletionOk(r);
-        console.debug("Result for " + model, JSON.stringify(out));
+        console.log("Result for " + model, JSON.stringify(out));
     });
 
     test.each(models)(`${name}: execute prompt with schema on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
         const r = await driver.execute(testPrompt_color, { model, temperature: 0.5, max_tokens: 1024, result_schema: testSchema_color });
-        console.debug("Result for " + model, JSON.stringify(r.result));
+        console.log("Result for " + model, JSON.stringify(r.result));
         assertCompletionOk(r);
     });
 
     test.each(models)(`${name}: execute prompt with streaming and schema on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
         const r = await driver.stream(testPrompt_color, { model, temperature: 0.5, max_tokens: 1024, result_schema: testSchema_color })
         const out = await assertStreamingCompletionOk(r, true);
-        console.log("Result for " + model, JSON.stringify(out));
+        console.log("Result for prompt with streaming and schema" + model, JSON.stringify(out));
     });
 
 
