@@ -60,7 +60,7 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
         const schema = options.result_schema;
         const contents: Content[] = [];
         const safety: string[] = [];
-        const jsonModeInConfig = options.result_schema && options.model.includes("1.5") && options.model.includes("pro");
+        const jsonModeInConfig = false //options.result_schema && options.model.includes("1.5") && options.model.includes("pro");
 
         let lastUserContent: Content | undefined = undefined;
 
