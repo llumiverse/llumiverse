@@ -72,7 +72,7 @@
     "json-schema": "^0.4.0",
     "mnemonist": "^0.39.7",
     "node-web-stream-adapters": "^0.1.0",
-    "openai": "^4.53.2",
+    "openai": "^4.55.4",
     "replicate": "^0.29.0"
   },
   "ts_dual_module": {
