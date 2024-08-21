@@ -10,16 +10,18 @@ It solely focuses on abstracting LLMs and their execution platforms, and does no
 
 The following LLM platforms are supported in the current version:
 
-
-| Provider | Completion | Chat | Model Listing | Fine-Tuning |
-| -------- | ---------- | ---- | ------------- | ----------- |
-| OpenAI    | ✅        | ✅    | ✅            | ✅          |
-| Replicate | ✅        | ✅    | ✅            | ✅          |
-| AWS Bedrock | ✅      | ✅    | ✅            | ✅          |
-| HuggingFace Inference Endpoints | ✅ | ✅ | N/A | N/A       |
-| Google Vertex AI | ✅ | ✅ | Partial | In Progress |
-| Together AI| ✅ | ✅ | ✅ | In Progress |
-| Groq | ✅ | ✅ | ✅ | N/A |
+| Provider | Completion | Chat | Model Listing | Multimodal | Fine-Tuning |
+| --- | :-: | :-: | :-: | :-: | :-: |
+| AWS Bedrock | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Azure OpenAI | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Google Vertex AI | ✅ | ✅ | N/A | ✅ | By Request |
+| Groq | ✅ | ✅ | ✅ | N/A | N/A |
+| HuggingFace Inference Endpoints | ✅ | ✅ | N/A | N/A | N/A |
+| IBM WatsonX | ✅ | ✅ | ✅ | N/A | By Request |
+| Mistral AI | ✅ | ✅ | ✅ | N/A | By Request |
+| OpenAI | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Replicate | ✅ | ✅ | ✅ | N/A | ✅ |
+| Together AI| ✅ | ✅ | ✅ | N/A | By Request |
 
 New capabilities and platform can easily be added by creating a new driver for the platform.
 
