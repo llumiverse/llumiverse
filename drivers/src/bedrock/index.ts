@@ -149,7 +149,6 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
         const payload = this.preparePayload(prompt, options);
         const executor = this.getExecutor();
-        console.log("Requesting completion", JSON.stringify(payload));
         const res = await executor.invokeModel({
             modelId: options.model,
             contentType: "application/json",
