@@ -2,21 +2,14 @@
     "name": "@llumiverse/parent",
     "version": "0.13.0",
     "private": true,
-    "workspaces": [
-        "./core",
-        "./drivers",
-        "./examples"
-    ],
     "scripts": {
         "release": "npm publish --ws --access public",
-        "prepare": "cp ./README.md ./core/ && cp ./README.md ./drivers/",
-        "build": "npm run build --ws",
-        "test": "npm run test --ws",
-        "clean": "npm run clean --ws"
+        "prepare": "cp ./README.md ./core/ && cp ./README.md ./drivers/"
+
     },
-    "packageManager": "^npm@10.4.0",
     "devDependencies": {
         "npm-ws-tools": "^0.2.0",
         "typescript": "^5.3.3"
-    }
+    },
+    "packageManager": "pnpm@7.21.0"
 }

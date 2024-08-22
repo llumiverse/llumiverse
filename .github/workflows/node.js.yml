@@ -27,14 +27,23 @@ jobs:
         role-to-assume: arn:aws:iam::716085231028:role/ComposablePromptExecutor
         role-session-name: github-actions
         aws-region: us-west-2
+
+    - uses: pnpm/action-setup@v4
+      name: Install pnpm
+      with:
+        version: 9
+        run_install: false
+  
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@main
       with:
         node-version: ${{ matrix.node-version }}
-        cache: 'npm'
-    - run: npm ci
-    - run: npm run build --if-present
-    - run: npm run test 
+        cache: 'pnpm'
+
+    
+    - run: pnpm install
+    - run: pnpm run build
+    - run: pnpm run test 
       env:
         TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
         MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}
