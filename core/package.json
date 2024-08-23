@@ -57,7 +57,7 @@
     },
     "scripts": {
         "test": "vitest run",
-        "build": "tsmod build",
+        "build": "npx tsmod build",
         "clean": "rimraf ./lib tsconfig.tsbuildinfo"
     },
     "author": "Llumiverse",
