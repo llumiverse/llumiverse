@@ -41,8 +41,8 @@ jobs:
 
     
     - run: pnpm install
-    - run: pnpm run build
-    - run: pnpm run test 
+    - run: pnpm build
+    - run: npx vitest
       env:
         TOGETHER_API_KEY: ${{ secrets.TOGETHER_API_KEY }}
         MISTRAL_API_KEY: ${{ secrets.MISTRAL_API_KEY }}

@@ -9,7 +9,8 @@
     },
     "devDependencies": {
         "npm-ws-tools": "^0.2.0",
-        "typescript": "^5.3.3"
+        "typescript": "^5.3.3",
+        "vitest": "^2.0.5"
     },
     "packageManager": "pnpm@7.21.0"
 }
