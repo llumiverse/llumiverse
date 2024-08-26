@@ -3,6 +3,7 @@
     "version": "0.13.0",
     "private": true,
     "scripts": {
+        "preinstall": "npx only-allow pnpm",
         "release": "pnpm -r publish --access public",
         "prepare": "cp ./README.md ./core/ && cp ./README.md ./drivers/",
         "build": "pnpm -r build"
