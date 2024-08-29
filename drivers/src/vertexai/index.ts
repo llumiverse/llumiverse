@@ -1,9 +1,9 @@
 import { GenerateContentRequest, VertexAI } from "@google-cloud/vertexai";
 import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload, PromptOptions, PromptSegment } from "@llumiverse/core";
 import { FetchClient } from "api-fetch-client";
+import { GoogleAuthOptions } from "google-auth-library";
 import { TextEmbeddingsOptions, getEmbeddingsForText } from "./embeddings/embeddings-text.js";
 import { BuiltinModels, getModelDefinition } from "./models.js";
-import { GoogleAuthOptions } from "google-auth-library";
 
 
 export interface VertexAIDriverOptions extends DriverOptions {
@@ -35,7 +35,7 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
             project: this.options.project,
         }).withAuthCallback(async () => {
             //@ts-ignore
-            const token = await this.vertexai.preview.googleAuth.getAccessToken();
+            const token = await this.options.googleAuthOptions?.authClient?.getAccessToken();
             return `Bearer ${token}`;
         });
         // this.aiplatform = new v1.ModelServiceClient({
