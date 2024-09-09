@@ -9,8 +9,8 @@ importers:
   .:
     devDependencies:
       npm-ws-tools:
-        specifier: ^0.2.0
-        version: 0.2.0
+        specifier: ^0.3.0
+        version: 0.3.0
       typescript:
         specifier: ^5.3.3
         version: 5.5.4
@@ -37,8 +37,8 @@ importers:
         specifier: ^7.0.15
         version: 7.0.15
       api-fetch-client:
-        specifier: 0.12.0
-        version: 0.12.0
+        specifier: ^0.13.0
+        version: 0.13.0
       rimraf:
         specifier: ^5.0.5
         version: 5.0.10
@@ -91,8 +91,8 @@ importers:
         specifier: ^3.3.0
         version: 3.3.0
       api-fetch-client:
-        specifier: 0.12.0
-        version: 0.12.0
+        specifier: ^0.13.0
+        version: 0.13.0
       eventsource:
         specifier: ^2.0.2
         version: 2.0.2
@@ -984,8 +984,11 @@ packages:
     resolution: {integrity: sha512-bN798gFfQX+viw3R7yrGWRqnrN2oRkEkUjjl4JNn4E8GxxbjtG3FbrEIIY3l8/hrwUwIeCZvi4QuOTP4MErVug==}
     engines: {node: '>=12'}
 
-  api-fetch-client@0.12.0:
-    resolution: {integrity: sha512-PdUBKDMszaUugvsRd675boL/xNZMlRZp0KDzpErClKEoF7605kg99Cod4xiZtFRRIZlqsgHFPvYfHEIhs27kyQ==}
+  api-fetch-client@0.13.0:
+    resolution: {integrity: sha512-ps5VlSblntyLe5ot30CodzKQGuHWmGXVZKoGkNXqeRU2zxh4mnyRjYz2/VBZed7a++mJ1G9EAoxZEtfM3fHihA==}
+
+  argparse@2.0.1:
+    resolution: {integrity: sha512-8+9WqebbFzpX9OR+Wa6O29asIogeRMzcGtAINdpMHHyAg10f05aSFVBbcEqGf/PXw1EjAZ+q2/bEBg3DvurK3Q==}
 
   assertion-error@1.1.0:
     resolution: {integrity: sha512-jgsaNduz+ndvGyFt3uSuWqvy4lCnIJiovtouQN5JZHOKCS2QuhEdbcQHFhVksz2N2U9hXJo8odG7ETyWlEeuDw==}
@@ -1056,6 +1059,10 @@ packages:
   combined-stream@1.0.8:
     resolution: {integrity: sha512-FQN4MRfuJeHf7cBbBMJFXhKSDq+2kAArBlmRBvcvFE5BB1HZKXtSFASDhdlz9zOYwxh8lDdnvmMOe/+5cdoEdg==}
     engines: {node: '>= 0.8'}
+
+  commander@11.1.0:
+    resolution: {integrity: sha512-yPVavfyCcRhmorC7rWlkHn15b4wDVgVmBA7kV4QVBsF7kv/9TKJAbAXVTxvTnwP8HHKjRCJDClKbciiYS7p0DQ==}
+    engines: {node: '>=16'}
 
   confbox@0.1.7:
     resolution: {integrity: sha512-uJcB/FKZtBMCJpK8MQji6bJHgu1tixKPxRLeGkNzBoOZzpnZUJm0jm2/sBDWcuBx1dYgxV4JU+g5hmNxCyAmdA==}
@@ -1264,6 +1271,10 @@ packages:
   js-tokens@9.0.0:
     resolution: {integrity: sha512-WriZw1luRMlmV3LGJaR6QOJjWwgLUTf89OwT2lUOyjX2dJGBwgmIkbcz+7WFZjrZM635JOIR517++e/67CP9dQ==}
 
+  js-yaml@4.1.0:
+    resolution: {integrity: sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==}
+    hasBin: true
+
   json-bigint@1.0.0:
     resolution: {integrity: sha512-SiPv/8VpZuWbvLSMtTDU8hEfrZWg/mH/nV/b4o0CYbSxu1UIQPLdwKOCIyLQX+VIPO5vrLX3i8qtqFyhdPSUSQ==}
 
@@ -1389,8 +1400,8 @@ packages:
     resolution: {integrity: sha512-ppwTtiJZq0O/ai0z7yfudtBpWIoxM8yE6nHi1X47eFR2EWORqfbu6CnPlNsjeN683eT0qG6H/Pyf9fCcvjnnnQ==}
     engines: {node: ^12.20.0 || ^14.13.1 || >=16.0.0}
 
-  npm-ws-tools@0.2.0:
-    resolution: {integrity: sha512-JtvxmXlRUCNxtT+5BpS7b3jM5CaQCQWXzlcDcQtwNUqmg/4LVtxNrKKjgmMPQG9wFZNF9s/TRPpuaaxuY5kxBA==}
+  npm-ws-tools@0.3.0:
+    resolution: {integrity: sha512-EETKCd/Qe7HxCPWYc6ZM5e8mFGPOgZ9jMioYW0Piizu7/I1T8l+ZOYW9Ro2zy0Ln4/K264VnRSnpfMO/2QskMA==}
     hasBin: true
 
   obliterator@2.0.4:
@@ -3136,9 +3147,11 @@ snapshots:
 
   ansi-styles@6.2.1: {}
 
-  api-fetch-client@0.12.0:
+  api-fetch-client@0.13.0:
     dependencies:
       eventsource-parser: 1.1.2
+
+  argparse@2.0.1: {}
 
   assertion-error@1.1.0: {}
 
@@ -3210,6 +3223,8 @@ snapshots:
   combined-stream@1.0.8:
     dependencies:
       delayed-stream: 1.0.0
+
+  commander@11.1.0: {}
 
   confbox@0.1.7: {}
 
@@ -3454,6 +3469,10 @@ snapshots:
 
   js-tokens@9.0.0: {}
 
+  js-yaml@4.1.0:
+    dependencies:
+      argparse: 2.0.1
+
   json-bigint@1.0.0:
     dependencies:
       bignumber.js: 9.1.2
@@ -3581,9 +3600,11 @@ snapshots:
     dependencies:
       path-key: 4.0.0
 
-  npm-ws-tools@0.2.0:
+  npm-ws-tools@0.3.0:
     dependencies:
+      commander: 11.1.0
       glob: 10.4.5
+      js-yaml: 4.1.0
 
   obliterator@2.0.4: {}
 
