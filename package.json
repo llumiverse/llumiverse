@@ -1,9 +1,10 @@
 {
     "name": "@llumiverse/parent",
-    "version": "0.13.0",
+    "version": "0.14.0",
     "private": true,
     "scripts": {
         "preinstall": "npx only-allow pnpm",
+        "bump": "npx npm-ws-tools bump minor",
         "release": "pnpm -r publish --access public",
         "prepare": "cp ./README.md ./core/ && cp ./README.md ./drivers/",
         "build": "pnpm -r build"
