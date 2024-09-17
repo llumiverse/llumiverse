@@ -1,28 +1,45 @@
-import { Content, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, InlineDataPart, TextPart } from "@google-cloud/vertexai";
+import { Content, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, InlineDataPart, ModelParams, ResponseSchema, TextPart } from "@google-cloud/vertexai";
 import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, PromptOptions, PromptRole, PromptSegment, readStreamAsBase64 } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
 import { BuiltinModels, ModelDefinition } from "../models.js";
 
-function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions) {
+function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions, modelParams?: ModelParams) {
 
     const jsonMode = options.result_schema && options.model.includes("1.5");
-    //const jsonModeWithSchema = jsonMode && options.model.includes("pro");
+    const jsonModeWithSchema = jsonMode && options.model.includes("pro");
+    const schema: ResponseSchema = options.result_schema as ResponseSchema;
 
     const model = driver.vertexai.getGenerativeModel({
         model: options.model,
-        //TODO pass in the options
-        safetySettings: [{
+        safetySettings: modelParams?.safetySettings ?? [{
             category: HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-            threshold: HarmBlockThreshold.BLOCK_MEDIUM_AND_ABOVE
-        }],
+            threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH
+        },
+        {
+            category: HarmCategory.HARM_CATEGORY_HARASSMENT,
+            threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH
+        },
+        {
+            category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+            threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH
+        },
+        {
+            category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+            threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH
+        },
+        {
+            category: HarmCategory.HARM_CATEGORY_UNSPECIFIED,
+            threshold: HarmBlockThreshold.BLOCK_ONLY_HIGH
+        }
+    ], 
         generationConfig: {
             responseMimeType: jsonMode ? "application/json" : "text/plain",
-            //responseSchema: jsonModeWithSchema ? options.result_schema : undefined, //doesn't seem quite ready yet
-            candidateCount: 1,
+            responseSchema: jsonModeWithSchema ? schema : undefined,
+            candidateCount: modelParams?.generationConfig?.candidateCount ?? 1,
             temperature: options.temperature,
-            maxOutputTokens: options.max_tokens
-        } as any,
+            maxOutputTokens: options.max_tokens,
+        },
     });
 
     return model;
@@ -60,7 +77,7 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
         const schema = options.result_schema;
         const contents: Content[] = [];
         const safety: string[] = [];
-        const jsonModeInConfig = false //options.result_schema && options.model.includes("1.5") && options.model.includes("pro");
+        const jsonModeInConfig = options.result_schema && options.model.includes("1.5") && options.model.includes("pro");
 
         let lastUserContent: Content | undefined = undefined;
 
