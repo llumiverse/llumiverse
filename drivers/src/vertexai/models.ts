@@ -1,10 +1,7 @@
 import { AIModel, Completion, ExecutionOptions, ModelType, PromptOptions, PromptSegment } from "@llumiverse/core";
 import { VertexAIDriver } from "./index.js";
-import { CodeyChatDefinition } from "./models/codey-chat.js";
-import { CodeyTextDefinition } from "./models/codey-text.js";
 import { GeminiModelDefinition } from "./models/gemini.js";
-import { Palm2ChatDefinition } from "./models/palm2-chat.js";
-import { Palm2TextDefinition } from "./models/palm2-text.js";
+
 
 
 
@@ -64,41 +61,6 @@ export const BuiltinModels: AIModel<string>[] = [
         type: ModelType.Text,
         can_stream: true,
     },
-    { // ChatModel.from_pretrained("chat-bison@002")
-        id: "chat-bison",
-        name: "PaLM 2 Chat Bison",
-        provider: "vertexai",
-        owner: "google",
-        type: ModelType.Chat,
-    },
-    {
-        id: "text-bison", // versions 001, 002
-        name: "PaLM 2 Text Bison",
-        provider: "vertexai",
-        owner: "google",
-        type: ModelType.Text,
-    },
-    {
-        id: "code-gecko",
-        name: "Codey for Code Completion",
-        provider: "vertexai",
-        owner: "google",
-        type: ModelType.Code,
-    },
-    {
-        id: "code-bison",
-        name: "Codey for Code Generation",
-        provider: "vertexai",
-        owner: "google",
-        type: ModelType.Code,
-    },
-    {
-        id: "codechat-bison",
-        name: "Codey for Code Chat",
-        provider: "vertexai",
-        owner: "google",
-        type: ModelType.Code,
-    },
     {
         id: "tablextembedding-gecko",
         name: "Gecko Text Embeddings",
@@ -124,8 +86,4 @@ const Models: Record<string, ModelDefinition> = {
     "gemini-1.5-flash": new GeminiModelDefinition("gemini-1.5-flash"),
     "gemini-1.5-pro": new GeminiModelDefinition("gemini-1.5-pro"),
     "gemini-1.0-pro": new GeminiModelDefinition(),
-    "text-bison": new Palm2TextDefinition(),
-    "chat-bison": new Palm2ChatDefinition(),
-    "code-bison": new CodeyTextDefinition(),
-    "codechat-bison": new CodeyChatDefinition(),
 }

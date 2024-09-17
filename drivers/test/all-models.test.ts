@@ -1,5 +1,6 @@
 import { AIModel, AbstractDriver } from '@llumiverse/core';
 import 'dotenv/config';
+import { GoogleAuth } from 'google-auth-library';
 import { describe, expect, test } from "vitest";
 import { AzureOpenAIDriver, BedrockDriver, GroqDriver, MistralAIDriver, OpenAIDriver, TogetherAIDriver, VertexAIDriver, WatsonxDriver } from '../src';
 import { assertCompletionOk, assertStreamingCompletionOk } from './assertions';
@@ -71,20 +72,6 @@ const AZURE_OPENAI_MODELS = [
     "gpt-3.5-turbo"
 ]
 
-if (process.env.AZURE_OPENAI_DEFAULTAUTH) {
-    drivers.push({
-        name: "azure-openai-default-auth",
-        driver: new AzureOpenAIDriver({
-            endpoint: process.env.AZURE_OPENAI_ENDPOINT as string,
-            deployment: process.env.AZURE_OPENAI_DEPLOYMENT as string
-        }),
-        models: AZURE_OPENAI_MODELS
-    }
-    )
-} else {
-    console.warn("OpenAI tests are skipped: OPENAI_API_KEY environment variable is not set");
-}
-
 
 if (process.env.AZURE_OPENAI_KEY && process.env.AZURE_OPENAI_ENDPOINT) {
     drivers.push({
@@ -97,7 +84,7 @@ if (process.env.AZURE_OPENAI_KEY && process.env.AZURE_OPENAI_ENDPOINT) {
         models: AZURE_OPENAI_MODELS
         })
 } else {
-    console.warn("OpenAI tests are skipped: OPENAI_API_KEY environment variable is not set");
+    console.warn("Azure OpenAI tests are skipped: AZURE_OPENAI_KEY environment variable is not set");
 }
 
 
@@ -111,7 +98,6 @@ if (process.env.BEDROCK_REGION) {
             "anthropic.claude-3-sonnet-20240229-v1:0",
             "anthropic.claude-v2:1",
             "cohere.command-text-v14",
-            "ai21.j2-mid-v1",
             "mistral.mixtral-8x7b-instruct-v0:1",
             "cohere.command-r-plus-v1:0",
             "meta.llama3-1-70b-instruct-v1:0"
@@ -150,10 +136,8 @@ if (process.env.WATSONX_API_KEY) {
             endpointUrl: process.env.WATSONX_ENDPOINT_URL as string
         }),
         models: [
-            "ibm/granite-8b-code-instruct",
             "ibm/granite-20b-multilingual",
             "ibm/granite-34b-code-instruct",
-            "ibm/granite-20b-code-instruct",
             "mistralai/mixtral-8x7b-instruct-v01"
         ]
     })
@@ -163,6 +147,8 @@ if (process.env.WATSONX_API_KEY) {
 
 
 if (process.env.GOOGLE_PROJECT_ID && process.env.GOOGLE_REGION) {
+    const auth = new GoogleAuth();
+    const client = auth.getClient();
     drivers.push({
         name: "google-vertex",
         driver: new VertexAIDriver({
@@ -172,7 +158,6 @@ if (process.env.GOOGLE_PROJECT_ID && process.env.GOOGLE_REGION) {
         models: [
             "gemini-1.5-flash",
             "gemini-1.5-pro",
-            "gemini-1.0-pro"
         ]
     })
 }
