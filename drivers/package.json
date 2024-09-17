@@ -56,12 +56,11 @@
         "vitest": "^1.6.0"
     },
     "dependencies": {
-        "@aws-sdk/client-bedrock": "^3.652.0",
-        "@aws-sdk/client-bedrock-runtime": "^3.651.1",
-        "@aws-sdk/client-s3": "^3.651.1",
-        "@aws-sdk/client-sso-oidc": "^3.651.1",
-        "@aws-sdk/credential-providers": "^3.651.1",
-        "@aws-sdk/lib-storage": "^3.651.1",
+        "@aws-sdk/client-bedrock": "3.635.0",
+        "@aws-sdk/client-bedrock-runtime": "3.635.0",
+        "@aws-sdk/client-s3": "3.635.0",
+        "@aws-sdk/credential-providers": "3.635.0",
+        "@aws-sdk/lib-storage": "3.635.0",
         "@azure/identity": "^4.4.1",
         "@azure/openai": "2.0.0-beta.2",
         "@google-cloud/vertexai": "^1.7.0",

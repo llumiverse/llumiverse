@@ -55,22 +55,22 @@ importers:
   drivers:
     dependencies:
       '@aws-sdk/client-bedrock':
-        specifier: ^3.652.0
+        specifier: ^3.635.0
         version: 3.652.0
       '@aws-sdk/client-bedrock-runtime':
-        specifier: ^3.651.1
+        specifier: ^3.635.0
         version: 3.651.1
       '@aws-sdk/client-s3':
-        specifier: ^3.651.1
+        specifier: ^3.635.0
         version: 3.651.1
       '@aws-sdk/client-sso-oidc':
-        specifier: ^3.651.1
+        specifier: ^3.635.0
         version: 3.651.1(@aws-sdk/client-sts@3.651.1)
       '@aws-sdk/credential-providers':
-        specifier: ^3.651.1
+        specifier: ^3.635.0
         version: 3.651.1(@aws-sdk/client-sso-oidc@3.651.1(@aws-sdk/client-sts@3.651.1))
       '@aws-sdk/lib-storage':
-        specifier: ^3.651.1
+        specifier: ^3.635.0
         version: 3.651.1(@aws-sdk/client-s3@3.651.1)
       '@azure/identity':
         specifier: ^4.4.1
