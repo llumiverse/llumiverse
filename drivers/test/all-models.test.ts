@@ -17,6 +17,24 @@ interface TestDriver {
 
 const drivers: TestDriver[] = [];
 
+
+if (process.env.GOOGLE_PROJECT_ID && process.env.GOOGLE_REGION) {
+    const auth = new GoogleAuth();
+    const client = auth.getClient();
+    drivers.push({
+        name: "google-vertex",
+        driver: new VertexAIDriver({
+            project: process.env.GOOGLE_PROJECT_ID as string,
+            region: process.env.GOOGLE_REGION as string,
+        }),
+        models: [
+            "gemini-1.5-flash",
+            "gemini-1.5-pro",
+        ]
+    })
+}
+
+
 if (process.env.MISTRAL_API_KEY) {
     drivers.push({
         name: "mistralai",
@@ -143,23 +161,6 @@ if (process.env.WATSONX_API_KEY) {
     })
 } else {
     console.warn("Groq tests are skipped: WATSONX_API_KEY environment variable is not set");
-}
-
-
-if (process.env.GOOGLE_PROJECT_ID && process.env.GOOGLE_REGION) {
-    const auth = new GoogleAuth();
-    const client = auth.getClient();
-    drivers.push({
-        name: "google-vertex",
-        driver: new VertexAIDriver({
-            project: process.env.GOOGLE_PROJECT_ID as string,
-            region: process.env.GOOGLE_REGION as string,
-        }),
-        models: [
-            "gemini-1.5-flash",
-            "gemini-1.5-pro",
-        ]
-    })
 }
 
 describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => {
