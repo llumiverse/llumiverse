@@ -41,10 +41,17 @@ jobs:
     - run: pnpm install
     - run: pnpm build
 
-    - uses: 'google-github-actions/auth@v2'
+    - name: Authenticate with Google Cloud
+      uses: "google-github-actions/auth@v2"
+      id: gauth
       with:
-        credentials_json: '${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}'
+        token_format: access_token
+        project_id: "dengenlabs"
+        service_account: gar-pusher@dengenlabs.iam.gserviceaccount.com
+        workload_identity_provider: "projects/265888598630/locations/global/workloadIdentityPools/composable-cloud/providers/github"
+        access_token_lifetime: 600s
         create_credentials_file: true
+
     - uses: 'aws-actions/configure-aws-credentials@v4.0.2'
       with:
         audience: sts.amazonaws.com
