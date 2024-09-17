@@ -73,7 +73,9 @@ export async function formatOpenAILikeMultimodalPrompt(segments: PromptSegment[]
                     type: "image_url"
                 })
             }
-        } else {
+        }
+
+        if (msg.content) {
             parts.push({
                 text: msg.content,
                 type: "text"
