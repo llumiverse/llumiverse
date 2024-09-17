@@ -47,7 +47,6 @@ jobs:
       with:
         token_format: access_token
         project_id: "dengenlabs"
-        service_account: gar-pusher@dengenlabs.iam.gserviceaccount.com
         workload_identity_provider: "projects/265888598630/locations/global/workloadIdentityPools/composable-cloud/providers/github"
         access_token_lifetime: 600s
         create_credentials_file: true
