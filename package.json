@@ -3,14 +3,15 @@
     "version": "0.15.0",
     "private": true,
     "scripts": {
-        "preinstall": "npx only-allow pnpm",
-        "bump": "npx npm-ws-tools bump minor",
+        "preinstall": "pnpm exec only-allow pnpm",
+        "bump": "pnpm exec npm-ws-tools bump minor",
         "release": "pnpm -r publish --access public",
         "prepare": "cp ./README.md ./core/ && cp ./README.md ./drivers/",
         "build": "pnpm -r build"
     },
     "devDependencies": {
         "npm-ws-tools": "^0.3.0",
+        "only-allow": "^1.2.1",
         "typescript": "^5.6.2",
         "vitest": "^2.1.1"
     },

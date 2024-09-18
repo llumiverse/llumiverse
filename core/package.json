@@ -56,8 +56,9 @@
         }
     },
     "scripts": {
+        "preinstall": "pnpm exec only-allow pnpm",
         "test": "vitest run",
-        "build": "npx tsmod build",
+        "build": "pnpm exec tsmod build",
         "clean": "rimraf ./lib tsconfig.tsbuildinfo"
     },
     "author": "Llumiverse",
