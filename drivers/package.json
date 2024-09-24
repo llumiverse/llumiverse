@@ -14,7 +14,6 @@
         "require": "./lib/cjs/index.js"
     },
     "scripts": {
-        "preinstall": "pnpm exec only-allow pnpm",
         "test": "vitest run --retry 3",
         "build": "pnpm exec tsmod build",
         "clean": "rimraf ./lib tsconfig.tsbuildinfo"
