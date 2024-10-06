@@ -127,11 +127,11 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
         throw new Error("Method not implemented.");
     }
 
-    async generateEmbeddings({ content, model = "mistral-embed" }: EmbeddingsOptions): Promise<EmbeddingsResult> {
+    async generateEmbeddings({ text, model = "mistral-embed" }: EmbeddingsOptions): Promise<EmbeddingsResult> {
         const r = await this.client.post('/v1/embeddings', {
             payload: {
                 model,
-                input: [content],
+                input: [ text ],
                 encoding_format: "float"
             },
         });

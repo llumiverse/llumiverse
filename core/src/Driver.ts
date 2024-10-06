@@ -92,7 +92,7 @@ export interface Driver<PromptT = unknown> {
     //check that it is possible to connect to the environment
     validateConnection(): Promise<boolean>;
 
-    //generate embeddings for a given text
+    //generate embeddings for a given text or image
     generateEmbeddings(options: EmbeddingsOptions): Promise<EmbeddingsResult>;
 
 }

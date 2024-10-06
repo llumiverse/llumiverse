@@ -226,9 +226,18 @@ export abstract class BaseOpenAIDriver extends AbstractDriver<
     }
 
 
-    async generateEmbeddings({ content, model = "text-embedding-ada-002" }: EmbeddingsOptions): Promise<EmbeddingsResult> {
+    async generateEmbeddings({ text, image, model = "text-embedding-ada-002" }: EmbeddingsOptions): Promise<EmbeddingsResult> {
+
+        if (image) {
+            throw new Error("Image embeddings not supported by OpenAI");
+        }
+
+        if (!text) {
+            throw new Error("No text provided");
+        }
+
         const res = await this.service.embeddings.create({
-            input: content,
+            input: text,
             model: model,
         });
 
