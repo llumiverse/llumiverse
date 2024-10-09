@@ -4,18 +4,18 @@ import { JSONObject } from "./json.js";
 
 export interface EmbeddingsOptions {
     /**
-     * The content to generate the embeddings for. Required.
+     * The text to generate the embeddings for. One of text or image is required.
      */
-    content: string;
+    text?: string;
+    /**
+     * The image to generate embeddings for
+     */
+    image?: string
     /**
      * The model to use to generate the embeddings. Optional.
      */
     model?: string;
-    /**
-     * Additional options for the embeddings generation. Optional.
-     * The supported properties depends on the target implementation.
-     */
-    [key: string]: any;
+
 }
 
 export interface EmbeddingsResult {
@@ -26,15 +26,12 @@ export interface EmbeddingsResult {
     /**
      * The model used to hgenerate the embeddings.
      */
-    model?: string;
+    model: string;
     /**
      * Number of tokens of the input text.
      */
     token_count?: number;
-    /**
-     * Additional properties. Depends on the target implementation.
-     */
-    [key: string]: any;
+
 }
 
 export interface ResultValidationError {

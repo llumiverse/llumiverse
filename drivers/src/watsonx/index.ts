@@ -137,8 +137,12 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
 
     async generateEmbeddings(options: EmbeddingsOptions): Promise<EmbeddingsResult> {
 
+        if (!options.text) {
+            throw new Error ("No text provided");
+        }
+
         const payload: GenerateEmbeddingPayload = {
-            inputs: [options.content],
+            inputs: [options.text],
             model_id: options.model ?? 'ibm/slate-125m-english-rtrvr',
             project_id: this.projectId
         }
