@@ -39,6 +39,11 @@ function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions, m
             candidateCount: modelParams?.generationConfig?.candidateCount ?? 1,
             temperature: options.temperature,
             maxOutputTokens: options.max_tokens,
+            topP: options.top_p,
+            topK: options.top_k,
+            frequencyPenalty: options.frequency_penalty,
+            stopSequences: typeof options.stop_sequence === 'string' ?
+            [options.stop_sequence] : options.stop_sequence
         },
     });
 

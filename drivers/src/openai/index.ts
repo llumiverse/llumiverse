@@ -90,11 +90,17 @@ export abstract class BaseOpenAIDriver extends AbstractDriver<
                 return chunk.choices[0]?.delta?.content ?? "";
             };
 
+        //TODO: OpenAI o1 support requires max_completions_tokens
         const stream = (await this.service.chat.completions.create({
             stream: true,
             model: options.model,
             messages: prompt,
             temperature: options.temperature,
+            top_p: options.top_p,
+            //top_logprobs: options.top_logprobs,       //Logprobs output currently not supported
+            //logprobs: options.top_logprobs ? true : false,
+            presence_penalty: options.presence_penalty,
+            frequency_penalty: options.frequency_penalty,
             n: 1,
             max_tokens: options.max_tokens,
             tools: options.result_schema
@@ -131,11 +137,17 @@ export abstract class BaseOpenAIDriver extends AbstractDriver<
             ]
             : undefined;
 
+        //TODO: OpenAI o1 support requires max_completions_tokens
         const res = await this.service.chat.completions.create({
             stream: false,
             model: options.model,
             messages: prompt,
             temperature: options.temperature,
+            top_p: options.top_p,
+            //top_logprobs: options.top_logprobs,       //Logprobs output currently not supported
+            //logprobs: options.top_logprobs ? true : false,
+            presence_penalty: options.presence_penalty,
+            frequency_penalty: options.frequency_penalty,
             n: 1,
             max_tokens: options.max_tokens,
             tools: functions,

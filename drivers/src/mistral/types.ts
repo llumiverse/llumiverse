@@ -138,7 +138,8 @@ export interface CompletionRequestParams {
     safeMode?: boolean,
     safePrompt?: boolean,
     toolChoice?: ToolChoice,
-    responseFormat?: ResponseFormat
+    responseFormat?: ResponseFormat,
+    stopSequences?: string[],
 }
 
 // class MistralClient {

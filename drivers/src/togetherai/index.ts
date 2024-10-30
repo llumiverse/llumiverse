@@ -30,6 +30,10 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
     }
 
     async requestCompletion(prompt: string, options: ExecutionOptions): Promise<Completion<any>> {
+
+        const stop_seq = typeof options.stop_sequence == 'string' ? 
+            [options.stop_sequence] : options.stop_sequence ?? [];
+
         const res = await this.fetchClient.post('/v1/completions', {
             payload: {
                 model: options.model,
@@ -37,9 +41,15 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
                 response_format: this.getResponseFormat(options),
                 max_tokens: options.max_tokens,
                 temperature: options.temperature,
+                top_p: options.top_p,
+                top_k: options.top_k,
+                //logprobs: options.top_logprobs,       //Logprobs output currently not supported
+                frequency_penalty: options.frequency_penalty,
+                presence_penalty: options.presence_penalty,
                 stop: [
                     "</s>",
-                    "[/INST]"
+                    "[/INST]",
+                    ...stop_seq,
                 ],
             }
         }) as TextCompletion;
@@ -59,6 +69,8 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
     }
 
     async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<string>> {
+        const stop_seq = typeof options.stop_sequence == 'string' ? 
+            [options.stop_sequence] : options.stop_sequence ?? [];
 
         const stream = await this.fetchClient.post('/v1/completions', {
             payload: {
@@ -67,10 +79,16 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
                 max_tokens: options.max_tokens,
                 temperature: options.temperature,
                 response_format: this.getResponseFormat(options),
+                top_p: options.top_p,
+                top_k: options.top_k,
+                //logprobs: options.top_logprobs,       //Logprobs output currently not supported
+                frequency_penalty: options.frequency_penalty,
+                presence_penalty: options.presence_penalty,
                 stream: true,
                 stop: [
                     "</s>",
-                    "[/INST]"
+                    "[/INST]",
+                    ...stop_seq,
                 ],
             },
             reader: 'sse'

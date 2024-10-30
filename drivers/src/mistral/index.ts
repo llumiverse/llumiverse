@@ -94,8 +94,11 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
                 messages: messages,
                 maxTokens: options.max_tokens,
                 temperature: options.temperature,
+                topP: options.top_p,
                 responseFormat: this.getResponseFormat(options),
-                stream: true
+                stream: true,
+                stopSequences: typeof options.stop_sequence === 'string' ?
+                [options.stop_sequence] : options.stop_sequence,
             }),
             reader: 'sse'
         });
@@ -173,6 +176,7 @@ function _makeChatCompletionRequest({
     safePrompt,
     toolChoice,
     responseFormat,
+    stopSequences,
 }: CompletionRequestParams) {
     return {
         model: model,
@@ -186,5 +190,6 @@ function _makeChatCompletionRequest({
         safe_prompt: (safeMode || safePrompt) ?? undefined,
         tool_choice: toolChoice ?? undefined,
         response_format: responseFormat ?? undefined,
+        stop: stopSequences ?? undefined,
     };
 };
