@@ -59,9 +59,6 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
     }
 
     async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunk>> {
-        const stop_seq = typeof options.stop_sequence == 'string' ? 
-            [options.stop_sequence] : options.stop_sequence ?? [];
-
         const stream = await this.fetchClient.post('/v1/completions', {
             payload: {
                 model: options.model,
