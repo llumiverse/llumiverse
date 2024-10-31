@@ -22,7 +22,8 @@ import {
     PromptSegment,
     TrainingJob,
     TrainingOptions,
-    TrainingPromptOptions
+    TrainingPromptOptions,
+    CompletionChunk
 } from "./types.js";
 import { validateResult } from "./validation.js";
 
@@ -223,7 +224,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
 
     abstract requestCompletion(prompt: PromptT, options: ExecutionOptions): Promise<Completion>;
 
-    abstract requestCompletionStream(prompt: PromptT, options: ExecutionOptions): Promise<AsyncIterable<string>>;
+    abstract requestCompletionStream(prompt: PromptT, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunk>>;
 
     //list models available for this environement
     abstract listModels(params?: ModelSearchPayload): Promise<AIModel[]>;

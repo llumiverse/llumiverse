@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment, CompletionChunkObject } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { OpenAITextMessage, formatOpenAILikeTextPrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import Groq from "groq-sdk";
@@ -85,7 +85,7 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
         };
     }
 
-    async requestCompletionStream(messages: OpenAITextMessage[], options: ExecutionOptions): Promise<AsyncIterable<string>> {
+    async requestCompletionStream(messages: OpenAITextMessage[], options: ExecutionOptions): Promise<AsyncIterable<CompletionChunkObject>> {
 
         const res = await this.client.chat.completions.create({
             model: options.model,
@@ -96,8 +96,11 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
             stream: true
         });
 
-        return transformAsyncIterator(res, (res) => res.choices[0].delta.content || '');
-
+        return transformAsyncIterator(res, (res) => ({
+            result: res.choices[0].delta.content ?? '',
+            finish_reason: res.choices[0].finish_reason,
+            //Token usage not supported
+            } as CompletionChunkObject));
     }
 
     async listModels(): Promise<AIModel<string>[]> {

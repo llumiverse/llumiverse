@@ -40,6 +40,14 @@ export interface ResultValidationError {
     data?: string;
 }
 
+export interface CompletionChunkObject<ResultT = any> {
+    result: ResultT;
+    token_usage?: ExecutionTokenUsage;
+    finish_reason?: "stop" | "length" | string;
+}
+
+export type CompletionChunk = CompletionChunkObject | string;
+
 export interface Completion<ResultT = any> {
     // the driver impl must return the result and optionally the token_usage. the execution time is computed by the extended abstract driver
     result: ResultT;
@@ -72,7 +80,7 @@ export interface ExecutionResponse<PromptT = any> extends Completion {
 }
 
 
-export interface CompletionStream<PromptT = any> extends AsyncIterable<string> {
+export interface CompletionStream<PromptT = any> extends AsyncIterable<CompletionChunk> {
     completion: ExecutionResponse<PromptT> | undefined;
 }
 
@@ -118,6 +126,8 @@ export interface ExecutionOptions extends PromptOptions {
     top_p?: number;
 
     /**
+     * Currently not supported, will be ignored.
+     * Should be an integer.
      * Only supported for OpenAI. Look at OpenAI documentation for more detailsx
      */
     top_logprobs?: number;

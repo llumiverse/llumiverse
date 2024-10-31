@@ -9,6 +9,7 @@ import {
     ExecutionOptions,
     ExecutionTokenUsage,
     ModelType,
+    CompletionChunkObject,
     TrainingJob,
     TrainingJobStatus,
     TrainingOptions,
@@ -54,14 +55,13 @@ export abstract class BaseOpenAIDriver extends AbstractDriver<
         };
 
         const choice = result.choices[0];
-        const finish_reason = choice.finish_reason;
 
         //if no schema, return content
         if (!options.result_schema) {
             return {
                 result: choice.message.content as string,
                 token_usage: tokenInfo,
-                finish_reason
+                finish_reason: choice.finish_reason, //Uses expected "stop" , "length" format
             }
         }
 
@@ -75,21 +75,36 @@ export abstract class BaseOpenAIDriver extends AbstractDriver<
         return {
             result: data,
             token_usage: tokenInfo,
-            finish_reason
+            finish_reason: choice.finish_reason,
         };
     }
 
     async requestCompletionStream(prompt: OpenAI.Chat.Completions.ChatCompletionMessageParam[], options: ExecutionOptions): Promise<any> {
         const mapFn = options.result_schema
             ? (chunk: OpenAI.Chat.Completions.ChatCompletionChunk) => {
-                return (
-                    chunk.choices[0]?.delta?.tool_calls?.[0].function?.arguments ?? ""
-                );
+                return {
+                    result: chunk.choices[0]?.delta?.tool_calls?.[0].function?.arguments ?? "",
+                    finish_reason: chunk.choices[0]?.finish_reason,         //Uses expected "stop" , "length" format
+                    token_usage: {
+                        prompt: chunk.usage?.prompt_tokens,
+                        result: chunk.usage?.completion_tokens,
+                        total: (chunk.usage?.prompt_tokens ?? 0) + (chunk.usage?.completion_tokens ?? 0),
+                    }
+                } as CompletionChunkObject;
             }
             : (chunk: OpenAI.Chat.Completions.ChatCompletionChunk) => {
-                return chunk.choices[0]?.delta?.content ?? "";
+                return {
+                    result: chunk.choices[0]?.delta.content ?? "",
+                    finish_reason: chunk.choices[0]?.finish_reason,
+                    token_usage: {
+                        prompt: chunk.usage?.prompt_tokens,
+                        result: chunk.usage?.completion_tokens,
+                        total: (chunk.usage?.prompt_tokens ?? 0) + (chunk.usage?.completion_tokens ?? 0),
+                    }
+                } as CompletionChunkObject;
             };
 
+        //TODO: OpenAI o1 support requires max_completions_tokens
         const stream = (await this.service.chat.completions.create({
             stream: true,
             model: options.model,
@@ -130,7 +145,8 @@ export abstract class BaseOpenAIDriver extends AbstractDriver<
                 } as OpenAI.Chat.ChatCompletionTool,
             ]
             : undefined;
-
+        
+        //TODO: OpenAI o1 support requires max_completions_tokens
         const res = await this.service.chat.completions.create({
             stream: false,
             model: options.model,

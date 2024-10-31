@@ -9,7 +9,8 @@ import {
     AbstractDriver,
     DriverOptions,
     EmbeddingsResult,
-    ExecutionOptions
+    ExecutionOptions,
+    CompletionChunkObject
 } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
@@ -74,11 +75,22 @@ export class HuggingFaceIEDriver extends AbstractDriver<HuggingFaceIEDriverOptio
                 max_new_tokens: options.max_tokens,
             },
         });
+        
 
         return transformAsyncIterator(req, (val: TextGenerationStreamOutput) => {
             //special like <s> are not part of the result
-            if (val.token.special) return "";
-            return val.token.text;
+            if (val.token.special) return {result:""};
+            let finish_reason = val.details?.finish_reason as string;
+            if (finish_reason === "eos_token") {
+                finish_reason = "stop";
+            }
+            return {
+                result: val.token.text ?? '',
+                finish_reason: finish_reason,
+                token_usage:{
+                    result: val.details?.generated_tokens ?? 0,
+                }
+            } as CompletionChunkObject;
         });
     }
 
@@ -98,12 +110,10 @@ export class HuggingFaceIEDriver extends AbstractDriver<HuggingFaceIEDriverOptio
         }
         return {
             result: res.generated_text,
+            finish_reason: finish_reason,
             token_usage: {
-                result: res.generated_text.length,
-                prompt: prompt.length,
-                total: res.generated_text.length + prompt.length,
+                result: res.details?.generated_tokens
             },
-            finish_reason,
             original_response: options.include_original_response ? res : undefined,
         };
 
