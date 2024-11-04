@@ -101,8 +101,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     }
 
     //Update this when supporting new models
-    static getTextAnsStopReason(result: any, prompt?: BedrockPrompt): CompletionChunkObject {
-        console.log(result);
+    static getExtractedCompletionChunk(result: any, prompt?: BedrockPrompt): CompletionChunkObject {
         //AWS universal token_usage
         let token_usage = this.getAmazonInvocationMetrics(result);
         if (result.generation || result.generation == '') {
@@ -277,7 +276,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         const body = decoder.decode(response.body);
         const result = JSON.parse(body);
         
-        return BedrockDriver.getTextAnsStopReason(result, prompt);
+        return BedrockDriver.getExtractedCompletionChunk(result, prompt);
     }
 
     async requestCompletion(prompt: BedrockPrompt, options: ExecutionOptions): Promise<Completion> {
@@ -325,7 +324,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             return transformAsyncIterator(res.body, (stream: ResponseStream) => {
                 const segment = JSON.parse(decoder.decode(stream.chunk?.bytes));
                 //console.log("Debug Segment for model " + options.model, JSON.stringify(segment));
-                return BedrockDriver.getTextAnsStopReason(segment, prompt);
+                return BedrockDriver.getExtractedCompletionChunk(segment, prompt);
             });
 
         }).catch((err) => {
