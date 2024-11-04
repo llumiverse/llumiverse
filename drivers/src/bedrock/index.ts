@@ -1,7 +1,7 @@
 import { Bedrock, CreateModelCustomizationJobCommand, FoundationModelSummary, GetModelCustomizationJobCommand, GetModelCustomizationJobCommandOutput, ModelCustomizationJobStatus, StopModelCustomizationJobCommand } from "@aws-sdk/client-bedrock";
 import { BedrockRuntime, InvokeModelCommandOutput, ResponseStream } from "@aws-sdk/client-bedrock-runtime";
 import { S3Client } from "@aws-sdk/client-s3";
-import { AIModel, AbstractDriver, Completion, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptOptions, PromptSegment, CompletionChunkObject, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptOptions, PromptSegment, CompletionChunkObject, TrainingJob, TrainingJobStatus, TrainingOptions, ExecutionTokenUsage } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { ClaudeMessagesPrompt, formatClaudePrompt } from "@llumiverse/core/formatters";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
@@ -89,99 +89,185 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         }
     }
 
+    static getAmazonInvocationMetrics(result: any): ExecutionTokenUsage | undefined {
+        if (result['amazon-bedrock-invocationMetrics']) {
+            return {
+                prompt: result['amazon-bedrock-invocationMetrics'].inputTokenCount,
+                result: result['amazon-bedrock-invocationMetrics'].outputTokenCount,
+                total: result['amazon-bedrock-invocationMetrics'].inputTokenCount + result['amazon-bedrock-invocationMetrics'].outputTokenCount,
+            };
+        }
+        return undefined;
+    }
+
     //Update this when supporting new models
-    static getTextAnsStopReason(result:any, prompt?: BedrockPrompt): CompletionChunkObject {
-        if (result.generation) {
+    static getTextAnsStopReason(result: any, prompt?: BedrockPrompt): CompletionChunkObject {
+        console.log(result);
+        //AWS universal token_usage
+        let token_usage = this.getAmazonInvocationMetrics(result);
+        if (result.generation || result.generation == '') {
             // LLAMA3
-            return {result: result.generation,
-                    finish_reason: result.stop_reason,  //already in "stop" or "length" format
-                    token_usage: {
-                        prompt: result.prompt_token_count,
-                        result: result.generation_token_count,
-                        total: result.generation_token_count + result.prompt_token_count,
-                    }};
+            if (!token_usage) {
+                token_usage = {
+                    prompt: result.prompt_token_count,
+                    result: result.generation_token_count,
+                    total: result.generation_token_count + result.prompt_token_count,
+                };
+            }
+            return {
+                result: result.generation,
+                finish_reason: result.stop_reason,  //already in "stop" or "length" format
+                token_usage: token_usage,
+            };
         } else if (result.generations) {
             // Cohere Command (Non-R)
-            return {result: result.generations[0].text,
-                    finish_reason: cohereFinishReason(result.generations[0].finish_reason),
-                    token_usage: {
-                        prompt: result?.meta.billed_units.input_tokens,
-                        result: result?.meta.billed_units.output_tokens,
-                        total: result?.meta.billed_units.input_tokens + result?.meta.billed_units.output_tokens,
-                    }};
+            if (!token_usage) { 
+                token_usage = {
+                    prompt: result?.meta?.billed_units.input_tokens,
+                    result: result?.meta?.billed_units.output_tokens,
+                    total: result?.meta?.billed_units.input_tokens + result?.meta?.billed_units.output_tokens,
+                }
+            }
+            return {
+                result: result.generations[0].text,
+                finish_reason: cohereFinishReason(result.generations[0].finish_reason),
+                //Token usage not given in AWS docs, but is in cohere docs.
+                token_usage: token_usage
+            };
         } else if (result.chat_history) {
             // Cohere Command R
-            return {result: result.text,
-                    finish_reason:cohereFinishReason(result.finish_reason),
-                    token_usage: {
-                        prompt: result?.meta.billed_units.input_tokens,
-                        result: result?.meta.billed_units.output_tokens,
-                        total: result?.meta.billed_units.input_tokens + result?.meta.billed_units.output_tokens,
-                    }};
+            if (!token_usage) { 
+                token_usage = {
+                    prompt: result?.meta?.billed_units.input_tokens,
+                    result: result?.meta?.billed_units.output_tokens,
+                    total: result?.meta?.billed_units.input_tokens + result?.meta?.billed_units.output_tokens,
+                }
+            }
+            return {
+                result: result.text,
+                finish_reason: cohereFinishReason(result.finish_reason),
+                token_usage: token_usage,
+            };
+        } else if (result.event_type) {
+            // Cohere Command R streaming
+            return {
+                result: result.text,
+                finish_reason: cohereFinishReason(result.finish_reason),
+                token_usage: token_usage,
+            };
         } else if (result.completions) {
             // A21 Jurassic
-            return {result: result.completions[0].data?.text,
-                    finish_reason: a21FinishReason(result.completions[0].finishReason?.reason),
-                    token_usage: {
-                        prompt: result.prompt.tokens.length,
-                        result: result.completions[0].data.tokens.length,
-                        total: result.prompt.tokens.length + result.completions[0].data.tokens.length,
-                    }};
+            if (!token_usage) { 
+                token_usage = {
+                    prompt: result.prompt.tokens.length,
+                    result: result.completions[0].data.tokens.length,
+                    total: result.prompt.tokens.length + result.completions[0].data.tokens.length,
+                }
+            }
+            return {
+                result: result.completions[0].data?.text,
+                finish_reason: a21FinishReason(result.completions[0].finishReason?.reason),
+                token_usage: token_usage,
+            };
         } else if (result.content) {
             // Claude
-            if(prompt){
+            if (!token_usage) {
+                token_usage = {
+                    prompt: result.usage?.input_tokens,
+                    result: result.usage?.output_tokens,
+                    total: result.usage?.input_tokens + result.usage?.output_tokens,
+                }
+            }
+            let res: string = "";
+            if (prompt) {
                 //if last prompt.messages is {, add { to the response
                 const p = prompt as ClaudeMessagesPrompt;
                 const lastMessage = (p as ClaudeMessagesPrompt).messages[p.messages.length - 1];
-                const res = lastMessage.content[0].text === '{' ? '{' + result.content[0]?.text : result.content[0]?.text;
-                return {result:res,
-                        finish_reason:claudeFinishReason(result.stop_reason),
-                        token_usage: {
-                            prompt: result.usage.input_tokens,
-                            result: result.usage.output_tokens,
-                            total: result.usage.input_tokens + result.usage.output_tokens,
-                        }};
-            }else{
-                return {result:result.content[0].text,
-                        finish_reason: claudeFinishReason(result.stop_reason),
-                        token_usage: {
-                            prompt: result.usage.input_tokens,
-                            result: result.usage.output_tokens,
-                            total: result.usage.input_tokens + result.usage.output_tokens,
-                        }};
+                res = lastMessage.content[0].text === '{' ? '{' + (result.content[0]?.text ?? '') : (result.content[0]?.text ?? '');
+            } else {
+                res = result.content[0].text
             }
+            return {
+                result: res,
+                finish_reason: claudeFinishReason(result.stop_reason),
+                token_usage: token_usage,
+            };
+        }
+        else if (result.delta || result.type) { // claude-v2:1 when streaming
+            if (!token_usage) {
+                token_usage = {
+                    prompt: result.usage?.input_tokens,
+                    result: result.usage?.output_tokens,
+                    total: result.usage?.input_tokens + result.usage?.output_tokens,
+                }
+            }
+            let res: string = "";
+            if (result.type == 'content_block_start'){
+                if (prompt) {
+                    //if last prompt.messages is {, add { to the response
+                    const p = prompt as ClaudeMessagesPrompt;
+                    const lastMessage = (p as ClaudeMessagesPrompt).messages[p.messages.length - 1];
+                    res = lastMessage.content[0].text === '{' ? '{' + (result?.content_block[0]?.text ?? '') : (result?.content_block[0]?.text ?? '');
+                } else {
+                    res = result.content_block[0]?.text;
+                }
+            } else { // content_block_delta
+                res = result.delta?.text || '';
+            }
+            return {
+                result: res,
+                finish_reason: claudeFinishReason(result.delta?.stop_reason),
+                token_usage: token_usage,
+            };
         } else if (result.outputs) {
             // Mistral
-            return {result: result.outputs[0]?.text,
-                    finish_reason: result.outputs[0]?.stop_reason};   // the stop reason is in the expected format ("stop" and "length")
-                    //Token usage not supported
+            return {
+                result: result.outputs[0]?.text,
+                finish_reason: result.outputs[0]?.stop_reason, // the stop reason is in the expected format ("stop" and "length")
+                token_usage: token_usage,
+            };   
+            //Token usage not supported
         } else if (result.results) {
             // Amazon Titan non-streaming
-            return {result: result.results[0]?.outputText ?? '',
-                    finish_reason: titanFinishReason(result.results[0]?.completionReason),
-                    token_usage: {
-                        prompt: result.inputTextTokenCount,
-                        result: result.results[0].tokenCount,
-                        total: result.inputTextTokenCount + result.results[0].tokenCount,
-                    }};
-        } else if (result.chunks) { 
+            if (!token_usage) { 
+                token_usage = {
+                    prompt: result.inputTextTokenCount,
+                    result: result.results[0].tokenCount,
+                    total: result.inputTextTokenCount + result.results[0].tokenCount,
+                }
+            }
+            return {
+                result: result.results[0]?.outputText ?? '',
+                finish_reason: titanFinishReason(result.results[0]?.completionReason),
+                token_usage: token_usage,
+            };
+        } else if (result.chunks) {
             // Amazon Titan streaming
             const decoder = new TextDecoder();
             const chunk = decoder.decode(result.chunks);
             const result_chunk = JSON.parse(chunk);
-            return {result: result_chunk.outputText,
-                    finish_reason: titanFinishReason(result_chunk.completionReason),
-                    token_usage: {
-                        prompt: result_chunk.inputTextTokenCount,
-                        result: result_chunk.totalOutputTextTokenCount,
-                        total: result_chunk.inputTextTokenCount + result_chunk.totalOutputTextTokenCount,
-                    }};
+            if (!token_usage) { 
+                token_usage = {
+                    prompt: result_chunk.inputTextTokenCount,
+                    result: result_chunk.totalOutputTextTokenCount,
+                    total: result_chunk.inputTextTokenCount + result_chunk.totalOutputTextTokenCount,
+                }
+            }
+            return {
+                result: result_chunk.outputText,
+                finish_reason: titanFinishReason(result_chunk.completionReason),
+                token_usage: token_usage,
+            };
         } else if (result.completion) { // TODO: who uses this?
-            return {result:result.completion};
-        } else if (result.delta) { // TODO: who uses this?
-            return {result:result.delta.text || ''};
+            return {
+                result: result.completion,
+                token_usage: token_usage,
+            };
         } else {    // Fallback
-            return {result:result.toString()};
+            return {
+                result: result,
+                token_usage: token_usage,
+            };
         }
     };
 

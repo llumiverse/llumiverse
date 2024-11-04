@@ -107,6 +107,7 @@ export abstract class BaseOpenAIDriver extends AbstractDriver<
         //TODO: OpenAI o1 support requires max_completions_tokens
         const stream = (await this.service.chat.completions.create({
             stream: true,
+            stream_options: {include_usage: true},
             model: options.model,
             messages: prompt,
             temperature: options.temperature,

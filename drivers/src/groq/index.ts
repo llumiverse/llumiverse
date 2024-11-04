@@ -99,7 +99,11 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
         return transformAsyncIterator(res, (res) => ({
             result: res.choices[0].delta.content ?? '',
             finish_reason: res.choices[0].finish_reason,
-            //Token usage not supported
+            token_usage: {
+                prompt: res.x_groq?.usage?.prompt_tokens,
+                result: res.x_groq?.usage?.completion_tokens,
+                total: res.x_groq?.usage?.total_tokens,
+            },
             } as CompletionChunkObject));
     }
 

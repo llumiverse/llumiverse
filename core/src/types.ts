@@ -77,6 +77,10 @@ export interface ExecutionResponse<PromptT = any> extends Completion {
      * The time it took to execute the request in seconds
      */
     execution_time?: number;
+    /**
+     * The number of chunks for streamed executions
+     */
+    chunks?: number;
 }
 
 

@@ -1,5 +1,5 @@
 import { AbstractDriver } from "./Driver.js";
-import { CompletionStream, DriverOptions, ExecutionOptions, ExecutionResponse } from "./types.js";
+import { CompletionStream, DriverOptions, ExecutionOptions, ExecutionResponse, ExecutionTokenUsage } from "./types.js";
 
 export class DefaultCompletionStream<PromptT = any> implements CompletionStream<PromptT> {
 
@@ -27,44 +27,45 @@ export class DefaultCompletionStream<PromptT = any> implements CompletionStream<
         const start = Date.now();
         const stream = await this.driver.requestCompletionStream(this.prompt, this.options);
 
-        let finish_reason: string = "";
+        let finish_reason: string | undefined = undefined;
         let promptTokens: number = 0;
-        let resultTokens: number = -1;   //-1 Used as a trigger to see if it has been changed
+        let resultTokens: number | undefined = undefined;
         for await (const chunk of stream) {
             if (chunk) {
                 if (typeof chunk === 'string'){
                     chunks.push(chunk);
                     yield chunk;
                 }else{
-                    if(!(finish_reason == "stop" && !chunk.result)){    //Used to skip empty chunk after stop
-                        chunks.push(chunk.result);
-                        finish_reason = chunk.finish_reason ?? "";
-                        if(chunk.token_usage) {
-                            promptTokens = chunk.token_usage.prompt ?? 0;      //Tokens returned include prior parts of stream, 
-                            resultTokens = chunk.token_usage.result ?? 0;      //so overwrite rather than accumulate
-                        }
-                        yield chunk;
+                    chunks.push(chunk.result);
+                    if (chunk.finish_reason) {                           //Do not replace non-null values with null values
+                        finish_reason = chunk.finish_reason;             //Used to skip empty finish_reason chunks coming after "stop" or "length"
                     }
+                    if (chunk.token_usage) {
+                        //Tokens returned include prior parts of stream,
+                        //so overwrite rather than accumulate
+                        //Math.max used as some models report final token count at beginning of stream
+                        promptTokens = Math.max(promptTokens,chunk.token_usage.prompt ?? 0);       
+                        resultTokens = Math.max(resultTokens ?? 0,chunk.token_usage.result ?? 0);      
+                    }
+                    yield chunk;
                 }                
             }
         }
 
-        //TODO: Confirm this is a true count for models/providers when streaming
-        // If resultTokens is -1, i.e. chunks never had a token_usage, then use chunks.length
-        resultTokens = resultTokens == -1 ? chunks.length : resultTokens;
-
         const content = chunks.join('');
+
+        // Return undefined for the ExecutionTokenUsage object if there is nothing to fill it with.
+        // Allows for checking for truthyness on token_usage, rather than it's internals. For testing and downstream usage.
+        let tokens: ExecutionTokenUsage | undefined = resultTokens ?
+            { prompt: promptTokens, result: resultTokens, total: resultTokens + promptTokens, } : undefined
 
         this.completion = {
             result: content,
             prompt: this.prompt,
             execution_time: Date.now() - start,
-            token_usage: {
-                prompt: promptTokens,
-                result: resultTokens,
-                total: resultTokens + promptTokens,
-            },
-            finish_reason: finish_reason
+            token_usage: tokens,
+            finish_reason: finish_reason,
+            chunks: chunks.length,
         }
 
         this.driver.validateResult(this.completion, this.options);
