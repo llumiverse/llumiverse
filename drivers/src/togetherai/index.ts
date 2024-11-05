@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, CompletionChunk } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
 import { TextCompletion, TogetherModelInfo } from "./interfaces.js";
@@ -63,12 +63,12 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
                 result: usage.completion_tokens,
                 total: usage.total_tokens,
             },
-            finish_reason: choice.finish_reason,
+            finish_reason: choice.finish_reason,                //Uses expected "stop" , "length" format
             original_response: options.include_original_response ? res : undefined,
         }
     }
 
-    async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<string>> {
+    async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunk>> {
         const stop_seq = typeof options.stop_sequence == 'string' ? 
             [options.stop_sequence] : options.stop_sequence ?? [];
 
@@ -96,7 +96,15 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
 
         return transformSSEStream(stream, (data: string) => {
             const json = JSON.parse(data);
-            return json.choices[0]?.text ?? '';
+            return {
+                result: json.choices[0]?.text ?? '',
+                finish_reason: json.choices[0]?.finish_reason,          //Uses expected "stop" , "length" format
+                token_usage: {
+                    prompt: json.usage?.prompt_tokens,
+                    result: json.usage?.completion_tokens,
+                    total: json.usage?.prompt_tokens + json.usage?.completion_tokens,
+                }
+            };
         });
 
     }

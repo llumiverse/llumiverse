@@ -205,7 +205,7 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
     test.each(models)(`${name}: execute prompt on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
         const r = await driver.execute(testPrompt_color, {...test_options, model: model} as ExecutionOptions);
         console.log("Result for execute " + model, JSON.stringify(r));
-        assertCompletionOk(r);
+        assertCompletionOk(r, model, driver);
     });
 
     test.each(models)(`${name}: execute prompt with streaming on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
@@ -217,7 +217,7 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
     test.each(models)(`${name}: execute prompt with schema on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
         const r = await driver.execute(testPrompt_color, {...test_options, model: model, result_schema: testSchema_color } as ExecutionOptions);
         console.log("Result for execute with schema " + model, JSON.stringify(r.result));
-        assertCompletionOk(r);
+        assertCompletionOk(r, model, driver);
     });
 
     test.each(models)(`${name}: execute prompt with streaming and schema on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {

@@ -1,5 +1,5 @@
 import { GenerateContentRequest, VertexAI } from "@google-cloud/vertexai";
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload, PromptOptions, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, CompletionChunkObject, DriverOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload, PromptOptions, PromptSegment } from "@llumiverse/core";
 import { FetchClient } from "api-fetch-client";
 import { GoogleAuth, GoogleAuthOptions } from "google-auth-library";
 import { JSONClient } from "google-auth-library/build/src/auth/googleauth.js";
@@ -58,7 +58,7 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
     async requestCompletion(prompt: GenerateContentRequest, options: ExecutionOptions): Promise<Completion<any>> {
         return getModelDefinition(options.model).requestCompletion(this, prompt, options);
     }
-    async requestCompletionStream(prompt: GenerateContentRequest, options: ExecutionOptions): Promise<AsyncIterable<string>> {
+    async requestCompletionStream(prompt: GenerateContentRequest, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunkObject>> {
         return getModelDefinition(options.model).requestCompletionStream(this, prompt, options);
     }
 

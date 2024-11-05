@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, CompletionChunk } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { FetchClient } from "api-fetch-client";
 import { GenerateEmbeddingPayload, GenerateEmbeddingResponse, WatsonAuthToken, WatsonxListModelResponse, WatsonxModelSpec, WatsonxTextGenerationPayload, WatsonxTextGenerationResponse } from "./interfaces.js";
@@ -51,12 +51,12 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
                 result: result.generated_token_count,
                 total: result.input_token_count + result.generated_token_count,
             },
-            finish_reason: result.stop_reason,
+            finish_reason: watsonFinishReason(result.stop_reason),
             original_response: options.include_original_response ? res : undefined,
         }
     }
 
-    async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<string>> {
+    async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunk>> {
 
         const payload: WatsonxTextGenerationPayload = {
             model_id: options.model,
@@ -75,7 +75,15 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
 
         return transformSSEStream(stream, (data: string) => {
             const json = JSON.parse(data) as WatsonxTextGenerationResponse;
-            return json.results[0]?.generated_text ?? '';
+            return {
+                result: json.results[0]?.generated_text ?? '',
+                finish_reason: watsonFinishReason(json.results[0]?.stop_reason),
+                token_usage: {
+                    prompt: json.results[0].input_token_count,
+                    result: json.results[0].generated_token_count,
+                    total: json.results[0].input_token_count + json.results[0].generated_token_count,
+                },
+            };
         });
 
     }
@@ -156,6 +164,15 @@ export class WatsonxDriver extends AbstractDriver<WatsonxDriverOptions, string> 
 
     }
 
+}
+
+function watsonFinishReason(reason: string | undefined) {
+    if (!reason) return undefined;
+    switch (reason) {
+        case 'eos_token': return "stop";
+        case 'max_tokens': return "length";
+        default: return reason;
+    }
 }
 
 

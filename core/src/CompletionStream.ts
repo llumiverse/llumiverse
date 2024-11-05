@@ -1,5 +1,5 @@
 import { AbstractDriver } from "./Driver.js";
-import { CompletionStream, DriverOptions, ExecutionOptions, ExecutionResponse } from "./types.js";
+import { CompletionStream, DriverOptions, ExecutionOptions, ExecutionResponse, ExecutionTokenUsage } from "./types.js";
 
 export class DefaultCompletionStream<PromptT = any> implements CompletionStream<PromptT> {
 
@@ -27,27 +27,47 @@ export class DefaultCompletionStream<PromptT = any> implements CompletionStream<
         const start = Date.now();
         const stream = await this.driver.requestCompletionStream(this.prompt, this.options);
 
+        let finish_reason: string | undefined = undefined;
+        let promptTokens: number = 0;
+        let resultTokens: number | undefined = undefined;
         for await (const chunk of stream) {
             if (chunk) {
-                chunks.push(chunk);
-                yield chunk;
+                if (typeof chunk === 'string') {
+                    chunks.push(chunk);
+                    yield chunk;
+                }else{
+                    if (chunk.finish_reason) {                           //Do not replace non-null values with null values
+                        finish_reason = chunk.finish_reason;             //Used to skip empty finish_reason chunks coming after "stop" or "length"
+                    }
+                    if (chunk.token_usage) {
+                        //Tokens returned include prior parts of stream,
+                        //so overwrite rather than accumulate
+                        //Math.max used as some models report final token count at beginning of stream
+                        promptTokens = Math.max(promptTokens,chunk.token_usage.prompt ?? 0);       
+                        resultTokens = Math.max(resultTokens ?? 0,chunk.token_usage.result ?? 0);      
+                    }
+                    if (chunk.result) {
+                        chunks.push(chunk.result);
+                        yield chunk.result;
+                    }
+                }                
             }
         }
 
         const content = chunks.join('');
 
-        const promptTokens = typeof this.prompt === 'string' ? this.prompt.length : JSON.stringify(this.prompt).length;
-        const resultTokens = content.length; //TODO use chunks.length ?
+        // Return undefined for the ExecutionTokenUsage object if there is nothing to fill it with.
+        // Allows for checking for truthyness on token_usage, rather than it's internals. For testing and downstream usage.
+        let tokens: ExecutionTokenUsage | undefined = resultTokens ?
+            { prompt: promptTokens, result: resultTokens, total: resultTokens + promptTokens, } : undefined
 
         this.completion = {
             result: content,
             prompt: this.prompt,
             execution_time: Date.now() - start,
-            token_usage: {
-                prompt: promptTokens,
-                result: resultTokens,
-                total: resultTokens + promptTokens,
-            }
+            token_usage: tokens,
+            finish_reason: finish_reason,
+            chunks: chunks.length,
         }
 
         this.driver.validateResult(this.completion, this.options);

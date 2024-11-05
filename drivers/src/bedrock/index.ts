@@ -1,7 +1,7 @@
 import { Bedrock, CreateModelCustomizationJobCommand, FoundationModelSummary, GetModelCustomizationJobCommand, GetModelCustomizationJobCommandOutput, ModelCustomizationJobStatus, StopModelCustomizationJobCommand } from "@aws-sdk/client-bedrock";
 import { BedrockRuntime, InvokeModelCommandOutput, ResponseStream } from "@aws-sdk/client-bedrock-runtime";
 import { S3Client } from "@aws-sdk/client-s3";
-import { AIModel, AbstractDriver, Completion, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptOptions, PromptSegment, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptOptions, PromptSegment, CompletionChunkObject, TrainingJob, TrainingJobStatus, TrainingOptions, ExecutionTokenUsage } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { ClaudeMessagesPrompt, formatClaudePrompt } from "@llumiverse/core/formatters";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
@@ -89,60 +89,194 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         }
     }
 
+    static getAmazonInvocationMetrics(result: any): ExecutionTokenUsage | undefined {
+        if (result['amazon-bedrock-invocationMetrics']) {
+            return {
+                prompt: result['amazon-bedrock-invocationMetrics'].inputTokenCount,
+                result: result['amazon-bedrock-invocationMetrics'].outputTokenCount,
+                total: result['amazon-bedrock-invocationMetrics'].inputTokenCount + result['amazon-bedrock-invocationMetrics'].outputTokenCount,
+            };
+        }
+        return undefined;
+    }
+
+    //Update this when supporting new models
+    static getExtractedCompletionChunk(result: any, prompt?: BedrockPrompt): CompletionChunkObject {
+        //AWS universal token_usage
+        let token_usage = this.getAmazonInvocationMetrics(result);
+        if (result.generation || result.generation == '') {
+            // LLAMA3
+            if (!token_usage) {
+                token_usage = {
+                    prompt: result.prompt_token_count,
+                    result: result.generation_token_count,
+                    total: result.generation_token_count + result.prompt_token_count,
+                };
+            }
+            return {
+                result: result.generation,
+                finish_reason: result.stop_reason,  //already in "stop" or "length" format
+                token_usage: token_usage,
+            };
+        } else if (result.generations) {
+            // Cohere Command (Non-R)
+            if (!token_usage) { 
+                token_usage = {
+                    prompt: result?.meta?.billed_units.input_tokens,
+                    result: result?.meta?.billed_units.output_tokens,
+                    total: result?.meta?.billed_units.input_tokens + result?.meta?.billed_units.output_tokens,
+                }
+            }
+            return {
+                result: result.generations[0].text,
+                finish_reason: cohereFinishReason(result.generations[0].finish_reason),
+                //Token usage not given in AWS docs, but is in cohere docs.
+                token_usage: token_usage
+            };
+        } else if (result.chat_history) {
+            // Cohere Command R
+            if (!token_usage) { 
+                token_usage = {
+                    prompt: result?.meta?.billed_units.input_tokens,
+                    result: result?.meta?.billed_units.output_tokens,
+                    total: result?.meta?.billed_units.input_tokens + result?.meta?.billed_units.output_tokens,
+                }
+            }
+            return {
+                result: result.text,
+                finish_reason: cohereFinishReason(result.finish_reason),
+                token_usage: token_usage,
+            };
+        } else if (result.event_type) {
+            // Cohere Command R streaming
+            return {
+                result: result.text,
+                finish_reason: cohereFinishReason(result.finish_reason),
+                token_usage: token_usage,
+            };
+        } else if (result.completions) {
+            // A21 Jurassic
+            if (!token_usage) { 
+                token_usage = {
+                    prompt: result.prompt.tokens.length,
+                    result: result.completions[0].data.tokens.length,
+                    total: result.prompt.tokens.length + result.completions[0].data.tokens.length,
+                }
+            }
+            return {
+                result: result.completions[0].data?.text,
+                finish_reason: a21FinishReason(result.completions[0].finishReason?.reason),
+                token_usage: token_usage,
+            };
+        } else if (result.content) {
+            // Claude
+            if (!token_usage) {
+                token_usage = {
+                    prompt: result.usage?.input_tokens,
+                    result: result.usage?.output_tokens,
+                    total: result.usage?.input_tokens + result.usage?.output_tokens,
+                }
+            }
+            let res: string = "";
+            if (prompt) {
+                //if last prompt.messages is {, add { to the response
+                const p = prompt as ClaudeMessagesPrompt;
+                const lastMessage = (p as ClaudeMessagesPrompt).messages[p.messages.length - 1];
+                res = lastMessage.content[0].text === '{' ? '{' + (result.content[0]?.text ?? '') : (result.content[0]?.text ?? '');
+            } else {
+                res = result.content[0].text
+            }
+            return {
+                result: res,
+                finish_reason: claudeFinishReason(result.stop_reason),
+                token_usage: token_usage,
+            };
+        }
+        else if (result.delta || result.type) { // claude-v2:1 when streaming
+            if (!token_usage) {
+                token_usage = {
+                    prompt: result.usage?.input_tokens,
+                    result: result.usage?.output_tokens,
+                    total: result.usage?.input_tokens + result.usage?.output_tokens,
+                }
+            }
+            let res: string = "";
+            if (result.type == 'content_block_start'){
+                if (prompt) {
+                    //if last prompt.messages is {, add { to the response
+                    const p = prompt as ClaudeMessagesPrompt;
+                    const lastMessage = (p as ClaudeMessagesPrompt).messages[p.messages.length - 1];
+                    res = lastMessage.content[0].text === '{' ? '{' + (result?.content_block[0]?.text ?? '') : (result?.content_block[0]?.text ?? '');
+                } else {
+                    res = result.content_block[0]?.text;
+                }
+            } else { // content_block_delta
+                res = result.delta?.text || '';
+            }
+            return {
+                result: res,
+                finish_reason: claudeFinishReason(result.delta?.stop_reason),
+                token_usage: token_usage,
+            };
+        } else if (result.outputs) {
+            // Mistral
+            return {
+                result: result.outputs[0]?.text,
+                finish_reason: result.outputs[0]?.stop_reason, // the stop reason is in the expected format ("stop" and "length")
+                token_usage: token_usage,
+            };   
+            //Token usage not supported
+        } else if (result.results) {
+            // Amazon Titan non-streaming
+            if (!token_usage) { 
+                token_usage = {
+                    prompt: result.inputTextTokenCount,
+                    result: result.results[0].tokenCount,
+                    total: result.inputTextTokenCount + result.results[0].tokenCount,
+                }
+            }
+            return {
+                result: result.results[0]?.outputText ?? '',
+                finish_reason: titanFinishReason(result.results[0]?.completionReason),
+                token_usage: token_usage,
+            };
+        } else if (result.chunks) {
+            // Amazon Titan streaming
+            const decoder = new TextDecoder();
+            const chunk = decoder.decode(result.chunks);
+            const result_chunk = JSON.parse(chunk);
+            if (!token_usage) { 
+                token_usage = {
+                    prompt: result_chunk.inputTextTokenCount,
+                    result: result_chunk.totalOutputTextTokenCount,
+                    total: result_chunk.inputTextTokenCount + result_chunk.totalOutputTextTokenCount,
+                }
+            }
+            return {
+                result: result_chunk.outputText,
+                finish_reason: titanFinishReason(result_chunk.completionReason),
+                token_usage: token_usage,
+            };
+        } else if (result.completion) { // TODO: who uses this?
+            return {
+                result: result.completion,
+                token_usage: token_usage,
+            };
+        } else {    // Fallback
+            return {
+                result: result,
+                token_usage: token_usage,
+            };
+        }
+    };
+
     extractDataFromResponse(prompt: BedrockPrompt, response: InvokeModelCommandOutput): Completion {
 
         const decoder = new TextDecoder();
         const body = decoder.decode(response.body);
         const result = JSON.parse(body);
-
-        const getTextAnsStopReason = (): string[] => {
-            if (result.generation) {
-                // LLAMA2
-                return [result.generation, result.stop_reason]; // comes in coirrect format (stop, length)
-            } else if (result.generations) {
-                // Cohere
-                return [result.generations[0].text, cohereFinishReason(result.generations[0].finish_reason)];
-            } else if (result.chat_history) {
-                //Cohere Command R
-                return [result.text, cohereFinishReason(result.finish_reason)];
-            } else if (result.completions) {
-                //A21
-                return [result.completions[0].data?.text, a21FinishReason(result.completions[0].finishReason?.reason)];
-            } else if (result.content) {
-                // Claude
-                //if last prompt.messages is {, add { to the response
-                const p = prompt as ClaudeMessagesPrompt;
-                const lastMessage = (p as ClaudeMessagesPrompt).messages[p.messages.length - 1];
-                const res = lastMessage.content[0].text === '{' ? '{' + result.content[0]?.text : result.content[0]?.text;
-
-                return [res, claudeFinishReason(result.stop_reason)];
-
-            } else if (result.outputs) {
-                // mistral
-                return [result.outputs[0]?.text, result.outputs[0]?.stop_reason]; // the stop reason is in the expected format ("stop" and "length")
-            } else if (result.results) {
-                // Amazon Titan
-                return [result.results[0]?.outputText ?? '', titanFinishReason(result.results[0]?.completionReason)];
-            } else if (result.completion) { // TODO: who uses this?
-                return [result.completion];
-            } else {
-                return [result.toString()];
-            }
-        };
-
-        const [text, finish_reason] = getTextAnsStopReason();
-
-        const promptLength = typeof prompt === 'string' ? prompt.length :
-            (prompt.system || '').length + prompt.messages.reduce((acc, m) => acc + m.content.length, 0);
-        return {
-            result: text,
-            token_usage: {
-                result: text?.length,
-                prompt: promptLength,
-                total: text?.length + promptLength,
-            },
-            finish_reason
-        }
+        
+        return BedrockDriver.getExtractedCompletionChunk(result, prompt);
     }
 
     async requestCompletion(prompt: BedrockPrompt, options: ExecutionOptions): Promise<Completion> {
@@ -173,7 +307,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         return canStream;
     }
 
-    async requestCompletionStream(prompt: BedrockPrompt, options: ExecutionOptions): Promise<AsyncIterable<string>> {
+    async requestCompletionStream(prompt: BedrockPrompt, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunkObject>> {
         const payload = this.preparePayload(prompt, options);
         const executor = this.getExecutor();
         return executor.invokeModelWithResponseStream({
@@ -187,46 +321,11 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             }
             const decoder = new TextDecoder();
 
-            const addBracket = () => {
-                if (typeof prompt === 'object' && (prompt as ClaudeMessagesPrompt).messages) {
-                    const p = prompt as ClaudeMessagesPrompt;
-                    const lastMessage = p.messages[p.messages.length - 1];
-                    return lastMessage.content[0].text === '{';
-                }
-                return false;
-            };
-
             return transformAsyncIterator(res.body, (stream: ResponseStream) => {
                 const segment = JSON.parse(decoder.decode(stream.chunk?.bytes));
                 //console.log("Debug Segment for model " + options.model, JSON.stringify(segment));
-                if (segment.delta) { // who is this?
-                    return segment.delta.text || '';
-                } else if (segment.completion) { // who is this?
-                    return segment.completion;
-                } else if (segment.text) { //cohere
-                    return segment.text;
-                } else if (segment.completions) {
-                    return segment.completions[0].data?.text;
-                } else if (segment.generation) {
-                    return segment.generation;
-                } else if (segment.generations) {
-                    return segment.generations[0].text;
-                } else if (segment.outputs) {
-                    // mistral.mixtral-8x7b-instruct-v0:1
-                    return segment.outputs[0].text;
-                    //segment.outputs[0].stop_reason;
-                } else if (segment.outputText) {
-                    // Amazon Titan
-                    return segment.outputText;
-                    //completionReason
-                    // token count too
-                } else {
-                    segment.toString();
-                }
-
-            },
-                () => addBracket() ? '{' : ''
-            );
+                return BedrockDriver.getExtractedCompletionChunk(segment, prompt);
+            });
 
         }).catch((err) => {
             this.logger.error("[Bedrock] Failed to stream", err);
