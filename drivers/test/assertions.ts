@@ -28,12 +28,7 @@ export async function assertStreamingCompletionOk(stream: CompletionStream, json
 
     const out: string[] = []
     for await (const chunk of stream) {
-        //console.log("-----",chunk)
-        if (typeof chunk === 'string'){
-            out.push(chunk)
-        } else {
-            out.push(chunk.result)
-        }
+        out.push(chunk)
     }
 
     const r = stream.completion as ExecutionResponse;

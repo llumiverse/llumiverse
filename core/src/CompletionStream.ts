@@ -32,11 +32,10 @@ export class DefaultCompletionStream<PromptT = any> implements CompletionStream<
         let resultTokens: number | undefined = undefined;
         for await (const chunk of stream) {
             if (chunk) {
-                if (typeof chunk === 'string'){
+                if (typeof chunk === 'string') {
                     chunks.push(chunk);
                     yield chunk;
                 }else{
-                    chunks.push(chunk.result);
                     if (chunk.finish_reason) {                           //Do not replace non-null values with null values
                         finish_reason = chunk.finish_reason;             //Used to skip empty finish_reason chunks coming after "stop" or "length"
                     }
@@ -47,7 +46,10 @@ export class DefaultCompletionStream<PromptT = any> implements CompletionStream<
                         promptTokens = Math.max(promptTokens,chunk.token_usage.prompt ?? 0);       
                         resultTokens = Math.max(resultTokens ?? 0,chunk.token_usage.result ?? 0);      
                     }
-                    yield chunk;
+                    if (chunk.result) {
+                        chunks.push(chunk.result);
+                        yield chunk.result;
+                    }
                 }                
             }
         }
@@ -90,7 +92,7 @@ export class FallbackCompletionStream<PromptT = any> implements CompletionStream
         );
         const completion = await this.driver._execute(this.prompt, this.options);
         const content = typeof completion.result === 'string' ? completion.result : JSON.stringify(completion.result);
-        yield {result:content};
+        yield content;
 
         this.completion = completion;
     }

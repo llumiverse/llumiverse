@@ -10,11 +10,11 @@ export class TestValidationErrorCompletionStream implements CompletionStream<Pro
         public options: ExecutionOptions) {
     }
     async *[Symbol.asyncIterator]() {
-        yield {result:"Started TestValidationError.\n"};
+        yield "Started TestValidationError.\n";
         await sleep(1000);
-        yield {result:"chunk1\n"}
+        yield "chunk1\n";
         await sleep(1000);
-        yield {result:"chunk2\n"}
+        yield "chunk2\n";
         await sleep(1000);
         this.completion = createValidationErrorCompletion(this.segments);
     }
