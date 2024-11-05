@@ -40,6 +40,18 @@ export interface ResultValidationError {
     data?: string;
 }
 
+//ResultT should be either JSONObject or string
+//Internal structure used in driver implementation.
+export interface CompletionChunkObject<ResultT = any> {
+    result: ResultT;
+    token_usage?: ExecutionTokenUsage;
+    finish_reason?: "stop" | "length" | string;
+}
+
+//Internal structure used in driver implementation.
+export type CompletionChunk = CompletionChunkObject | string;
+
+//ResultT should be either JSONObject or string
 export interface Completion<ResultT = any> {
     // the driver impl must return the result and optionally the token_usage. the execution time is computed by the extended abstract driver
     result: ResultT;
@@ -69,6 +81,10 @@ export interface ExecutionResponse<PromptT = any> extends Completion {
      * The time it took to execute the request in seconds
      */
     execution_time?: number;
+    /**
+     * The number of chunks for streamed executions
+     */
+    chunks?: number;
 }
 
 
@@ -118,6 +134,8 @@ export interface ExecutionOptions extends PromptOptions {
     top_p?: number;
 
     /**
+     * Currently not supported, will be ignored.
+     * Should be an integer.
      * Only supported for OpenAI. Look at OpenAI documentation for more detailsx
      */
     top_logprobs?: number;
