@@ -115,7 +115,7 @@ if (process.env.BEDROCK_REGION) {
         models: [
             "anthropic.claude-3-sonnet-20240229-v1:0",
             "anthropic.claude-v2:1",
-            "cohere.command-text-v14",
+            //"cohere.command-text-v14", EOL
             "mistral.mixtral-8x7b-instruct-v0:1",
             "cohere.command-r-plus-v1:0",
             "meta.llama3-1-70b-instruct-v1:0"
@@ -169,12 +169,12 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
 
     let test_options: ExecutionOptions = {
         model: "",
-        max_tokens: 64,
-        temperature: 0.5,
+        max_tokens: 128,
+        temperature: 0.3,
         top_k: 40,
-        top_p: 1.0,
+        top_p: 0.7,             //Some models do not support top_p = 1.0, set to 0.99 or lower.
         top_logprobs: 5,        //Currently not supported, option will be ignored
-        presence_penalty: 0.0,
+        presence_penalty: 0.1,      //Cohere Command R does not support using presence & frequency penalty at the same time
         frequency_penalty: 0.0,
     };
 
