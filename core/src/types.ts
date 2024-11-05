@@ -40,8 +40,9 @@ export interface ResultValidationError {
     data?: string;
 }
 
+//ResultT should be either JSONObject or string
 //Internal structure used in driver implementation.
-export interface CompletionChunkObject<ResultT = JSONObject | string> {
+export interface CompletionChunkObject<ResultT = any> {
     result: ResultT;
     token_usage?: ExecutionTokenUsage;
     finish_reason?: "stop" | "length" | string;
@@ -50,7 +51,8 @@ export interface CompletionChunkObject<ResultT = JSONObject | string> {
 //Internal structure used in driver implementation.
 export type CompletionChunk = CompletionChunkObject | string;
 
-export interface Completion<ResultT = JSONObject | string> {
+//ResultT should be either JSONObject or string
+export interface Completion<ResultT = any> {
     // the driver impl must return the result and optionally the token_usage. the execution time is computed by the extended abstract driver
     result: ResultT;
     token_usage?: ExecutionTokenUsage;
