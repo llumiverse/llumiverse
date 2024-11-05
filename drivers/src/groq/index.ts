@@ -66,6 +66,11 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
             messages: messages,
             max_tokens: options.max_tokens,
             temperature: options.temperature,
+            top_p: options.top_p,
+            //top_logprobs: options.top_logprobs,       //Logprobs output currently not supported
+            //logprobs: options.top_logprobs ? true : false,
+            presence_penalty: options.presence_penalty,
+            frequency_penalty: options.frequency_penalty,
             response_format: this.getResponseFormat(options),
         });
 
@@ -92,8 +97,13 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
             messages: messages,
             max_tokens: options.max_tokens,
             temperature: options.temperature,
+            top_p: options.top_p,
+            //top_logprobs: options.top_logprobs,       //Logprobs output currently not supported
+            //logprobs: options.top_logprobs ? true : false,
+            presence_penalty: options.presence_penalty,
+            frequency_penalty: options.frequency_penalty,
             response_format: this.getResponseFormat(options),
-            stream: true
+            stream: true,
         });
 
         return transformAsyncIterator(res, (res) => ({

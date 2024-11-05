@@ -6,7 +6,7 @@ import { transformAsyncIterator } from "@llumiverse/core/async";
 import { ClaudeMessagesPrompt, formatClaudePrompt } from "@llumiverse/core/formatters";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import mnemonist from "mnemonist";
-import { AI21RequestPayload, AmazonRequestPayload, ClaudeRequestPayload, CohereCommandRPayload, CohereRequestPayload, LLama2RequestPayload, MistralPayload } from "./payloads.js";
+import { AI21JurassicRequestPayload, AmazonRequestPayload, ClaudeRequestPayload, CohereCommandRPayload, CohereRequestPayload, LLama3RequestPayload, MistralPayload } from "./payloads.js";
 import { forceUploadFile } from "./s3.js";
 
 const { LRUCache } = mnemonist;
@@ -347,7 +347,8 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 prompt,
                 temperature: options.temperature,
                 max_gen_len: options.max_tokens,
-            } as LLama2RequestPayload
+                top_p: options.top_p
+            } as LLama3RequestPayload
         } else if (contains(options.model, "claude")) {
 
             const maxToken = () => {
@@ -365,35 +366,55 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 ...(prompt as ClaudeMessagesPrompt),
                 temperature: options.temperature,
                 max_tokens: maxToken(),
+                top_p: options.top_p,
+                top_k: options.top_k,
+                stop_sequences: typeof options.stop_sequence === 'string' ?
+                [options.stop_sequence] : options.stop_sequence,
             } as ClaudeRequestPayload;
         } else if (contains(options.model, "ai21")) {
             return {
                 prompt: prompt,
                 temperature: options.temperature,
                 maxTokens: options.max_tokens,
-            } as AI21RequestPayload;
+                topP: options.top_p,
+                stopSequences: typeof options.stop_sequence === 'string' ?
+                [options.stop_sequence] : options.stop_sequence,
+                presencePenalty: {scale: options.presence_penalty},
+                frequencyPenalty: {scale: options.frequency_penalty},
+            } as AI21JurassicRequestPayload;
         } else if (contains(options.model, "command-r-plus")) {
             return {
                 message: prompt as string,
                 max_tokens: options.max_tokens,
                 temperature: options.temperature,
+                p: options.top_p,
+                k: options.top_k,
+                frequency_penalty: options.frequency_penalty,
+                presence_penalty: options.presence_penalty,
+                stop_sequences: typeof options.stop_sequence === 'string' ?
+                [options.stop_sequence] : options.stop_sequence,
             } as CohereCommandRPayload;
-
         }
         else if (contains(options.model, "cohere")) {
             return {
                 prompt: prompt,
                 temperature: options.temperature,
                 max_tokens: options.max_tokens,
+                p: options.top_p,
+                k: options.top_k,
+                stop_sequences: typeof options.stop_sequence === 'string' ?
+                [options.stop_sequence] : options.stop_sequence,
             } as CohereRequestPayload;
         } else if (contains(options.model, "amazon")) {
+            const stop_seq: string[] = (typeof options.stop_sequence === 'string' ?
+            [options.stop_sequence] : options.stop_sequence) ?? [];
             return {
                 inputText: "User: " + (prompt as string) + "\nBot:", // see https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-titan-text.html#model-parameters-titan-request-response
                 textGenerationConfig: {
                     temperature: options.temperature,
                     topP: options.top_p,
                     maxTokenCount: options.max_tokens,
-                    //stopSequences: ["\n"],
+                    stopSequences: ["\n", ...stop_seq],
                 },
             } as AmazonRequestPayload;
         } else if (contains(options.model, "mistral")) {
@@ -401,6 +422,10 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 prompt: prompt,
                 temperature: options.temperature,
                 max_tokens: options.max_tokens,
+                top_k: options.top_k,
+                top_p: options.top_p,
+                stop: typeof options.stop_sequence === 'string' ?
+                [options.stop_sequence] : options.stop_sequence,
             } as MistralPayload;
         } else {
             throw new Error("Cannot prepare payload for unknown provider: " + options.model);

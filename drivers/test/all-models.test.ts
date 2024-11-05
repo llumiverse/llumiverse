@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver } from '@llumiverse/core';
+import { AIModel, AbstractDriver, ExecutionOptions } from '@llumiverse/core';
 import 'dotenv/config';
 import { GoogleAuth } from 'google-auth-library';
 import { describe, expect, test } from "vitest";
@@ -60,8 +60,8 @@ if (process.env.TOGETHER_API_KEY) {
             apiKey: process.env.TOGETHER_API_KEY as string
         }),
         models: [
-            //"meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
-            //"mistralai/Mixtral-8x7B-Instruct-v0.1" too slow in tests for now
+            "meta-llama/Meta-Llama-3.1-70B-Instruct-Turbo",
+            //"mistralai/Mixtral-8x7B-Instruct-v0.1" //too slow in tests for now
         ]
     }
     )
@@ -115,7 +115,7 @@ if (process.env.BEDROCK_REGION) {
         models: [
             "anthropic.claude-3-sonnet-20240229-v1:0",
             "anthropic.claude-v2:1",
-            "cohere.command-text-v14",
+            //"cohere.command-text-v14", EOL
             "mistral.mixtral-8x7b-instruct-v0:1",
             "cohere.command-r-plus-v1:0",
             "meta.llama3-1-70b-instruct-v1:0"
@@ -165,11 +165,23 @@ if (process.env.WATSONX_API_KEY) {
 
 describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => {
 
-    let fetchedModels: AIModel[]
+    let fetchedModels: AIModel[];
+
+    let test_options: ExecutionOptions = {
+        model: "",
+        max_tokens: 128,
+        temperature: 0.3,
+        top_k: 40,
+        top_p: 0.7,             //Some models do not support top_p = 1.0, set to 0.99 or lower.
+        top_logprobs: 5,        //Currently not supported, option will be ignored
+        presence_penalty: 0.1,      //Cohere Command R does not support using presence & frequency penalty at the same time
+        frequency_penalty: 0.0,
+    };
 
     test(`${name}: list models`, { timeout: TIMEOUT, retry: 1 }, async () => {
         const r = await driver.listModels();
         fetchedModels = r;
+        console.log(r)
         expect(r.length).toBeGreaterThan(0);
     });
 
@@ -191,27 +203,27 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
     });
 
     test.each(models)(`${name}: execute prompt on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
-        const r = await driver.execute(testPrompt_color, { model, temperature: 0.5, max_tokens: 1024 });
-        console.debug("Result for " + model, JSON.stringify(r));
+        const r = await driver.execute(testPrompt_color, {...test_options, model: model} as ExecutionOptions);
+        console.log("Result for execute " + model, JSON.stringify(r));
         assertCompletionOk(r, model, driver);
     });
 
     test.each(models)(`${name}: execute prompt with streaming on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
-        const r = await driver.stream(testPrompt_color, { model, temperature: 0.5, max_tokens: 1024 })
+        const r = await driver.stream(testPrompt_color, {...test_options, model: model} as ExecutionOptions);
         const out = await assertStreamingCompletionOk(r);
-        console.log("Result for " + model, JSON.stringify(out));
+        console.log("Result for streaming " + model, JSON.stringify(out));
     });
 
     test.each(models)(`${name}: execute prompt with schema on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
-        const r = await driver.execute(testPrompt_color, { model, temperature: 0.5, max_tokens: 1024, result_schema: testSchema_color });
-        console.log("Result for " + model, JSON.stringify(r.result));
+        const r = await driver.execute(testPrompt_color, {...test_options, model: model, result_schema: testSchema_color } as ExecutionOptions);
+        console.log("Result for execute with schema " + model, JSON.stringify(r.result));
         assertCompletionOk(r, model, driver);
     });
 
     test.each(models)(`${name}: execute prompt with streaming and schema on %s`, { timeout: TIMEOUT, retry: 3 }, async (model) => {
-        const r = await driver.stream(testPrompt_color, { model, temperature: 0.5, max_tokens: 1024, result_schema: testSchema_color })
+        const r = await driver.stream(testPrompt_color, {...test_options, model: model, result_schema: testSchema_color } as ExecutionOptions);
         const out = await assertStreamingCompletionOk(r, true);
-        console.log("Result for prompt with streaming and schema" + model, JSON.stringify(out));
+        console.log("Result for streaming with schema " + model, JSON.stringify(out));
     });
 
 
@@ -235,6 +247,4 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
         console.log("Result", r)
         assertCompletionOk(r);
     });
-
-
 });

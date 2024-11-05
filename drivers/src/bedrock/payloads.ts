@@ -1,48 +1,73 @@
 import { ClaudeMessagesPrompt } from "@llumiverse/core/formatters";
 
-export interface LLama2RequestPayload {
+//Overall documentation:
+//https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html
+
+//Docs at: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-meta.html
+export interface LLama3RequestPayload {
     prompt: string;
-    temperature: number;
+    temperature?: number;
     top_p?: number;
-    max_gen_len: number;
+    max_gen_len?: number;
 }
+
+//Docs at: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-anthropic-claude-messages.html
 export interface ClaudeRequestPayload extends ClaudeMessagesPrompt {
     anthropic_version: "bedrock-2023-05-31";
     max_tokens: number;
-    prompt: string;
     temperature?: number;
     top_p?: number;
     top_k?: number;
     stop_sequences?: [string];
 }
-export interface AI21RequestPayload {
+
+//Docs at: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-jurassic2.html
+export interface AI21JurassicRequestPayload {
     prompt: string;
     temperature: number;
     maxTokens: number;
+    topP?: number;
+    stopSequences?: [string]
+    presencePenalty?: {
+        scale : number
+    }
+    frequencyPenalty?: {
+        scale : number
+    }
 }
+
+//Docs at: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-cohere-command.html
 export interface CohereRequestPayload {
     prompt: string;
     temperature: number;
     max_tokens?: number;
     p?: number;
+    k?: number;
+    stop_sequences: [string],
 }
+
+//Docs at: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-titan-text.html
 export interface AmazonRequestPayload {
     inputText: string;
-    textGenerationConfig: {
-        temperature: number;
-        topP: number;
-        maxTokenCount: number;
-        stopSequences: [string];
+    textGenerationConfig?: {
+        temperature?: number;
+        topP?: number;
+        maxTokenCount?: number;
+        stopSequences?: [string];
     };
 }
+
+//Docs at: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-mistral-text-completion.html
 export interface MistralPayload {
     prompt: string;
     temperature: number;
     max_tokens: number;
     top_p?: number;
     top_k?: number;
+    stop?: [string]
 }
 
+//Docs at: https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-cohere-command-r-plus.html
 export interface CohereCommandRPayload {
 
     message: string,
