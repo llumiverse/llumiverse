@@ -52,14 +52,6 @@ export function createLogger(logger: Logger | "console" | undefined) {
     }
 }
 
-function applyExecutionDefaults(options: ExecutionOptions): ExecutionOptions {
-    return {
-        max_tokens: 2048,
-        temperature: 0.7,
-        ...options
-    }
-}
-
 export interface Driver<PromptT = unknown> {
 
     /**
@@ -148,7 +140,6 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     }
 
     async execute(segments: PromptSegment[], options: ExecutionOptions): Promise<ExecutionResponse<PromptT>> {
-        options = applyExecutionDefaults(options);
         const prompt = await this.createPrompt(segments, options);
         return this._execute(prompt, options);
     }
@@ -170,7 +161,6 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
 
     // by default no stream is supported. we block and we return all at once
     async stream(segments: PromptSegment[], options: ExecutionOptions): Promise<CompletionStream<PromptT>> {
-        options = applyExecutionDefaults(options);
         const prompt = await this.createPrompt(segments, options);
         const canStream = await this.canStream(options);
         if (canStream) {

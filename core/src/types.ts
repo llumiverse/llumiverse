@@ -103,6 +103,9 @@ export interface DriverOptions {
     logger?: Logger | "console";
 }
 
+//Options are split into PromptOptions, ModelOptions and ExecutionOptions.
+//ExecutionOptions are most often used within llumiverse as they are the most complete.
+//The base types are useful for external code that needs to interact with llumiverse.
 export interface PromptOptions {
     model: string;
     /**
@@ -112,10 +115,11 @@ export interface PromptOptions {
     format?: PromptFormatter;
     result_schema?: JSONSchema4;
 }
-export interface ExecutionOptions extends PromptOptions {
+
+export interface ModelOptions {
     temperature?: number;
     max_tokens?: number;
-    stop_sequence?: string | string[];
+    stop_sequence?: string[];
 
     /**
      * restricts the selection of tokens to the “k” most likely options, based on their probabilities
@@ -151,7 +155,8 @@ export interface ExecutionOptions extends PromptOptions {
      * Ignored for models which doesn;t support it
      */
     frequency_penalty?: number;
-
+}
+export interface ExecutionOptions extends PromptOptions, ModelOptions {
     /**
      * If set to true the original response from the target LLM will be included in the response under the original_response field.
      * This is useful for debugging and for some advanced use cases.
