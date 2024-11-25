@@ -21,7 +21,7 @@ export class TogetherAIDriver extends AbstractDriver<TogetherAIDriverOptions, st
         });
     }
 
-    getResponseFormat = (options: ExecutionOptions) => {
+    getResponseFormat = (options: ExecutionOptions): { type: string; schema: any } | undefined => {
         return options.result_schema ?
             {
                 type: "json_object",
