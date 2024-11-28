@@ -1,10 +1,12 @@
 import { GenerateContentRequest, VertexAI } from "@google-cloud/vertexai";
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload, PromptOptions, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, CompletionChunkObject, DriverOptions, EmbeddingsResult, ExecutionOptions, ModelSearchPayload, PromptOptions, PromptSegment } from "@llumiverse/core";
 import { FetchClient } from "api-fetch-client";
 import { GoogleAuth, GoogleAuthOptions } from "google-auth-library";
 import { JSONClient } from "google-auth-library/build/src/auth/googleauth.js";
 import { TextEmbeddingsOptions, getEmbeddingsForText } from "./embeddings/embeddings-text.js";
 import { BuiltinModels, getModelDefinition } from "./models.js";
+import { EmbeddingsOptions } from "@llumiverse/core";
+import { getEmbeddingsForImages } from "./embeddings/embeddings-image.js";
 
 
 export interface VertexAIDriverOptions extends DriverOptions {
@@ -58,7 +60,7 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
     async requestCompletion(prompt: GenerateContentRequest, options: ExecutionOptions): Promise<Completion<any>> {
         return getModelDefinition(options.model).requestCompletion(this, prompt, options);
     }
-    async requestCompletionStream(prompt: GenerateContentRequest, options: ExecutionOptions): Promise<AsyncIterable<string>> {
+    async requestCompletionStream(prompt: GenerateContentRequest, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunkObject>> {
         return getModelDefinition(options.model).requestCompletionStream(this, prompt, options);
     }
 
@@ -84,8 +86,18 @@ export class VertexAIDriver extends AbstractDriver<VertexAIDriverOptions, Genera
         throw new Error("Method not implemented.");
     }
 
-    async generateEmbeddings(options: TextEmbeddingsOptions): Promise<EmbeddingsResult> {
-        return getEmbeddingsForText(this, options);
+    async generateEmbeddings(options: EmbeddingsOptions): Promise<EmbeddingsResult> {
+        if (options.image || options.model?.includes("multimodal")) {
+            if (options.text && options.image) {
+                throw new Error("Text and Image simultaneous embedding not implemented. Submit seperately");
+            }
+            return getEmbeddingsForImages(this, options);
+        }
+        const text_options: TextEmbeddingsOptions = {
+            content: options.text ?? '',
+            model: options.model,
+        }
+        return getEmbeddingsForText(this, text_options);
     }
 
 }

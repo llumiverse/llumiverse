@@ -1,5 +1,5 @@
 import { Content, FinishReason, GenerateContentRequest, HarmBlockThreshold, HarmCategory, InlineDataPart, ModelParams, ResponseSchema, TextPart } from "@google-cloud/vertexai";
-import { AIModel, Completion, ExecutionOptions, ExecutionTokenUsage, PromptOptions, PromptRole, PromptSegment, readStreamAsBase64 } from "@llumiverse/core";
+import { AIModel, Completion, CompletionChunkObject, ExecutionOptions, ExecutionTokenUsage, PromptOptions, PromptRole, PromptSegment, readStreamAsBase64 } from "@llumiverse/core";
 import { asyncMap } from "@llumiverse/core/async";
 import { VertexAIDriver } from "../index.js";
 import { BuiltinModels, ModelDefinition } from "../models.js";
@@ -39,6 +39,11 @@ function getGenerativeModel(driver: VertexAIDriver, options: ExecutionOptions, m
             candidateCount: modelParams?.generationConfig?.candidateCount ?? 1,
             temperature: options.temperature,
             maxOutputTokens: options.max_tokens,
+            topP: options.top_p,
+            topK: options.top_k,
+            frequencyPenalty: options.frequency_penalty,
+            stopSequences: typeof options.stop_sequence === 'string' ?
+            [options.stop_sequence] : options.stop_sequence
         },
     });
 
@@ -173,26 +178,46 @@ export class GeminiModelDefinition implements ModelDefinition<GenerateContentReq
 
         return {
             result: result ?? '',
-            token_usage,
-            finish_reason,
+            token_usage: token_usage,
+            finish_reason: finish_reason,
             original_response: options.include_original_response ? response : undefined,
         } as Completion;
     }
 
-    async requestCompletionStream(driver: VertexAIDriver, prompt: GenerateContentRequest, options: ExecutionOptions): Promise<AsyncIterable<string>> {
+    async requestCompletionStream(driver: VertexAIDriver, prompt: GenerateContentRequest, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunkObject>> {
         const model = getGenerativeModel(driver, options);
         const streamingResp = await model.generateContentStream(prompt);
 
         const stream = asyncMap(streamingResp.stream, async (item) => {
+            const usage = item.usageMetadata;
+            const token_usage: ExecutionTokenUsage = {
+                prompt: usage?.promptTokenCount,
+                result: usage?.candidatesTokenCount,
+                total: usage?.totalTokenCount,
+            }
             if (item.candidates && item.candidates.length > 0) {
                 for (const candidate of item.candidates) {
+                    let finish_reason: string | undefined;
+                    switch (candidate.finishReason) {
+                        case FinishReason.MAX_TOKENS: finish_reason = "length"; break;
+                        case FinishReason.STOP: finish_reason = "stop"; break;
+                        default: finish_reason = candidate.finishReason;
+                    }
                     if (candidate.content?.role === 'model') {
                         const text = collectTextParts(candidate.content);
-                        if (text) return text;
+                        return {
+                            result:text,
+                            token_usage: token_usage,
+                            finish_reason: finish_reason,
+                        };
                     }
                 }
             }
-            return '';
+            //No normal output, returning block reason if it exists.
+            return {
+                result: item.promptFeedback?.blockReasonMessage ?? "",
+                finish_reason: item.promptFeedback?.blockReason ?? "",
+            };
         });
 
         return stream;

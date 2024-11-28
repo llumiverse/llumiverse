@@ -40,6 +40,18 @@ export interface ResultValidationError {
     data?: string;
 }
 
+//ResultT should be either JSONObject or string
+//Internal structure used in driver implementation.
+export interface CompletionChunkObject<ResultT = any> {
+    result: ResultT;
+    token_usage?: ExecutionTokenUsage;
+    finish_reason?: "stop" | "length" | string;
+}
+
+//Internal structure used in driver implementation.
+export type CompletionChunk = CompletionChunkObject | string;
+
+//ResultT should be either JSONObject or string
 export interface Completion<ResultT = any> {
     // the driver impl must return the result and optionally the token_usage. the execution time is computed by the extended abstract driver
     result: ResultT;
@@ -69,6 +81,10 @@ export interface ExecutionResponse<PromptT = any> extends Completion {
      * The time it took to execute the request in seconds
      */
     execution_time?: number;
+    /**
+     * The number of chunks for streamed executions
+     */
+    chunks?: number;
 }
 
 
@@ -87,6 +103,9 @@ export interface DriverOptions {
     logger?: Logger | "console";
 }
 
+//Options are split into PromptOptions, ModelOptions and ExecutionOptions.
+//ExecutionOptions are most often used within llumiverse as they are the most complete.
+//The base types are useful for external code that needs to interact with llumiverse.
 export interface PromptOptions {
     model: string;
     /**
@@ -96,10 +115,11 @@ export interface PromptOptions {
     format?: PromptFormatter;
     result_schema?: JSONSchema4;
 }
-export interface ExecutionOptions extends PromptOptions {
+
+export interface ModelOptions {
     temperature?: number;
     max_tokens?: number;
-    stop_sequence?: string | string[];
+    stop_sequence?: string[];
 
     /**
      * restricts the selection of tokens to the “k” most likely options, based on their probabilities
@@ -118,6 +138,8 @@ export interface ExecutionOptions extends PromptOptions {
     top_p?: number;
 
     /**
+     * Currently not supported, will be ignored.
+     * Should be an integer.
      * Only supported for OpenAI. Look at OpenAI documentation for more detailsx
      */
     top_logprobs?: number;
@@ -133,7 +155,8 @@ export interface ExecutionOptions extends PromptOptions {
      * Ignored for models which doesn;t support it
      */
     frequency_penalty?: number;
-
+}
+export interface ExecutionOptions extends PromptOptions, ModelOptions {
     /**
      * If set to true the original response from the target LLM will be included in the response under the original_response field.
      * This is useful for debugging and for some advanced use cases.

@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment, CompletionChunkObject } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { OpenAITextMessage, formatOpenAILikeTextPrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import Groq from "groq-sdk";
@@ -66,6 +66,11 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
             messages: messages,
             max_tokens: options.max_tokens,
             temperature: options.temperature,
+            top_p: options.top_p,
+            //top_logprobs: options.top_logprobs,       //Logprobs output currently not supported
+            //logprobs: options.top_logprobs ? true : false,
+            presence_penalty: options.presence_penalty,
+            frequency_penalty: options.frequency_penalty,
             response_format: this.getResponseFormat(options),
         });
 
@@ -85,19 +90,31 @@ export class GroqDriver extends AbstractDriver<GroqDriverOptions, OpenAITextMess
         };
     }
 
-    async requestCompletionStream(messages: OpenAITextMessage[], options: ExecutionOptions): Promise<AsyncIterable<string>> {
+    async requestCompletionStream(messages: OpenAITextMessage[], options: ExecutionOptions): Promise<AsyncIterable<CompletionChunkObject>> {
 
         const res = await this.client.chat.completions.create({
             model: options.model,
             messages: messages,
             max_tokens: options.max_tokens,
             temperature: options.temperature,
+            top_p: options.top_p,
+            //top_logprobs: options.top_logprobs,       //Logprobs output currently not supported
+            //logprobs: options.top_logprobs ? true : false,
+            presence_penalty: options.presence_penalty,
+            frequency_penalty: options.frequency_penalty,
             response_format: this.getResponseFormat(options),
-            stream: true
+            stream: true,
         });
 
-        return transformAsyncIterator(res, (res) => res.choices[0].delta.content || '');
-
+        return transformAsyncIterator(res, (res) => ({
+            result: res.choices[0].delta.content ?? '',
+            finish_reason: res.choices[0].finish_reason,
+            token_usage: {
+                prompt: res.x_groq?.usage?.prompt_tokens,
+                result: res.x_groq?.usage?.completion_tokens,
+                total: res.x_groq?.usage?.total_tokens,
+            },
+            } as CompletionChunkObject));
     }
 
     async listModels(): Promise<AIModel<string>[]> {

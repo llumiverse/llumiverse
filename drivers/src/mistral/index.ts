@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment } from "@llumiverse/core";
+import { AIModel, AbstractDriver, Completion, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptSegment, CompletionChunk } from "@llumiverse/core";
 import { transformSSEStream } from "@llumiverse/core/async";
 import { OpenAITextMessage, formatOpenAILikeTextPrompt, getJSONSafetyNotice } from "@llumiverse/core/formatters";
 import { FetchClient } from "api-fetch-client";
@@ -82,27 +82,38 @@ export class MistralAIDriver extends AbstractDriver<MistralAIDriverOptions, Open
                 result: res.usage.completion_tokens,
                 total: res.usage.total_tokens,
             },
-            finish_reason: choice.finish_reason,
+            finish_reason: choice.finish_reason,        //Uses expected "stop" , "length" format
             original_response: options.include_original_response ? res : undefined,
         };
     }
 
-    async requestCompletionStream(messages: OpenAITextMessage[], options: ExecutionOptions): Promise<AsyncIterable<string>> {
+    async requestCompletionStream(messages: OpenAITextMessage[], options: ExecutionOptions): Promise<AsyncIterable<CompletionChunk>> {
         const stream = await this.client.post('/v1/chat/completions', {
             payload: _makeChatCompletionRequest({
                 model: options.model,
                 messages: messages,
                 maxTokens: options.max_tokens,
                 temperature: options.temperature,
+                topP: options.top_p,
                 responseFormat: this.getResponseFormat(options),
-                stream: true
+                stream: true,
+                stopSequences: typeof options.stop_sequence === 'string' ?
+                [options.stop_sequence] : options.stop_sequence,
             }),
             reader: 'sse'
         });
 
         return transformSSEStream(stream, (data: string) => {
             const json = JSON.parse(data);
-            return json.choices[0]?.delta.content ?? '';
+            return {
+                result: json.choices[0]?.delta.content ?? '',
+                finish_reason: json.choices[0]?.finish_reason,      //Uses expected "stop" , "length" format
+                token_usage: {
+                    prompt: json.usage?.prompt_tokens,
+                    result: json.usage?.completion_tokens,
+                    total: json.usage?.total_tokens,
+                },
+            };
         });
 
     }
@@ -173,6 +184,7 @@ function _makeChatCompletionRequest({
     safePrompt,
     toolChoice,
     responseFormat,
+    stopSequences,
 }: CompletionRequestParams) {
     return {
         model: model,
@@ -186,5 +198,6 @@ function _makeChatCompletionRequest({
         safe_prompt: (safeMode || safePrompt) ?? undefined,
         tool_choice: toolChoice ?? undefined,
         response_format: responseFormat ?? undefined,
+        stop: stopSequences ?? undefined,
     };
 };

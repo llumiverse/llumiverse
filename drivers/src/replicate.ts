@@ -2,6 +2,7 @@ import {
     AIModel,
     AbstractDriver,
     Completion,
+    CompletionChunk,
     DataSource,
     DriverOptions,
     EmbeddingsResult,
@@ -55,19 +56,14 @@ export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
         });
     }
 
-    extractDataFromResponse(prompt: string, response: Prediction): Completion {
+    extractDataFromResponse(response: Prediction): Completion {
         const text = response.output.join("");
         return {
             result: text,
-            token_usage: {
-                result: response.output.length,
-                prompt: prompt.length,
-                total: response.output.length + prompt.length,
-            },
         };
     }
 
-    async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<string>> {
+    async requestCompletionStream(prompt: string, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunk>> {
         const model = ReplicateDriver.parseModelId(options.model);
         const predictionData = {
             input: {
@@ -82,7 +78,7 @@ export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
         const prediction =
             await this.service.predictions.create(predictionData);
 
-        const stream = new EventStream<string>();
+        const stream = new EventStream<CompletionChunk>();
 
         const source = new EventSource(prediction.urls.stream!);
         source.addEventListener("output", (e: any) => {
@@ -133,11 +129,6 @@ export class ReplicateDriver extends AbstractDriver<DriverOptions, string> {
         const text = res.output.join("");
         return {
             result: text,
-            token_usage: {
-                result: res.output.length,
-                prompt: prompt.length,
-                total: res.output.length + prompt.length,
-            },
             original_response: options.include_original_response ? res : undefined,
         };
     }

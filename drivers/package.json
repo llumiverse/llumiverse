@@ -20,10 +20,10 @@
     },
     "author": "Llumiverse",
     "license": "Apache-2.0",
-    "homepage": "https://github.com/llumiverse/llumiverse",
+    "homepage": "https://github.com/becomposable/llumiverse",
     "repository": {
         "type": "git",
-        "url": "git+ssh://git@github.com/llumiverse/llumiverse.git"
+        "url": "git+ssh://git@github.com/becomposable/llumiverse.git"
     },
     "keywords": [
         "llm",
@@ -55,11 +55,11 @@
         "vitest": "^2.0.0"
     },
     "dependencies": {
-        "@aws-sdk/client-bedrock": "3.635.0",
-        "@aws-sdk/client-bedrock-runtime": "3.635.0",
-        "@aws-sdk/client-s3": "3.635.0",
-        "@aws-sdk/credential-providers": "3.635.0",
-        "@aws-sdk/lib-storage": "3.635.0",
+        "@aws-sdk/client-bedrock": "^3.693.0",
+        "@aws-sdk/client-bedrock-runtime": "^3.693.0",
+        "@aws-sdk/client-s3": "^3.693.0",
+        "@aws-sdk/credential-providers": "^3.693.0",
+        "@aws-sdk/lib-storage": "^3.693.0",
         "@azure/identity": "^4.4.1",
         "@azure/openai": "2.0.0-beta.2",
         "@google-cloud/vertexai": "^1.7.0",
