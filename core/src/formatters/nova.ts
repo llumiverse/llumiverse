@@ -91,17 +91,16 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
         systemMessage = systemMessage + '\n\nIMPORTANT: ' + safety.join('\n');
     }
 
-
-    /*if (schema) {
+/*
+    if (schema) {
         messages.push({
             role: "user",
             content: [{
-                type: "text",
                 text: getJSONSafetyNotice(schema)
             }]
         });
-    }*/
-
+    }
+*/
     /*start Claude's message to amke sure it answers properly in JSON
    if enabled, this requires to add the { to Claude's response*/
     /*
@@ -114,19 +113,11 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
         });
     }
     */
+    console.log("systemMessage:  ", systemMessage)
+    
     // put system mesages first and safety last
     return {
-        system: [{text:""}],
+        system: systemMessage ? [{ text: systemMessage }] : [{text:""}],
         messages
     }
 }
-
-// export function claude(messages: PromptSegment[], schema?: JSONSchema4) {
-//     const prompt = genericColonSeparator(messages, schema, {
-//         user: "\nHuman",
-//         assistant: "\nAssistant",
-//         system: "\nHuman",
-//     });
-
-//     return "\n\n" + prompt + "\n\nAssistant:";
-// }

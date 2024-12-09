@@ -3,12 +3,11 @@ import { BedrockRuntime, InvokeModelCommandOutput, ResponseStream } from "@aws-s
 import { S3Client } from "@aws-sdk/client-s3";
 import { AIModel, AbstractDriver, Completion, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptOptions, PromptSegment, CompletionChunkObject, TrainingJob, TrainingJobStatus, TrainingOptions, ExecutionTokenUsage } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
-import { ClaudeMessagesPrompt, formatClaudePrompt } from "@llumiverse/core/formatters";
+import { ClaudeMessagesPrompt, formatClaudePrompt, formatNovaPrompt, NovaMessagesPrompt } from "@llumiverse/core/formatters";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import mnemonist from "mnemonist";
 import { AI21JurassicRequestPayload, AmazonRequestPayload, ClaudeRequestPayload, CohereCommandRPayload, CohereRequestPayload, LLama3RequestPayload, MistralPayload, NovaPayload } from "./payloads.js";
 import { forceUploadFile } from "./s3.js";
-import { formatNovaPrompt, NovaMessagesPrompt } from "../../../core/src/formatters/nova.js";
 
 const { LRUCache } = mnemonist;
 
@@ -270,6 +269,10 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 token_usage: token_usage,
             };
         } else if (result.output) { // Amazon Nova
+            console.log("Nova result ", result.output.message.content[0].text);
+            for (const message of result.output.message.content) {
+                console.log("Nova message ", message.text);
+            }
             return {
                 result: result.output.message.content[0].text,
                 token_usage: {
@@ -287,6 +290,10 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             return {
                 result: "",
                 finish_reason: novaFinishReason(result.messageStop.stopReason),
+            }
+        } else if (result.contentBlockStop) { // Amazon Nova streaming (converse API style) necessary for streaming parsing
+            return {
+                result: "",
             }
         } else {    // Fallback
             return {
