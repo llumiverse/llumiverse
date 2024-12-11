@@ -193,7 +193,7 @@ export function parseJSON(text: string): JSONValue {
         try {
             return JsonParser.parse(text);
         } catch (err2: any) { // throw the original error            
-            throw err2;
+            throw err;
         }
     }
 }

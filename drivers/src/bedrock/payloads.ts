@@ -99,6 +99,6 @@ export interface NovaPayload extends NovaMessagesPrompt {
         temperature?: number,
         top_p?: number,
         top_k?: number,
-        stop_sequences?: [string]
+        stopSequences?: [string]
     }
 }

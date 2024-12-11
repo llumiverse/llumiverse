@@ -65,8 +65,8 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
             const data = await readStreamAsBase64(source);
             parts.push({
             })
-    }
-    */
+        }
+        */
 
         if (segment.content) {
             parts.push({
@@ -108,16 +108,6 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
         systemMessage = systemMessage + '\n\nIMPORTANT: ' + safety.join('\n');
     }
 
-
-    if (schema) {
-        messages.push({
-            role: "user",
-            content: [{
-                text: getJSONSafetyNotice(schema)
-            }]
-        });
-    }
-
     /*start Nova's message to amke sure it answers properly in JSON
    if enabled, this requires to add the { to Nova's response*/
     
@@ -129,9 +119,7 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
             }]
         });
     }
-    
-    console.log("systemMessage:  ", systemMessage)
-    
+        
     // put system mesages first and safety last
     return {
         system: systemMessage ? [{ text: systemMessage }] : [{ text: "" }],
