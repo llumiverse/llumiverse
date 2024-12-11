@@ -675,7 +675,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 }
 
                 const model: AIModel = {
-                    id: p.inferenceProfileId ?? p.inferenceProfileArn,
+                    id: p.inferenceProfileArn ?? p.inferenceProfileId,
                     name: p.inferenceProfileName ?? p.inferenceProfileArn,
                     provider: this.provider,
                 };
