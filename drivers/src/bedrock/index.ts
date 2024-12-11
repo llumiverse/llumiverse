@@ -266,8 +266,17 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 token_usage: token_usage,
             };
         } else if (result.output) { // Amazon Nova
+            let res: string = "";
+            if (prompt) {
+                //if last prompt.messages is {, add { to the response
+                const p = prompt as NovaMessagesPrompt;
+                const lastMessage = (p as NovaMessagesPrompt).messages[p.messages.length - 1];
+                res = lastMessage.content[0].text === '{' ? '{' + (result.output.message.content[0].text ?? '') : (result.output.message.content[0].text ?? '');
+            } else {
+                res = result.output.message.content[0].text;
+            }
             return {
-                result: result.output.message.content[0].text,
+                result: res,
                 token_usage: {
                     prompt: result.usage.inputTokens,
                     result: result.usage.outputTokens,
@@ -276,8 +285,17 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 finish_reason: novaFinishReason(result.stopReason),
             };
         } else if (result.contentBlockDelta) { // Amazon Nova streaming (converse API style)
+            let res: string = "";
+            if (prompt && result.contentBlockDelta.contentBlockIndex == 0) {
+                //if last prompt.messages is {, add { to the response
+                const p = prompt as NovaMessagesPrompt;
+                const lastMessage = (p as NovaMessagesPrompt).messages[p.messages.length - 1];
+                res = lastMessage.content[0].text === '{' ? '{' + (result.contentBlockDelta.delta.text ?? '') : (result.contentBlockDelta.delta.text ?? '');
+            } else {
+                res = result.contentBlockDelta.delta.text;
+            }
             return {
-                result: result.contentBlockDelta.delta.text
+                result: res
             }
         } else if (result.contentBlockStop) { // Amazon Nova streaming (converse API style) necessary for streaming parsing
             return {
