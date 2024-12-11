@@ -585,13 +585,17 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
     async _listModels(foundationFilter?: (m: FoundationModelSummary) => boolean): Promise<AIModel[]> {
         const service = this.getService();
-        const [foundationals, customs] = await Promise.all([
+        const [foundationals, customs, inferenceProfiles] = await Promise.all([
             service.listFoundationModels({}).catch(() => {
                 this.logger.warn("[Bedrock] Can't list foundation models. Check if the user has the right permissions.");
                 return undefined
             }),
             service.listCustomModels({}).catch(() => {
                 this.logger.warn("[Bedrock] Can't list custom models. Check if the user has the right permissions.");
+                return undefined
+            }),
+            service.listInferenceProfiles({}).catch(() => {
+                this.logger.warn("[Bedrock] Can't list inference profiles. Check if the user has the right permissions.");
                 return undefined
             }),
         ]);
@@ -643,6 +647,23 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
                 aimodels.push(model);
                 this.validateConnection;
+            });
+        }
+
+        //add inference profiles
+        if (inferenceProfiles?.inferenceProfileSummaries) {
+            inferenceProfiles.inferenceProfileSummaries.forEach((p) => {
+                if (!p.inferenceProfileArn) {
+                    throw new Error("Profile ARN not found");
+                }
+
+                const model: AIModel = {
+                    id: p.inferenceProfileId ?? p.inferenceProfileArn,
+                    name: p.inferenceProfileName ?? p.inferenceProfileArn,
+                    provider: this.provider,
+                };
+
+                aimodels.push(model);
             });
         }
 
