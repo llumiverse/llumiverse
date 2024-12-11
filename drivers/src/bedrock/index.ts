@@ -491,7 +491,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                     max_new_tokens: options.max_tokens,
                     top_p: options.top_p,
                     top_k: options.top_k,
-                    stop_sequences: typeof options.stop_sequence === 'string' ?
+                    stopSequences: typeof options.stop_sequence === 'string' ?
                         [options.stop_sequence] : options.stop_sequence,
                 }
             } as NovaPayload;    
