@@ -3,10 +3,10 @@ import { BedrockRuntime, InvokeModelCommandOutput, ResponseStream } from "@aws-s
 import { S3Client } from "@aws-sdk/client-s3";
 import { AIModel, AbstractDriver, Completion, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, PromptOptions, PromptSegment, CompletionChunkObject, TrainingJob, TrainingJobStatus, TrainingOptions, ExecutionTokenUsage } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
-import { ClaudeMessagesPrompt, formatClaudePrompt } from "@llumiverse/core/formatters";
+import { ClaudeMessagesPrompt, formatClaudePrompt, formatNovaPrompt, NovaMessagesPrompt } from "@llumiverse/core/formatters";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
 import mnemonist from "mnemonist";
-import { AI21JurassicRequestPayload, AmazonRequestPayload, ClaudeRequestPayload, CohereCommandRPayload, CohereRequestPayload, LLama3RequestPayload, MistralPayload } from "./payloads.js";
+import { AI21JurassicRequestPayload, AmazonRequestPayload, ClaudeRequestPayload, CohereCommandRPayload, CohereRequestPayload, LLama3RequestPayload, MistralPayload, NovaPayload } from "./payloads.js";
 import { forceUploadFile } from "./s3.js";
 
 const { LRUCache } = mnemonist;
@@ -40,7 +40,7 @@ export interface BedrockDriverOptions extends DriverOptions {
     credentials?: AwsCredentialIdentity | Provider<AwsCredentialIdentity>;
 }
 
-export type BedrockPrompt = string | ClaudeMessagesPrompt;
+export type BedrockPrompt = string | ClaudeMessagesPrompt | NovaMessagesPrompt;
 
 export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockPrompt> {
 
@@ -84,6 +84,9 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         if (opts.model.includes('anthropic')) {
             //TODO: need to type better the types aren't checked properly by TS
             return await formatClaudePrompt(segments, opts.result_schema);
+        } else if (opts.model.includes('nova')) {
+            //TODO: need to type better the types aren't checked properly by TS
+            return await formatNovaPrompt(segments, opts.result_schema);
         } else {
             return await super.formatPrompt(segments, opts) as string;
         }
@@ -120,7 +123,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             };
         } else if (result.generations) {
             // Cohere Command (Non-R)
-            if (!token_usage) { 
+            if (!token_usage) {
                 token_usage = {
                     prompt: result?.meta?.billed_units.input_tokens,
                     result: result?.meta?.billed_units.output_tokens,
@@ -135,7 +138,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             };
         } else if (result.chat_history) {
             // Cohere Command R
-            if (!token_usage) { 
+            if (!token_usage) {
                 token_usage = {
                     prompt: result?.meta?.billed_units.input_tokens,
                     result: result?.meta?.billed_units.output_tokens,
@@ -156,7 +159,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             };
         } else if (result.completions) {
             // A21 Jurassic
-            if (!token_usage) { 
+            if (!token_usage) {
                 token_usage = {
                     prompt: result.prompt.tokens.length,
                     result: result.completions[0].data.tokens.length,
@@ -201,7 +204,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 }
             }
             let res: string = "";
-            if (result.type == 'content_block_start'){
+            if (result.type == 'content_block_start') {
                 if (prompt) {
                     //if last prompt.messages is {, add { to the response
                     const p = prompt as ClaudeMessagesPrompt;
@@ -224,11 +227,11 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 result: result.outputs[0]?.text,
                 finish_reason: result.outputs[0]?.stop_reason, // the stop reason is in the expected format ("stop" and "length")
                 token_usage: token_usage,
-            };   
+            };
             //Token usage not supported
         } else if (result.results) {
             // Amazon Titan non-streaming
-            if (!token_usage) { 
+            if (!token_usage) {
                 token_usage = {
                     prompt: result.inputTextTokenCount,
                     result: result.results[0].tokenCount,
@@ -245,7 +248,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             const decoder = new TextDecoder();
             const chunk = decoder.decode(result.chunks);
             const result_chunk = JSON.parse(chunk);
-            if (!token_usage) { 
+            if (!token_usage) {
                 token_usage = {
                     prompt: result_chunk.inputTextTokenCount,
                     result: result_chunk.totalOutputTextTokenCount,
@@ -260,6 +263,56 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         } else if (result.completion) { // TODO: who uses this?
             return {
                 result: result.completion,
+                token_usage: token_usage,
+            };
+        } else if (result.output) { // Amazon Nova
+            let res: string = "";
+            if (prompt) {
+                //if last prompt.messages is {, add { to the response
+                const p = prompt as NovaMessagesPrompt;
+                const lastMessage = (p as NovaMessagesPrompt).messages[p.messages.length - 1];
+                res = lastMessage.content[0].text === '{' ? '{' + (result.output.message.content[0].text ?? '') : (result.output.message.content[0].text ?? '');
+            } else {
+                res = result.output.message.content[0].text;
+            }
+            return {
+                result: res,
+                token_usage: {
+                    prompt: result.usage.inputTokens,
+                    result: result.usage.outputTokens,
+                    total: result.usage.totalTokens
+                },
+                finish_reason: novaFinishReason(result.stopReason),
+            };
+        } else if (result.contentBlockDelta) { // Amazon Nova streaming (converse API style)
+            let res: string = "";
+            if (prompt && result.contentBlockDelta.contentBlockIndex == 0) {
+                //if last prompt.messages is {, add { to the response
+                const p = prompt as NovaMessagesPrompt;
+                const lastMessage = (p as NovaMessagesPrompt).messages[p.messages.length - 1];
+                res = lastMessage.content[0].text === '{' ? '{' + (result.contentBlockDelta.delta.text ?? '') : (result.contentBlockDelta.delta.text ?? '');
+            } else {
+                res = result.contentBlockDelta.delta.text;
+            }
+            return {
+                result: res
+            }
+        } else if (result.contentBlockStop) { // Amazon Nova streaming (converse API style) necessary for streaming parsing
+            return {
+                result: "",
+            }
+        } else if (result.messageStart) { // Amazon Nova streaming (converse API style) necessary for streaming parsing
+            return {
+                result: "",
+            }
+        } else if (result.messageStop) { // Amazon Nova streaming (converse API style)
+            return {
+                result: "",
+                finish_reason: novaFinishReason(result.messageStop.stopReason),
+            }
+        } else if (result['amazon-bedrock-invocationMetrics']) { // Amazon Bedrock final response
+            return {
+                result: "",
                 token_usage: token_usage,
             };
         } else {    // Fallback
@@ -283,6 +336,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
         const payload = this.preparePayload(prompt, options);
         const executor = this.getExecutor();
+        
         const res = await executor.invokeModel({
             modelId: options.model,
             contentType: "application/json",
@@ -298,8 +352,26 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     protected async canStream(options: ExecutionOptions): Promise<boolean> {
         let canStream = supportStreamingCache.get(options.model);
         if (canStream == null) {
+            let model = options.model
+            //TODO: replace this temporary hack
+            //with a proper approach for inference profiles
+            //model comes in as inference profile, trying to get the underlying model.
+            if (model.includes("us.amazon.nova")) {
+                //replace us.amazon.nova with amazon.nova
+                if (model.includes("nova-micro-v1:0")) {
+                    model = "amazon.nova-micro-v1:0";
+                } else if (model.includes("nova-lite-v1:0")) {
+                    model = "amazon.nova-lite-v1:0";
+                } else if (model.includes("nova-pro-v1:0")) {
+                    model = "amazon.nova-pro-v1:0";
+                } else if (model.includes("nova-reel-v1:0")) {
+                    model = "amazon.nova-reel-v1:0";
+                } else if (model.includes("nova-canvas-v1:0")) {
+                    model = "amazon.nova-canvas-v1:0";
+                }
+            }
             const response = await this.getService().getFoundationModel({
-                modelIdentifier: options.model
+                modelIdentifier: model
             });
             canStream = response.modelDetails?.responseStreamingSupported ?? false;
             supportStreamingCache.set(options.model, canStream);
@@ -369,7 +441,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 top_p: options.top_p,
                 top_k: options.top_k,
                 stop_sequences: typeof options.stop_sequence === 'string' ?
-                [options.stop_sequence] : options.stop_sequence,
+                    [options.stop_sequence] : options.stop_sequence,
             } as ClaudeRequestPayload;
         } else if (contains(options.model, "ai21")) {
             return {
@@ -378,9 +450,9 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 maxTokens: options.max_tokens,
                 topP: options.top_p,
                 stopSequences: typeof options.stop_sequence === 'string' ?
-                [options.stop_sequence] : options.stop_sequence,
-                presencePenalty: {scale: options.presence_penalty},
-                frequencyPenalty: {scale: options.frequency_penalty},
+                    [options.stop_sequence] : options.stop_sequence,
+                presencePenalty: { scale: options.presence_penalty },
+                frequencyPenalty: { scale: options.frequency_penalty },
             } as AI21JurassicRequestPayload;
         } else if (contains(options.model, "command-r-plus")) {
             return {
@@ -392,7 +464,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 frequency_penalty: options.frequency_penalty,
                 presence_penalty: options.presence_penalty,
                 stop_sequences: typeof options.stop_sequence === 'string' ?
-                [options.stop_sequence] : options.stop_sequence,
+                    [options.stop_sequence] : options.stop_sequence,
             } as CohereCommandRPayload;
         }
         else if (contains(options.model, "cohere")) {
@@ -403,11 +475,11 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 p: options.top_p,
                 k: options.top_k,
                 stop_sequences: typeof options.stop_sequence === 'string' ?
-                [options.stop_sequence] : options.stop_sequence,
+                    [options.stop_sequence] : options.stop_sequence,
             } as CohereRequestPayload;
-        } else if (contains(options.model, "amazon")) {
+        } else if (contains(options.model, "titan")) {
             const stop_seq: string[] = (typeof options.stop_sequence === 'string' ?
-            [options.stop_sequence] : options.stop_sequence) ?? [];
+                [options.stop_sequence] : options.stop_sequence) ?? [];
             return {
                 inputText: "User: " + (prompt as string) + "\nBot:", // see https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters-titan-text.html#model-parameters-titan-request-response
                 textGenerationConfig: {
@@ -425,8 +497,21 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 top_k: options.top_k,
                 top_p: options.top_p,
                 stop: typeof options.stop_sequence === 'string' ?
-                [options.stop_sequence] : options.stop_sequence,
+                    [options.stop_sequence] : options.stop_sequence,
             } as MistralPayload;
+        } else if (contains(options.model, "nova")) {
+            return {
+                schemaVersion: "messages-v1",
+                ...(prompt as NovaMessagesPrompt),
+                inferenceConfig: {
+                    temperature: options.temperature,
+                    max_new_tokens: options.max_tokens,
+                    top_p: options.top_p,
+                    top_k: options.top_k,
+                    stopSequences: typeof options.stop_sequence === 'string' ?
+                        [options.stop_sequence] : options.stop_sequence,
+                }
+            } as NovaPayload;    
         } else {
             throw new Error("Cannot prepare payload for unknown provider: " + options.model);
         }
@@ -517,13 +602,17 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
     async _listModels(foundationFilter?: (m: FoundationModelSummary) => boolean): Promise<AIModel[]> {
         const service = this.getService();
-        const [foundationals, customs] = await Promise.all([
+        const [foundationals, customs, inferenceProfiles] = await Promise.all([
             service.listFoundationModels({}).catch(() => {
                 this.logger.warn("[Bedrock] Can't list foundation models. Check if the user has the right permissions.");
                 return undefined
             }),
             service.listCustomModels({}).catch(() => {
                 this.logger.warn("[Bedrock] Can't list custom models. Check if the user has the right permissions.");
+                return undefined
+            }),
+            service.listInferenceProfiles({}).catch(() => {
+                this.logger.warn("[Bedrock] Can't list inference profiles. Check if the user has the right permissions.");
                 return undefined
             }),
         ]);
@@ -575,6 +664,23 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
                 aimodels.push(model);
                 this.validateConnection;
+            });
+        }
+
+        //add inference profiles
+        if (inferenceProfiles?.inferenceProfileSummaries) {
+            inferenceProfiles.inferenceProfileSummaries.forEach((p) => {
+                if (!p.inferenceProfileArn) {
+                    throw new Error("Profile ARN not found");
+                }
+
+                const model: AIModel = {
+                    id: p.inferenceProfileArn ?? p.inferenceProfileId,
+                    name: p.inferenceProfileName ?? p.inferenceProfileArn,
+                    provider: this.provider,
+                };
+
+                aimodels.push(model);
             });
         }
 
@@ -679,6 +785,15 @@ function titanFinishReason(reason: string | undefined) {
     switch (reason) {
         case 'FINISH': return "stop";
         case 'LENGTH': return "length";
+        default: return reason;
+    }
+}
+
+function novaFinishReason(reason: string | undefined) {
+    if (!reason) return undefined;
+    switch (reason) {
+        case 'end_turn': return "stop";
+        case 'max_tokens': return "length";
         default: return reason;
     }
 }
