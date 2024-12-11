@@ -107,9 +107,6 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     static getExtractedCompletionChunk(result: any, prompt?: BedrockPrompt): CompletionChunkObject {
         //AWS universal token_usage
         let token_usage = this.getAmazonInvocationMetrics(result);
-        console.log("-----------------")
-        console.log(result)
-        console.log("-----------------")
         if (result.generation || result.generation == '') {
             // LLAMA3
             if (!token_usage) {
@@ -269,10 +266,6 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 token_usage: token_usage,
             };
         } else if (result.output) { // Amazon Nova
-            console.log("Nova result ", result.output.message.content[0].text);
-            for (const message of result.output.message.content) {
-                console.log("Nova message ", message.text);
-            }
             return {
                 result: result.output.message.content[0].text,
                 token_usage: {
@@ -286,15 +279,24 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             return {
                 result: result.contentBlockDelta.delta.text
             }
+        } else if (result.contentBlockStop) { // Amazon Nova streaming (converse API style) necessary for streaming parsing
+            return {
+                result: "",
+            }
+        } else if (result.messageStart) { // Amazon Nova streaming (converse API style) necessary for streaming parsing
+            return {
+                result: "",
+            }
         } else if (result.messageStop) { // Amazon Nova streaming (converse API style)
             return {
                 result: "",
                 finish_reason: novaFinishReason(result.messageStop.stopReason),
             }
-        } else if (result.contentBlockStop) { // Amazon Nova streaming (converse API style) necessary for streaming parsing
+        } else if (result['amazon-bedrock-invocationMetrics']) { // Amazon Bedrock final response
             return {
                 result: "",
-            }
+                token_usage: token_usage,
+            };
         } else {    // Fallback
             return {
                 result: result,
