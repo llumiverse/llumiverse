@@ -352,6 +352,10 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                     model = "amazon.nova-lite-v1:0";
                 } else if (model.includes("nova-pro-v1:0")) {
                     model = "amazon.nova-pro-v1:0";
+                } else if (model.includes("nova-reel-v1:0")) {
+                    model = "amazon.nova-reel-v1:0";
+                } else if (model.includes("nova-canvas-v1:0")) {
+                    model = "amazon.nova-canvas-v1:0";
                 }
             }
             const response = await this.getService().getFoundationModel({

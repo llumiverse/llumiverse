@@ -1,6 +1,6 @@
 import { JSONSchema4 } from "json-schema";
 import { PromptRole, PromptSegment } from "../index.js";
-import { readStreamAsBase64 } from "../stream.js";
+//import { readStreamAsBase64 } from "../stream.js";
 import { getJSONSafetyNotice } from "./commons.js";
 
 export interface NovaMessage {
@@ -19,6 +19,24 @@ interface NovaMessagePart {
         data: string,
     }, // only set for images
     text?: string // only set for text messages
+    image?: {
+        format: "jpeg" | "png" | "gif" | "webp",
+        source: {
+            bytes: "base64",
+        }
+    }
+    video?: {
+        format: "mkv" | "mov" | "mp4" | "webm" | "three_gp" | "flv" | "mpeg" | "mpg" | "wmv",
+        source: {
+            //Option 1: sending a s3 location
+            s3Location?: {
+                uri: string, // example: s3://my-bucket/object-key
+                bucketOwner: string // optional. example: "123456789012"
+            }
+            //Option 2: sending a base64 encoded video
+            bytes?: "base64",
+        }
+    }
 }
 
 export interface NovaMessagesPrompt {
@@ -35,21 +53,20 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
     const safety: string[] = [];
     const messages: NovaMessage[] = [];
 
-    //TODO type: 'image' -> detect from f.mime_type
     for (const segment of segments) {
 
         const parts: NovaMessagePart[] = [];
+        /*
         if (segment.files) for (const f of segment.files) {
+            //TODO type: 'image' -> detect from f.mime_type
+            //TODO: image and video support
+
             const source = await f.getStream();
             const data = await readStreamAsBase64(source);
             parts.push({
-                source: {
-                    type: "base64",
-                    media_type: f.mime_type || 'image/png',
-                    data
-                }
             })
-        }
+    }
+    */
 
         if (segment.content) {
             parts.push({
@@ -91,7 +108,7 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
         systemMessage = systemMessage + '\n\nIMPORTANT: ' + safety.join('\n');
     }
 
-/*
+
     if (schema) {
         messages.push({
             role: "user",
@@ -100,10 +117,10 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
             }]
         });
     }
-*/
-    /*start Claude's message to amke sure it answers properly in JSON
-   if enabled, this requires to add the { to Claude's response*/
-    /*
+
+    /*start Nova's message to amke sure it answers properly in JSON
+   if enabled, this requires to add the { to Nova's response*/
+    
     if (schema) {
         messages.push({
             role: "assistant",
@@ -112,7 +129,7 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
             }]
         });
     }
-    */
+    
     console.log("systemMessage:  ", systemMessage)
     
     // put system mesages first and safety last
