@@ -344,14 +344,15 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             //TODO: replace this temporary hack
             //with a proper approach for inference profiles
             //model comes in as inference profile, trying to get the underlying model.
-            if (model == "us.amazon.nova-micro-v1:0") {
-                model = "amazon.nova-micro-v1:0";
-            }
-            if (model == "us.amazon.nova-lite-v1:0") {
-                model = "amazon.nova-lite-v1:0";
-            }
-            if (model == "us.amazon.nova-pro-v1:0") {
-                model = "amazon.nova-pro-v1:0";
+            if (model.includes("us.amazon.nova")) {
+                //replace us.amazon.nova with amazon.nova
+                if (model.includes("nova-micro-v1:0")) {
+                    model = "amazon.nova-micro-v1:0";
+                } else if (model.includes("nova-lite-v1:0")) {
+                    model = "amazon.nova-lite-v1:0";
+                } else if (model.includes("nova-pro-v1:0")) {
+                    model = "amazon.nova-pro-v1:0";
+                }
             }
             const response = await this.getService().getFoundationModel({
                 modelIdentifier: model
@@ -482,7 +483,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 stop: typeof options.stop_sequence === 'string' ?
                     [options.stop_sequence] : options.stop_sequence,
             } as MistralPayload;
-        } else if (contains(options.model,"nova")){
+        } else if (contains(options.model, "nova")) {
             return {
                 schemaVersion: "messages-v1",
                 ...(prompt as NovaMessagesPrompt),

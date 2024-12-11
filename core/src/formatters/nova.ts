@@ -117,7 +117,7 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
     
     // put system mesages first and safety last
     return {
-        system: systemMessage ? [{ text: systemMessage }] : [{text:""}],
+        system: systemMessage ? [{ text: systemMessage }] : [{ text: "" }],
         messages
     }
 }
