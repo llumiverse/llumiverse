@@ -179,6 +179,7 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
         top_logprobs: 5,        //Currently not supported, option will be ignored
         presence_penalty: 0.1,      //Cohere Command R does not support using presence & frequency penalty at the same time
         frequency_penalty: 0.0,
+        stop_sequence: ["adsoiuygsa"],
     };
 
     test(`${name}: list models`, { timeout: TIMEOUT, retry: 1 }, async () => {
