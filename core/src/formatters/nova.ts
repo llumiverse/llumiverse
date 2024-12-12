@@ -1,5 +1,5 @@
 import { JSONSchema4 } from "json-schema";
-import { PromptRole, PromptSegment } from "../index.js";
+import { PromptRole, PromptSegment, readStreamAsBase64 } from "../index.js";
 //import { readStreamAsBase64 } from "../stream.js";
 import { getJSONSafetyNotice } from "./commons.js";
 
@@ -13,16 +13,11 @@ export interface NovaSystemMessage{
 }
 
 interface NovaMessagePart {
-    source?: {
-        type: "base64",
-        media_type: string,
-        data: string,
-    }, // only set for images
     text?: string // only set for text messages
     image?: {
         format: "jpeg" | "png" | "gif" | "webp",
         source: {
-            bytes: "base64",
+            bytes: string //"base64",
         }
     }
     video?: {
@@ -34,7 +29,7 @@ interface NovaMessagePart {
                 bucketOwner: string // optional. example: "123456789012"
             }
             //Option 2: sending a base64 encoded video
-            bytes?: "base64",
+            bytes?: string //"base64",
         }
     }
 }
@@ -56,7 +51,6 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
     for (const segment of segments) {
 
         const parts: NovaMessagePart[] = [];
-        /*
         if (segment.files) for (const f of segment.files) {
             //TODO type: 'image' -> detect from f.mime_type
             //TODO: image and video support
@@ -64,9 +58,14 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
             const source = await f.getStream();
             const data = await readStreamAsBase64(source);
             parts.push({
+                image: {
+                    format: 'png',
+                    source: {
+                        bytes: data
+                    }
+                }
             })
         }
-        */
 
         if (segment.content) {
             parts.push({
