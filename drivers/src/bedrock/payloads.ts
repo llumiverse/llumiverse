@@ -1,4 +1,4 @@
-import { ClaudeMessagesPrompt } from "@llumiverse/core/formatters";
+import { ClaudeMessagesPrompt, NovaMessagesPrompt } from "@llumiverse/core/formatters";
 
 //Overall documentation:
 //https://docs.aws.amazon.com/bedrock/latest/userguide/model-parameters.html
@@ -89,4 +89,16 @@ export interface CohereCommandRPayload {
     stop_sequences?: string[],
     raw_prompting?: boolean
 
+}
+
+//Docs at: https://docs.aws.amazon.com/nova/latest/userguide/complete-request-schema.html
+export interface NovaPayload extends NovaMessagesPrompt {
+    schemaVersion: string,
+    inferenceConfig?: {
+        max_new_tokens?: number,
+        temperature?: number,
+        top_p?: number,
+        top_k?: number,
+        stopSequences?: [string]
+    }
 }

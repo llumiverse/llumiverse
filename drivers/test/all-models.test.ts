@@ -118,7 +118,10 @@ if (process.env.BEDROCK_REGION) {
             //"cohere.command-text-v14", EOL
             "mistral.mixtral-8x7b-instruct-v0:1",
             "cohere.command-r-plus-v1:0",
-            "meta.llama3-1-70b-instruct-v1:0"
+            "meta.llama3-1-70b-instruct-v1:0",
+            "us.amazon.nova-micro-v1:0",
+            //"us.amazon.nova-lite-v1:0",
+            //"us.amazon.nova-pro-v1:0",
         ]
     }
     )
@@ -190,6 +193,7 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
         top_logprobs: 5,        //Currently not supported, option will be ignored
         presence_penalty: 0.1,      //Cohere Command R does not support using presence & frequency penalty at the same time
         frequency_penalty: 0.0,
+        stop_sequence: ["adsoiuygsa"],
     };
 
     test(`${name}: list models`, { timeout: TIMEOUT, retry: 1 }, async () => {
