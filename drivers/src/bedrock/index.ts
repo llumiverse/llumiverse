@@ -349,31 +349,61 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         return completion;
     }
 
+    private async getCanStream(model: string, type: string): Promise<boolean> {
+        let canStream: boolean = false;
+        let error: any = null;
+        if (type == "foundation-model" || type == "") {
+            try {
+                const response = await this.getService().getFoundationModel({
+                    modelIdentifier: model
+                });
+                canStream = response.modelDetails?.responseStreamingSupported ?? false;
+                return canStream;
+            } catch (e) {
+                error = e;
+            }
+        }
+        if (type == "inference-profile" || type == "") {
+            try {
+                const response = await this.getService().getInferenceProfile({
+                    inferenceProfileIdentifier: model
+                });
+                canStream = await this.getCanStream(response.models?.[0].modelArn ?? "", "foundation-model");
+                return canStream;
+            } catch (e) {
+                error = e;
+            }
+        }
+        if (type == "custom-model" || type == "") {
+            try {
+                const response = await this.getService().getCustomModel({
+                    modelIdentifier: model
+                });
+                canStream = await this.getCanStream(response.baseModelArn ?? "", "foundation-model");
+                return canStream;
+            } catch (e) {
+                error = e;
+            }
+        }
+        
+        if (error) {
+            throw error;
+        }
+        return canStream;
+    }
+
     protected async canStream(options: ExecutionOptions): Promise<boolean> {
         let canStream = supportStreamingCache.get(options.model);
         if (canStream == null) {
-            let model = options.model
-            //TODO: replace this temporary hack
-            //with a proper approach for inference profiles
-            //model comes in as inference profile, trying to get the underlying model.
-            if (model.includes("us.amazon.nova")) {
-                //replace us.amazon.nova with amazon.nova
-                if (model.includes("nova-micro-v1:0")) {
-                    model = "amazon.nova-micro-v1:0";
-                } else if (model.includes("nova-lite-v1:0")) {
-                    model = "amazon.nova-lite-v1:0";
-                } else if (model.includes("nova-pro-v1:0")) {
-                    model = "amazon.nova-pro-v1:0";
-                } else if (model.includes("nova-reel-v1:0")) {
-                    model = "amazon.nova-reel-v1:0";
-                } else if (model.includes("nova-canvas-v1:0")) {
-                    model = "amazon.nova-canvas-v1:0";
-                }
+            let type: string = "";
+            if (options.model.includes("foundation-model")) {
+                type = "foundation-model";
+            } else if (options.model.includes("inference-profile")) {  
+                type = "inference-profile";
+            } else if (options.model.includes("custom-model")) {
+                type = "custom-model";
             }
-            const response = await this.getService().getFoundationModel({
-                modelIdentifier: model
-            });
-            canStream = response.modelDetails?.responseStreamingSupported ?? false;
+            canStream = await this.getCanStream(options.model, type);
             supportStreamingCache.set(options.model, canStream);
         }
         return canStream;
