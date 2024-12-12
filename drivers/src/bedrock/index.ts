@@ -387,7 +387,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         }
         
         if (error) {
-            throw error;
+            console.warn("Error on canStream check for model " + model, error);
         }
         return canStream;
     }
