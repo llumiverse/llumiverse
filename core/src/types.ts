@@ -165,6 +165,12 @@ export interface ExecutionOptions extends PromptOptions, ModelOptions {
     include_original_response?: boolean;
 }
 
+export interface ImageGenExecutionOptions extends ExecutionOptions {
+
+    
+
+}
+
 // ============== Prompts ===============
 export enum PromptRole {
     safety = "safety",
