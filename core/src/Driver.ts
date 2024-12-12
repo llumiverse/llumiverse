@@ -9,6 +9,7 @@ import { formatLlama2Prompt, formatLlama3Prompt, formatTextPrompt } from "./form
 import {
     AIModel,
     Completion,
+    CompletionChunk,
     CompletionStream,
     DataSource,
     DriverOptions,
@@ -16,14 +17,15 @@ import {
     EmbeddingsResult,
     ExecutionOptions,
     ExecutionResponse,
+    ImageGenExecutionOptions,
+    ImageGeneration,
     Logger,
     ModelSearchPayload,
     PromptOptions,
     PromptSegment,
     TrainingJob,
     TrainingOptions,
-    TrainingPromptOptions,
-    CompletionChunk
+    TrainingPromptOptions
 } from "./types.js";
 import { validateResult } from "./validation.js";
 
@@ -215,6 +217,10 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
     abstract requestCompletion(prompt: PromptT, options: ExecutionOptions): Promise<Completion>;
 
     abstract requestCompletionStream(prompt: PromptT, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunk>>;
+
+    async requestImageGeneration(_segment: PromptSegment[], _options: ImageGenExecutionOptions): Promise<ImageGeneration> { //make abstract?
+        throw new Error("Image generation not implemented.");
+    }
 
     //list models available for this environement
     abstract listModels(params?: ModelSearchPayload): Promise<AIModel[]>;

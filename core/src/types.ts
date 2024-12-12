@@ -75,6 +75,13 @@ export interface Completion<ResultT = any> {
 
 }
 
+export interface ImageGeneration {
+
+    error?: string;
+    images?: string[];
+
+}
+
 export interface ExecutionResponse<PromptT = any> extends Completion {
     prompt: PromptT;
     /**
@@ -167,7 +174,12 @@ export interface ExecutionOptions extends PromptOptions, ModelOptions {
 
 export interface ImageGenExecutionOptions extends ExecutionOptions {
 
-    
+    width?: number;
+    height?: number;
+
+    generationType: "text-to-image" | "inpainting" | "outpainting" | "colorization"
+
+    inputImageUse: "variation" | "inspiration" | "none"
 
 }
 
