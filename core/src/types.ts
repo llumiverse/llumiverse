@@ -35,7 +35,7 @@ export interface EmbeddingsResult {
 }
 
 export interface ResultValidationError {
-    code: 'validation_error' | 'json_error';
+    code: 'validation_error' | 'json_error' | 'content_policy_violation';
     message: string;
     data?: string;
 }
@@ -77,7 +77,6 @@ export interface Completion<ResultT = any> {
 
 export interface ImageGeneration {
 
-    error?: string;
     images?: string[];
 
 }
@@ -170,16 +169,19 @@ export interface ExecutionOptions extends PromptOptions, ModelOptions {
      * It is ignored on streaming requests
      */
     include_original_response?: boolean;
+
+    output_modality?: Modalities
 }
 
 export interface ImageGenExecutionOptions extends ExecutionOptions {
 
+    output_modality: Modalities.image;
     width?: number;
     height?: number;
 
-    generationType: "text-to-image" | "inpainting" | "outpainting" | "colorization"
+    generation_type: "text-to-image" | "inpainting" | "outpainting" | "colorization"
 
-    inputImageUse: "variation" | "inspiration" | "none"
+    input_image_use: "variation" | "inspiration" | "none"
 
 }
 
@@ -201,6 +203,13 @@ export interface ExecutionTokenUsage {
     prompt?: number;
     result?: number;
     total?: number;
+}
+
+export enum Modalities {
+    text = "text",
+    image = "image",
+    video = "video",
+    audio = "audio"
 }
 
 

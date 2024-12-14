@@ -10,7 +10,7 @@ async function textToImagePayload(segments: PromptSegment[], options: ImageGenEx
         if (!imageProvided) {
             return undefined;
         }
-        if (options.inputImageUse === "inspiration") {
+        if (options.input_image_use === "inspiration") {
             return segments[0].files![0].getStream().then((stream) => readStreamAsBase64(stream));
         }
         return undefined;

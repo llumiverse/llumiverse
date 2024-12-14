@@ -1,7 +1,7 @@
 import { Bedrock, CreateModelCustomizationJobCommand, FoundationModelSummary, GetModelCustomizationJobCommand, GetModelCustomizationJobCommandOutput, ModelCustomizationJobStatus, StopModelCustomizationJobCommand } from "@aws-sdk/client-bedrock";
 import { BedrockRuntime, InvokeModelCommandOutput, ResponseStream } from "@aws-sdk/client-bedrock-runtime";
 import { S3Client } from "@aws-sdk/client-s3";
-import { AbstractDriver, AIModel, Completion, CompletionChunkObject, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, ExecutionTokenUsage, ImageGeneration, ImageGenExecutionOptions, PromptOptions, PromptSegment, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
+import { AbstractDriver, AIModel, Completion, CompletionChunkObject, DataSource, DriverOptions, EmbeddingsOptions, EmbeddingsResult, ExecutionOptions, ExecutionTokenUsage, ImageGeneration, ImageGenExecutionOptions, Modalities, PromptOptions, PromptSegment, TrainingJob, TrainingJobStatus, TrainingOptions } from "@llumiverse/core";
 import { transformAsyncIterator } from "@llumiverse/core/async";
 import { ClaudeMessagesPrompt, formatClaudePrompt, formatNovaPrompt, NovaMessagesPrompt } from "@llumiverse/core/formatters";
 import { AwsCredentialIdentity, Provider } from "@smithy/types";
@@ -41,7 +41,7 @@ export interface BedrockDriverOptions extends DriverOptions {
     credentials?: AwsCredentialIdentity | Provider<AwsCredentialIdentity>;
 }
 
-export type BedrockPrompt = string | ClaudeMessagesPrompt | NovaMessagesPrompt;
+export type BedrockPrompt = string | ClaudeMessagesPrompt | NovaMessagesPrompt | PromptSegment[];
 
 export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockPrompt> {
 
@@ -520,13 +520,17 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     }
 
 
-    async requestImageGeneration(segments: PromptSegment[], options: ImageGenExecutionOptions): Promise<ImageGeneration> {
+    async requestImageGeneration(segments: PromptSegment[], options: ImageGenExecutionOptions): Promise<Completion<ImageGeneration>> {
+
+        if (options.output_modality !== Modalities.image) {
+            throw new Error(`Image generation requires image output_modality`);
+        }
 
         const executor = this.getExecutor();
         const taskType = () => {
-            switch (options.generationType) {
+            switch (options.generation_type) {
                 case "text-to-image":
-                    if (options.inputImageUse === "variation") {
+                    if (options.input_image_use === "variation") {
                         return NovaImageGenerationTaskType.IMAGE_VARIATION;
                     } else {
                         return NovaImageGenerationTaskType.TEXT_IMAGE
@@ -537,20 +541,6 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         }
 
         const payload = await formatNovaImageGenerationPayload(taskType(), segments, options);
-        /*const payload = {
-            "taskType": "TEXT_IMAGE",
-            "textToImageParams": {
-                "text": segments.map(s => s.content).join(" "),
-            },
-            "imageGenerationConfig": {
-                "numberOfImages": 1,
-                "height": 1024,
-                "width": 1024,
-                "cfgScale": 8.0,
-                "seed": 0
-            }
-        }*/
-
 
         const res = await executor.invokeModel({
             modelId: options.model,
@@ -568,8 +558,10 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
         return {
             error: result.error,
-            images: result.images,
-        };
+            result: {
+                images: result.images,
+            }
+        }
 
     }
 

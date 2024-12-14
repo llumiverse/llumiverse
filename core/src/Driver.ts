@@ -20,6 +20,7 @@ import {
     ImageGenExecutionOptions,
     ImageGeneration,
     Logger,
+    Modalities,
     ModelSearchPayload,
     PromptOptions,
     PromptSegment,
@@ -146,13 +147,25 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
         return this._execute(prompt, options);
     }
 
-    async _execute(prompt: PromptT, options: ExecutionOptions): Promise<ExecutionResponse<PromptT>> {
+    async _execute(prompt: PromptT, options: ExecutionOptions|ImageGenExecutionOptions): Promise<ExecutionResponse<PromptT>> {
         this.logger.debug(
             `[${this.provider}] Executing prompt on ${options.model}`);
         try {
             const start = Date.now();
-            const result = await this.requestCompletion(prompt, options);
-            this.validateResult(result, options);
+            let result;
+
+            switch (options.output_modality) {
+                case Modalities.text:
+                    result = await this.requestCompletion(prompt, options);
+                    this.validateResult(result, options);
+                    break;
+                case Modalities.image:
+                    result = await this.requestImageGeneration(prompt, options as ImageGenExecutionOptions);
+                    break;
+                default:
+                    throw new Error(`Unsupported modality: ${options.output_modality}`)
+            }
+
             const execution_time = Date.now() - start;
             return { ...result, prompt, execution_time };
         } catch (error) {
@@ -218,7 +231,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
 
     abstract requestCompletionStream(prompt: PromptT, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunk>>;
 
-    async requestImageGeneration(_segment: PromptSegment[], _options: ImageGenExecutionOptions): Promise<ImageGeneration> { //make abstract?
+    async requestImageGeneration(_segment: PromptT, _options: ImageGenExecutionOptions): Promise<Completion<ImageGeneration>> { //make abstract?
         throw new Error("Image generation not implemented.");
     }
 
