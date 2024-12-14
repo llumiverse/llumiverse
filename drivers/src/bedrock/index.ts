@@ -536,11 +536,12 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                         return NovaImageGenerationTaskType.TEXT_IMAGE
                     }
                 default:
-                    throw new Error("Invalid generation type");
+                    return NovaImageGenerationTaskType.TEXT_IMAGE
             }
         }
+        this.logger.info("Task type: " + taskType());
 
-        const payload = await formatNovaImageGenerationPayload(taskType(), segments, options);
+        const payload = await formatNovaImageGenerationPayload(NovaImageGenerationTaskType.TEXT_IMAGE, segments, options);
 
         const res = await executor.invokeModel({
             modelId: options.model,
