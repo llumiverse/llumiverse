@@ -1,17 +1,20 @@
-import { ImageGenExecutionOptions, PromptSegment, readStreamAsBase64 } from "@llumiverse/core";
+import { ImageGenExecutionOptions } from "@llumiverse/core";
+import { NovaMessagesPrompt } from "@llumiverse/core/formatters";
 
 
 
-async function textToImagePayload(segments: PromptSegment[], options: ImageGenExecutionOptions): Promise<NovaTextToImagePayload> {
+async function textToImagePayload(prompt: NovaMessagesPrompt, options: ImageGenExecutionOptions): Promise<NovaTextToImagePayload> {
 
-    const imageProvided = segments.some((s) => s.files?.length && s.files?.length > 0);
+    const messages = prompt.messages
+    const text = messages.map(m => m.content[0].text).join("\n\n")
+    const imageProvided = messages.some(s => s.content.some(n => n.image))
 
     const conditionImage = async () => {
         if (!imageProvided) {
             return undefined;
         }
         if (options.input_image_use === "inspiration") {
-            return segments[0].files![0].getStream().then((stream) => readStreamAsBase64(stream));
+            return prompt.messages[0].content[0].image?.source.bytes;
         }
         return undefined;
     }
@@ -25,7 +28,7 @@ async function textToImagePayload(segments: PromptSegment[], options: ImageGenEx
             height: options.height,
         },
         textToImageParams: {
-            text: segments.map(s => s.content).join(" "),
+            text: text,
             conditionImage: await conditionImage(),
         }
     }
@@ -33,23 +36,20 @@ async function textToImagePayload(segments: PromptSegment[], options: ImageGenEx
     return payload;
 }
 
-async function imageVariationPayload(segments: PromptSegment[], options: ImageGenExecutionOptions): Promise<NovaImageVariationPayload> {
+async function imageVariationPayload(prompt: NovaMessagesPrompt, options: ImageGenExecutionOptions): Promise<NovaImageVariationPayload> {
 
-    const imageProvided = segments.some((s) => s.files?.length && s.files?.length > 0);
+    const messages = prompt.messages
+    const text = messages.map(m => m.content[0].text).join("\n\n")
+    const imageProvided = messages.some(s => s.content.some(n => n.image))
 
     const images = async () => {
-        if (!imageProvided || !segments.some((s) => s.files?.length && s.files?.length > 0)) {
+        if (!imageProvided ) {
             throw new Error("No images provided for image variation");
         }
 
-        const images = await Promise.all(segments.map(async (s) => {
-            if (s.files && s.files.length > 0) {
-                const source = await s.files[0].getStream();
-                const data = await readStreamAsBase64(source);
-                return data;
-            }
-            return undefined;
-        }));
+        const images = await Promise.all(messages.map(async (m) => {
+            return m.content[0].image?.source.bytes
+        }));  
 
 
         return images.filter((i) => i !== undefined);
@@ -64,7 +64,7 @@ async function imageVariationPayload(segments: PromptSegment[], options: ImageGe
         },
         imageVariationParams: {
             images: await images(),
-            text: segments.map(s => s.content).join(" "),
+            text
         }
     }
 
@@ -73,13 +73,13 @@ async function imageVariationPayload(segments: PromptSegment[], options: ImageGe
 }
 
 
-export function formatNovaImageGenerationPayload(taskType: NovaImageGenerationTaskType, segments: PromptSegment[], options: ImageGenExecutionOptions) {
+export function formatNovaImageGenerationPayload(taskType: NovaImageGenerationTaskType, prompt: NovaMessagesPrompt, options: ImageGenExecutionOptions) {
 
     switch (taskType) {
         case NovaImageGenerationTaskType.TEXT_IMAGE:
-            return textToImagePayload(segments, options);
+            return textToImagePayload(prompt, options);
         case NovaImageGenerationTaskType.IMAGE_VARIATION:
-            return imageVariationPayload(segments, options);
+            return imageVariationPayload(prompt, options);
         default:
             throw new Error("Task type not supported");
     }

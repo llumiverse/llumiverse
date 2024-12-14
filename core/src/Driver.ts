@@ -231,7 +231,7 @@ export abstract class AbstractDriver<OptionsT extends DriverOptions = DriverOpti
 
     abstract requestCompletionStream(prompt: PromptT, options: ExecutionOptions): Promise<AsyncIterable<CompletionChunk>>;
 
-    async requestImageGeneration(_segment: PromptT, _options: ImageGenExecutionOptions): Promise<Completion<ImageGeneration>> { //make abstract?
+    async requestImageGeneration(_prompt: PromptT, _options: ImageGenExecutionOptions): Promise<Completion<ImageGeneration>> { //make abstract?
         throw new Error("Image generation not implemented.");
     }
 

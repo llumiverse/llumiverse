@@ -520,7 +520,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     }
 
 
-    async requestImageGeneration(segments: PromptSegment[], options: ImageGenExecutionOptions): Promise<Completion<ImageGeneration>> {
+    async requestImageGeneration(prompt: NovaMessagesPrompt, options: ImageGenExecutionOptions): Promise<Completion<ImageGeneration>> {
 
         if (options.output_modality !== Modalities.image) {
             throw new Error(`Image generation requires image output_modality`);
@@ -541,7 +541,11 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         }
         this.logger.info("Task type: " + taskType());
 
-        const payload = await formatNovaImageGenerationPayload(NovaImageGenerationTaskType.TEXT_IMAGE, segments, options);
+        if (typeof prompt === "string" ) {
+            throw  new Error( "Bad prompt format");
+        }
+
+        const payload = await formatNovaImageGenerationPayload(NovaImageGenerationTaskType.TEXT_IMAGE, prompt, options);
 
         const res = await executor.invokeModel({
             modelId: options.model,
