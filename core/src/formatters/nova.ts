@@ -52,8 +52,7 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
 
         const parts: NovaMessagePart[] = [];
         if (segment.files) for (const f of segment.files) {
-            //TODO type: 'image' -> detect from f.mime_type
-            //TODO: image and video support
+            //TODO add video support
             if (!f.mime_type?.startsWith('image')) {
                 continue;
             }
