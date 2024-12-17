@@ -54,12 +54,17 @@ export async function formatNovaPrompt(segments: PromptSegment[], schema?: JSONS
         if (segment.files) for (const f of segment.files) {
             //TODO type: 'image' -> detect from f.mime_type
             //TODO: image and video support
+            if (!f.mime_type?.startsWith('image')) {
+                continue;
+            }
 
             const source = await f.getStream();
             const data = await readStreamAsBase64(source);
+            const format = f.mime_type?.split('/')[1] || 'png';
+            
             parts.push({
                 image: {
-                    format: 'png',
+                    format: format as "jpeg" | "png" | "gif" | "webp",
                     source: {
                         bytes: data
                     }
