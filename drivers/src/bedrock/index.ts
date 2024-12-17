@@ -545,7 +545,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
             throw  new Error( "Bad prompt format");
         }
 
-        const payload = await formatNovaImageGenerationPayload(NovaImageGenerationTaskType.TEXT_IMAGE, prompt, options);
+        const payload = await formatNovaImageGenerationPayload(taskType(), prompt, options);
 
         const res = await executor.invokeModel({
             modelId: options.model,
