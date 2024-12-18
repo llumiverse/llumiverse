@@ -170,7 +170,7 @@ export interface ExecutionOptions extends PromptOptions, ModelOptions {
      */
     include_original_response?: boolean;
 
-    output_modality: Modalities
+    output_modality?: Modalities
 }
 
 export interface ImageGenExecutionOptions extends ExecutionOptions {
