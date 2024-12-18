@@ -1,20 +1,16 @@
-import { ImageGenExecutionOptions } from "@llumiverse/core";
-import { NovaMessagesPrompt } from "@llumiverse/core/formatters";
+import { ImageGenExecutionOptions, PromptSegment, readStreamAsBase64 } from "@llumiverse/core";
 
+async function textToImagePayload(prompt: PromptSegment[], options: ImageGenExecutionOptions): Promise<NovaTextToImagePayload> {
 
-
-async function textToImagePayload(prompt: NovaMessagesPrompt, options: ImageGenExecutionOptions): Promise<NovaTextToImagePayload> {
-
-    const messages = prompt.messages
-    const text = messages.map(m => m.content[0].text).join("\n\n")
-    const imageProvided = messages.some(s => s.content.some(n => n.image))
+    const text = prompt.map(m => m.content).join("\n\n");
+    const imageProvided = prompt.some(s => s.files);
 
     const conditionImage = async () => {
         if (!imageProvided) {
             return undefined;
         }
         if (options.input_image_use === "inspiration") {
-            return prompt.messages[0].content[0].image?.source.bytes;
+            return prompt[0]?.files ? (await readStreamAsBase64(await prompt[0].files[0].getStream())) : undefined;
         }
         return undefined;
     }
@@ -36,19 +32,18 @@ async function textToImagePayload(prompt: NovaMessagesPrompt, options: ImageGenE
     return payload;
 }
 
-async function imageVariationPayload(prompt: NovaMessagesPrompt, options: ImageGenExecutionOptions): Promise<NovaImageVariationPayload> {
+async function imageVariationPayload(prompt: PromptSegment[], options: ImageGenExecutionOptions): Promise<NovaImageVariationPayload> {
 
-    const messages = prompt.messages
-    const text = messages.map(m => m.content[0].text).join("\n\n")
-    const imageProvided = messages.some(s => s.content.some(n => n.image))
+    const text = prompt.map(m => m.content).join("\n\n");
+    const imageProvided = prompt.some(s => s.files);
 
     const images = async () => {
-        if (!imageProvided ) {
+        if (!imageProvided) {
             throw new Error("No images provided for image variation");
         }
 
-        const images = await Promise.all(messages.map(async (m) => {
-            return m.content[0].image?.source.bytes
+        const images = await Promise.all(prompt.map(async (m) => {
+            return m.files ? (await readStreamAsBase64(await m.files[0].getStream())) : undefined;
         }));  
 
 
@@ -64,7 +59,7 @@ async function imageVariationPayload(prompt: NovaMessagesPrompt, options: ImageG
         },
         imageVariationParams: {
             images: await images(),
-            text
+            text: text,
         }
     }
 
@@ -73,7 +68,7 @@ async function imageVariationPayload(prompt: NovaMessagesPrompt, options: ImageG
 }
 
 
-export function formatNovaImageGenerationPayload(taskType: NovaImageGenerationTaskType, prompt: NovaMessagesPrompt, options: ImageGenExecutionOptions) {
+export function formatNovaImageGenerationPayload(taskType: NovaImageGenerationTaskType, prompt: PromptSegment[], options: ImageGenExecutionOptions) {
 
     switch (taskType) {
         case NovaImageGenerationTaskType.TEXT_IMAGE:

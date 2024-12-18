@@ -1,4 +1,4 @@
-import { AbstractDriver, ImageGenExecutionOptions } from "@llumiverse/core";
+import { AbstractDriver, ImageGenExecutionOptions, Modalities } from "@llumiverse/core";
 import "dotenv/config";
 import fs from "fs";
 import { describe, expect, test } from "vitest";
@@ -35,10 +35,11 @@ if (process.env.BEDROCK_REGION) {
 describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => {
 
     
-    test("generate a prompt canva", async () => {
+    test("generate a prompt Nova canvas", async () => {
         const options: ImageGenExecutionOptions = {
-            generationType: "text-to-image",
-            inputImageUse: "none",
+            output_modality: Modalities.image,
+            generation_type: "text-to-image",
+            input_image_use: "none",
             model: "amazon.nova-canvas-v1:0",
         }
         const res = await formatNovaImageGenerationPayload(NovaImageGenerationTaskType.TEXT_IMAGE, testPrompt_textToImage, options)
@@ -53,16 +54,17 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
         console.log(`Testing model ${model}`);
 
         const options: ImageGenExecutionOptions = {
-            generationType: "text-to-image",
-            inputImageUse: "none",
+            output_modality: Modalities.image,
+            generation_type: "text-to-image",
+            input_image_use: "none",
             model: model,
         }
 
         const res = await driver.requestImageGeneration(testPrompt_textToImage, options);
         expect(res).toBeDefined();
-        expect(res).toHaveProperty("images");
-        expect(res.images).toHaveLength(1);
-        saveImagesToOutput(res.images, `text-to-image-${model}`);
+        expect(res.result).toHaveProperty("images");
+        expect(res.result.images).toHaveLength(1);
+        saveImagesToOutput(res.result.images, `text-to-image-${model}`);
     });
 
     test.each(models)(`${name}: text to image guidance`, {timeout: 300*1000}, async (model) => {
@@ -70,16 +72,17 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
         console.log(`Testing model ${model}`);
 
         const options: ImageGenExecutionOptions = {
-            generationType: "text-to-image",
-            inputImageUse: "variation",
+            output_modality: Modalities.image,
+            generation_type: "text-to-image",
+            input_image_use: "variation",
             model: model,
         }
 
         const res = await driver.requestImageGeneration(testPrompt_textToImageGuidance, options);
         expect(res).toBeDefined();
-        expect(res).toHaveProperty("images");
-        expect(res.images).toHaveLength(1);
-        saveImagesToOutput(res.images, `text-to-image-guidance-${model}`);
+        expect(res.result).toHaveProperty("images");
+        expect(res.result.images).toHaveLength(1);
+        saveImagesToOutput(res.result.images, `text-to-image-guidance-${model}`);
 
 
     });
@@ -88,16 +91,17 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
     test.each(models)(`${name}: text to image variation`, {timeout: 300*1000}, async (model) => {
 
         const options: ImageGenExecutionOptions = {
-            generationType: "text-to-image",
-            inputImageUse: "inspiration",
+            output_modality: Modalities.image,
+            generation_type: "text-to-image",
+            input_image_use: "inspiration",
             model: model,
         }
 
         const res = await driver.requestImageGeneration(testPrompt_imageVariations, options);
         expect(res).toBeDefined();
-        expect(res).toHaveProperty("images");
-        expect(res.images).toHaveLength(1);
-        saveImagesToOutput(res.images, `text-to-image-variation-${model}`);
+        expect(res.result).toHaveProperty("images");
+        expect(res.result.images).toHaveLength(1);
+        saveImagesToOutput(res.result.images, `text-to-image-variation-${model}`);
 
     });
 

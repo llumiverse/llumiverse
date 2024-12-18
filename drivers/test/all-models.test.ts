@@ -1,4 +1,4 @@
-import { AIModel, AbstractDriver, ExecutionOptions } from '@llumiverse/core';
+import { AIModel, AbstractDriver, ExecutionOptions, Modalities } from '@llumiverse/core';
 import 'dotenv/config';
 import { GoogleAuth } from 'google-auth-library';
 import { describe, expect, test } from "vitest";
@@ -194,6 +194,7 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
         presence_penalty: 0.1,      //Cohere Command R does not support using presence & frequency penalty at the same time
         frequency_penalty: 0.0,
         stop_sequence: ["adsoiuygsa"],
+        output_modality: Modalities.text,
     };
 
     test(`${name}: list models`, { timeout: TIMEOUT, retry: 1 }, async () => {
@@ -257,6 +258,7 @@ describe.concurrent.each(drivers)("Driver $name", ({ name, driver, models }) => 
         if (!isMultiModal) return;
 
         const r = await driver.execute(testPrompt_describeImage, {
+            output_modality: Modalities.text,
             model: model,
             temperature: 0.5,
             max_tokens: 1024,
