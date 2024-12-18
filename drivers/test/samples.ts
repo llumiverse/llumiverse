@@ -1,8 +1,8 @@
-import { DataSource, PromptRole, PromptSegment } from "@llumiverse/core"
-import { JSONSchema4 } from "json-schema"
-import { basename, resolve } from "path"
-import { createReadStream } from "fs"
+import { DataSource, PromptRole, PromptSegment } from "@llumiverse/core";
+import { createReadStream } from "fs";
+import { JSONSchema4 } from "json-schema";
 import { createReadableStreamFromReadable } from "node-web-stream-adapters";
+import { basename, resolve } from "path";
 
 export const testPrompt_color: PromptSegment[] = [
     {
@@ -92,3 +92,30 @@ export const testSchema_animalDescription: JSONSchema4 =
         }
     }
 }
+
+
+export const testPrompt_textToImage: PromptSegment[] = [
+    {
+        role: PromptRole.user,
+        content: "A blue sky with a purple unicorn flying, cosplaying flash"
+    }
+]
+
+export const testPrompt_textToImageGuidance: PromptSegment[] = [
+    {
+        role: PromptRole.user,
+        content: "A blue sky with a purple unicorn flying, cosplaying flash",
+        files: [new ImageUrlSource("https://upload.wikimedia.org/wikipedia/commons/b/b2/WhiteCat.jpg")]
+    }
+]
+
+export const testPrompt_imageVariations: PromptSegment[] = [
+    {
+        content: "A purple cat in from of a cathedral",
+        role: PromptRole.user,
+        files: [
+            new ImageUrlSource("https://upload.wikimedia.org/wikipedia/commons/b/b2/WhiteCat.jpg"),
+            new ImageSource("https://upload.wikimedia.org/wikipedia/commons/thumb/b/bf/Krakow_-_Kosciol_Mariacki.jpg/1000px-Krakow_-_Kosciol_Mariacki.jpg"),
+        ]
+    }
+]
