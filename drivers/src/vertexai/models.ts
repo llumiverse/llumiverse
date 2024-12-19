@@ -31,17 +31,6 @@ export function getAIModels() {
     return Object.values(Models).map(m => m.model);
 }
 
-// Must be updated when adding new models
-const Models: Record<string, ModelDefinition> = {
-    "gemini-1.5-flash-002": new GeminiModelDefinition("gemini-1.5-flash-002"),
-    "gemini-1.5-flash-001": new GeminiModelDefinition("gemini-1.5-flash-001"),
-    "gemini-1.5-flash": new GeminiModelDefinition("gemini-1.5-flash"),
-    "gemini-1.5-pro-002": new GeminiModelDefinition("gemini-1.5-pro-002"),
-    "gemini-1.5-pro-001": new GeminiModelDefinition("gemini-1.5-pro-001"),
-    "gemini-1.5-pro": new GeminiModelDefinition("gemini-1.5-pro"),
-    "gemini-1.0-pro": new GeminiModelDefinition(),
-}
-
 // Builtin models. VertexAI doesn't provide an API to list models. so we have to hardcode them here.
 export const BuiltinModels: AIModel<string>[] = [
     {
@@ -107,3 +96,14 @@ export const BuiltinModels: AIModel<string>[] = [
         can_stream: true,
     },
 ]
+
+// Must be updated when adding new models
+const Models: Record<string, ModelDefinition> = {
+    "gemini-1.5-flash-002": new GeminiModelDefinition("gemini-1.5-flash-002"),
+    "gemini-1.5-flash-001": new GeminiModelDefinition("gemini-1.5-flash-001"),
+    "gemini-1.5-flash": new GeminiModelDefinition("gemini-1.5-flash"),
+    "gemini-1.5-pro-002": new GeminiModelDefinition("gemini-1.5-pro-002"),
+    "gemini-1.5-pro-001": new GeminiModelDefinition("gemini-1.5-pro-001"),
+    "gemini-1.5-pro": new GeminiModelDefinition("gemini-1.5-pro"),
+    "gemini-1.0-pro": new GeminiModelDefinition(),
+}
