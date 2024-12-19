@@ -50,6 +50,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
 
     private _executor?: BedrockRuntime;
     private _service?: Bedrock;
+    private _service_region?: string;
 
     constructor(options: BedrockDriverOptions) {
         super(options);
@@ -69,12 +70,13 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         return this._executor;
     }
 
-    getService() {
-        if (!this._service) {
+    getService(region: string = this.options.region) {
+        if (!this._service || this._service_region != region) {
             this._service = new Bedrock({
-                region: this.options.region,
+                region: region,
                 credentials: this.options.credentials,
             });
+            this._service_region = region;
         }
         return this._service;
     }
@@ -349,12 +351,29 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         return completion;
     }
 
+    extractRegion(modelString: string, defaultRegion: string): string {
+        // Match region in full ARN pattern
+        const arnMatch = modelString.match(/arn:aws[^:]*:bedrock:([^:]+):/);
+        if (arnMatch) {
+            return arnMatch[1];
+        }
+        
+        // Match common AWS regions directly in string
+        const regionMatch = modelString.match(/(?:us|eu|ap|sa|ca|me|af)[-](east|west|central|south|north|southeast|southwest|northeast|northwest)[-][1-9]/);
+        if (regionMatch) {
+            return regionMatch[0];
+        }
+    
+        return defaultRegion;
+    }
+
     private async getCanStream(model: string, type: string): Promise<boolean> {
         let canStream: boolean = false;
         let error: any = null;
+        const region = this.extractRegion(model, this.options.region);
         if (type == "foundation-model" || type == "") {
             try {
-                const response = await this.getService().getFoundationModel({
+                const response = await this.getService(region).getFoundationModel({
                     modelIdentifier: model
                 });
                 canStream = response.modelDetails?.responseStreamingSupported ?? false;
@@ -365,8 +384,8 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         }
         if (type == "inference-profile" || type == "") {
             try {
-                const response = await this.getService().getInferenceProfile({
-                    inferenceProfileIdentifier: model
+                const response = await this.getService(region).getInferenceProfile({
+                   inferenceProfileIdentifier: model
                 });
                 canStream = await this.getCanStream(response.models?.[0].modelArn ?? "", "foundation-model");
                 return canStream;
@@ -376,7 +395,7 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         }
         if (type == "custom-model" || type == "") {
             try {
-                const response = await this.getService().getCustomModel({
+                const response = await this.getService(region).getCustomModel({
                     modelIdentifier: model
                 });
                 canStream = await this.getCanStream(response.baseModelArn ?? "", "foundation-model");
@@ -385,7 +404,6 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 error = e;
             }
         }
-        
         if (error) {
             console.warn("Error on canStream check for model " + model, error);
         }
