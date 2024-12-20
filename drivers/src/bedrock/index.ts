@@ -13,6 +13,13 @@ const { LRUCache } = mnemonist;
 
 const supportStreamingCache = new LRUCache<string, boolean>(4096);
 
+enum BedrockModelType {
+    FoundationModel = "foundation-model",
+    InferenceProfile = "inference-profile",
+    CustomModel = "custom-model",
+    Unknown = "unknown",
+};
+
 export interface BedrockModelCapabilities {
     name: string;
     canStream: boolean;
@@ -367,11 +374,11 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
         return defaultRegion;
     }
 
-    private async getCanStream(model: string, type: string): Promise<boolean> {
+    private async getCanStream(model: string, type: BedrockModelType): Promise<boolean> {
         let canStream: boolean = false;
         let error: any = null;
         const region = this.extractRegion(model, this.options.region);
-        if (type == "foundation-model" || type == "") {
+        if (type == BedrockModelType.FoundationModel || type == BedrockModelType.Unknown) {
             try {
                 const response = await this.getService(region).getFoundationModel({
                     modelIdentifier: model
@@ -382,23 +389,23 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
                 error = e;
             }
         }
-        if (type == "inference-profile" || type == "") {
+        if (type == BedrockModelType.InferenceProfile || type == BedrockModelType.Unknown) {
             try {
                 const response = await this.getService(region).getInferenceProfile({
                    inferenceProfileIdentifier: model
                 });
-                canStream = await this.getCanStream(response.models?.[0].modelArn ?? "", "foundation-model");
+                canStream = await this.getCanStream(response.models?.[0].modelArn ?? "", BedrockModelType.FoundationModel);
                 return canStream;
             } catch (e) {
                 error = e;
             }
         }
-        if (type == "custom-model" || type == "") {
+        if (type == BedrockModelType.CustomModel || type == BedrockModelType.Unknown) {
             try {
                 const response = await this.getService(region).getCustomModel({
                     modelIdentifier: model
                 });
-                canStream = await this.getCanStream(response.baseModelArn ?? "", "foundation-model");
+                canStream = await this.getCanStream(response.baseModelArn ?? "", BedrockModelType.FoundationModel);
                 return canStream;
             } catch (e) {
                 error = e;
@@ -413,13 +420,13 @@ export class BedrockDriver extends AbstractDriver<BedrockDriverOptions, BedrockP
     protected async canStream(options: ExecutionOptions): Promise<boolean> {
         let canStream = supportStreamingCache.get(options.model);
         if (canStream == null) {
-            let type: string = "";
+            let type = BedrockModelType.Unknown;
             if (options.model.includes("foundation-model")) {
-                type = "foundation-model";
+                type = BedrockModelType.FoundationModel;
             } else if (options.model.includes("inference-profile")) {  
-                type = "inference-profile";
+                type = BedrockModelType.InferenceProfile;
             } else if (options.model.includes("custom-model")) {
-                type = "custom-model";
+                type = BedrockModelType.CustomModel;
             }
             canStream = await this.getCanStream(options.model, type);
             supportStreamingCache.set(options.model, canStream);
